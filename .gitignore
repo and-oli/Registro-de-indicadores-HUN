@@ -1,0 +1,12 @@
+# Node build artifacts
+npm-debug.log
+workspace
+frontend/node_modules
+backend/node_modules
+frontend/.yarn
+backend/banners
+frontend/build/
+# Local development
+*.env
+*.dev
+.DS_Store
