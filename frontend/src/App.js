@@ -1,13 +1,13 @@
 import React from 'react';
 import './App.css';
 //import SignIn from './Shared/SignIn'
-import MainPage from './Shared/MainPage/MainPage'
+import Navigation from './Shared/Navigation'
 
 function App() {
   return (
     <div className="App">
       {/*<SignIn />*/}
-      <MainPage />
+      <Navigation/>
     </div>
   );
 }

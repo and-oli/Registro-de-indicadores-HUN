@@ -4,7 +4,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
-import Title from './Title';
+import Title from '../Title';
 import { TableRow, TableCell } from '@material-ui/core';
 
 // Generate Indicator Data
