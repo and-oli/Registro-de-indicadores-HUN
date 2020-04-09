@@ -17,6 +17,9 @@ import { mainListItems, secondaryListItems } from './menuItems';
 //import CreateIndicator from '../Admin/CreateIndicator';
 //import UserRequests from '../Admin/Requests/UserRequests';
 //import UsersInfo from '../Admin/UserInfo/UsersInfo';
+//import RegisterIndicator from '../User/RegisterIndicator';
+//import AccessDenied from '../User/AccessDenied';
+import AccessRequests from '../User/Requests/AccessRequests';
 
 const drawerWidth = 240;
 
@@ -129,6 +132,9 @@ export default function Navigation() {
       {/*<CreateIndicator />*/}
       {/*<UserRequests />*/}
       {/*<UsersInfo />*/}
+      {/*<RegisterIndicator />*/}
+      {/*<AccessDenied />*/}
+      {<AccessRequests />}
     </div>
   );
 }
