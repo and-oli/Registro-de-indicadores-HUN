@@ -12,11 +12,12 @@ import Typography from '@material-ui/core/Typography';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import List from '@material-ui/core/List';
 import { mainListItems, secondaryListItems } from './menuItems';
+import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 
-//import MainPaige from './MainPage/MainPage';
-//import CreateIndicator from '../Admin/CreateIndicator';
-//import UserRequests from '../Admin/Requests/UserRequests';
-//import UsersInfo from '../Admin/UserInfo/UsersInfo';
+import MainPage from './MainPage/MainPage';
+import CreateIndicator from '../Admin/CreateIndicator';
+import UserRequests from '../Admin/Requests/UserRequests';
+import UsersInfo from '../Admin/UserInfo/UsersInfo';
 //import RegisterIndicator from '../User/RegisterIndicator';
 //import AccessDenied from '../User/AccessDenied';
 //import AccessRequests from '../User/Requests/AccessRequests';
@@ -111,27 +112,45 @@ export default function Navigation() {
           </Typography>
         </Toolbar>
       </AppBar>
-      <Drawer
-        variant="permanent"
-        classes={{
-          paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
-        }}
-        open={open}
-      >
-        <div className={classes.toolbarIcon}>
-          <IconButton onClick={handleDrawerClose}>
-            <ChevronLeftIcon />
-          </IconButton>
-        </div>
-        <Divider />
-        <List>{mainListItems}</List>
-        <Divider />
-        <List>{secondaryListItems}</List>
-      </Drawer>
-      {/*<MainPaige />*/}
-      {/*<CreateIndicator />*/}
-      {/*<UserRequests />*/}
-      {/*<UsersInfo />*/}
+      <Router>
+        <Drawer
+          variant="permanent"
+          classes={{
+            paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
+          }}
+          open={open}
+        >
+          <div className={classes.toolbarIcon}>
+            <IconButton onClick={handleDrawerClose}>
+              <ChevronLeftIcon />
+            </IconButton>
+          </div>
+          <Divider />
+          <List>{mainListItems}</List>
+          <Divider />
+          <List>{secondaryListItems}</List>
+        </Drawer>
+        <Switch>
+          <Route exact path="/">
+            <MainPage />
+          </Route>
+          <Route path="/solicitudes">
+            <UserRequests />
+          </Route>
+          <Route path="/usuarios">
+            <UsersInfo />
+          </Route>
+          <Route path="/autorizar">
+            <UserRequests />
+          </Route>
+          <Route path="/editar-indicador">
+            <MainPage />
+          </Route>
+          <Route path="/nuevo-indicador">
+            <CreateIndicator />
+          </Route>
+        </Switch>
+      </Router>
       {/*<RegisterIndicator />*/}
       {/*<AccessDenied />*/}
       {/*<AccessRequests />*/}
