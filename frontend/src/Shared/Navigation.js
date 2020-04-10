@@ -11,16 +11,16 @@ import MenuIcon from '@material-ui/icons/Menu';
 import Typography from '@material-ui/core/Typography';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import List from '@material-ui/core/List';
-import { mainListItems, secondaryListItems } from './menuItems';
+import ListItems, { secondaryListItemsAdmin, secondaryListItemsUser } from './menuItems';
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 
 import MainPage from './MainPage/MainPage';
 import CreateIndicator from '../Admin/CreateIndicator';
 import UserRequests from '../Admin/Requests/UserRequests';
 import UsersInfo from '../Admin/UserInfo/UsersInfo';
-//import RegisterIndicator from '../User/RegisterIndicator';
+import RegisterIndicator from '../User/RegisterIndicator';
 //import AccessDenied from '../User/AccessDenied';
-//import AccessRequests from '../User/Requests/AccessRequests';
+import AccessRequests from '../User/Requests/AccessRequests';
 
 const drawerWidth = 240;
 
@@ -85,6 +85,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function Navigation() {
+  const admin = true;
   const classes = useStyles();
   const [open, setOpen] = React.useState(false);
   const handleDrawerOpen = () => {
@@ -126,16 +127,21 @@ export default function Navigation() {
             </IconButton>
           </div>
           <Divider />
-          <List>{mainListItems}</List>
+          <List>
+            <ListItems admin={admin} />
+          </List>
           <Divider />
-          <List>{secondaryListItems}</List>
+          <List>{admin ? secondaryListItemsAdmin : secondaryListItemsUser}</List>
         </Drawer>
         <Switch>
           <Route exact path="/">
             <MainPage />
           </Route>
-          <Route path="/solicitudes">
+          <Route path="/admin/solicitudes">
             <UserRequests />
+          </Route>
+          <Route path="/user/solicitudes">
+            <AccessRequests />
           </Route>
           <Route path="/usuarios">
             <UsersInfo />
@@ -149,11 +155,12 @@ export default function Navigation() {
           <Route path="/nuevo-indicador">
             <CreateIndicator />
           </Route>
+          <Route path="/registrar-indicador">
+            <RegisterIndicator />
+          </Route>
         </Switch>
       </Router>
-      {/*<RegisterIndicator />*/}
       {/*<AccessDenied />*/}
-      {/*<AccessRequests />*/}
     </div>
   );
 }

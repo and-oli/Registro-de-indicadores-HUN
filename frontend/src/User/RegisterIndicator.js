@@ -8,6 +8,7 @@ import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import Checkbox from '@material-ui/core/Checkbox';
+import Dropdown from '../Shared/Dropdown';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -38,6 +39,22 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: theme.spacing(5),
   },
 }));
+
+const options1 = [
+  'Servicio 1',
+  'Servicio 2',
+  'Servicio 3',
+  'Servicio 4',
+  'Servicio 5',
+];
+
+const options2 = [
+  'Indicador 1',
+  'Indicador 2',
+  'Indicador 3',
+  'Indicador 4',
+  'Indicador 5',
+];
 
 export default function RegisterIndicator() {
   const classes = useStyles();
@@ -74,18 +91,6 @@ export default function RegisterIndicator() {
         <React.Fragment>
           <Paper>
             <Title>Registrar Indicador</Title>
-            <Grid container spacing={3}>
-              <Grid item xs>
-                <Typography color="textSecondary">
-                  Dropdown Servicio
-                </Typography>
-              </Grid>
-              <Grid item xs>
-                <Typography color="textSecondary">
-                  Dropdown Indicador
-                </Typography>
-              </Grid>
-            </Grid>
             <Grid
               container
               direction="column"
@@ -93,6 +98,14 @@ export default function RegisterIndicator() {
               alignItems="center"
             >
               <form className={classes.root} noValidate autoComplete="off">
+                <Grid container spacing={3}>
+                  <Grid item xs>
+                    <Dropdown type="Servicio" options={options1} />
+                  </Grid>
+                  <Grid item xs>
+                    <Dropdown type="Indicador" options={options2} />
+                  </Grid>
+                </Grid>
                 <Grid item xs>
                   <TextField
                     className={classes.textFieldSpacer}
@@ -100,7 +113,7 @@ export default function RegisterIndicator() {
                     margin="normal"
                     required
                     id="analysis"
-                    label="Nombre del indicador"
+                    label="Analísis Cualitativo"
                     name="analysis"
                     autoComplete="analysis"
                     onChange={handleChange}

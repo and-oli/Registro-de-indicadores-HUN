@@ -5,7 +5,7 @@ import Container from '@material-ui/core/Container';
 import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
-import Typography from '@material-ui/core/Typography';
+import Dropdown from '../Shared/Dropdown';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -33,6 +33,14 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(3, 0, 2),
   },
 }));
+
+const options = [
+  'Servicio 1',
+  'Servicio 2',
+  'Servicio 3',
+  'Servicio 4',
+  'Servicio 5',
+];
 
 export default function CreateIndicador() {
   const [state, setState] = React.useState({
@@ -66,10 +74,8 @@ export default function CreateIndicador() {
         <React.Fragment>
           <Paper className={classes.paper}>
             <Title>Nuevo Indicador</Title>
-            <Typography color="textSecondary">
-              Falta dropdown del servicio
-            </Typography>
             <form className={classes.root} noValidate autoComplete="off">
+              <Dropdown type="Servicio" options={options} />
               <TextField
               variant="outlined"
               margin="normal"

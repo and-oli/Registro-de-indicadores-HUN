@@ -6,6 +6,8 @@ import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableRow from '@material-ui/core/TableRow';
 import Title from '../Title';
+import Dropdown from '../Dropdown';
+import Grid from '@material-ui/core/Grid';
 
 // Generate Info Data
 function createData(id, label, value) {
@@ -26,6 +28,22 @@ const rows = [
   event.preventDefault();
 }*/
 
+const options1 = [
+  'Servicio 1',
+  'Servicio 2',
+  'Servicio 3',
+  'Servicio 4',
+  'Servicio 5',
+];
+
+const options2 = [
+  'Indicador 1',
+  'Indicador 2',
+  'Indicador 3',
+  'Indicador 4',
+  'Indicador 5',
+];
+
 const useStyles = makeStyles((theme) => ({
   thead: {
     fontWeight: "bold",
@@ -37,6 +55,14 @@ export default function IndicatorInfo() {
   return (
     <React.Fragment>
       <Title>Información del Indicador</Title>
+      <Grid container spacing={3}>
+        <Grid item xs>
+          <Dropdown type="Servicio" options={options1} />
+        </Grid>
+        <Grid item xs>
+          <Dropdown type="Indicador" options={options2} />
+        </Grid>
+      </Grid>
       <Table size="small">
         <TableBody>
           {rows.map((row) => (

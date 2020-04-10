@@ -13,32 +13,7 @@ import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import Badge from '@material-ui/core/Badge';
 import { Link } from 'react-router-dom';
 
-export const mainListItems = (
-  <div>
-    <ListItem component={Link} to={"/"} button>
-      <ListItemIcon>
-        <TrendingUpIcon />
-      </ListItemIcon>
-      <ListItemText primary="Indicadores" />
-    </ListItem>
-    <ListItem component={Link} to={"/solicitudes"} button>
-      <ListItemIcon>
-        <Badge badgeContent={4} color="secondary">
-          <AssignmentIcon />
-        </Badge>
-      </ListItemIcon>
-      <ListItemText primary="Solicitudes" />
-    </ListItem>
-    <ListItem component={Link} to={"/usuarios"} button>
-      <ListItemIcon>
-        <PeopleIcon />
-      </ListItemIcon>
-      <ListItemText primary="Usuarios" />
-    </ListItem>
-  </div>
-);
-
-export const secondaryListItems = (
+export const secondaryListItemsAdmin = (
   <div>
     <ListSubheader inset>Acciones</ListSubheader>
     <ListItem component={Link} to={"/autorizar"} button>
@@ -61,3 +36,46 @@ export const secondaryListItems = (
     </ListItem>
   </div>
 );
+
+export const secondaryListItemsUser = (
+  <div>
+    <ListSubheader inset>Acciones</ListSubheader>
+    <ListItem component={Link} to={"/registrar-indicador"} button>
+      <ListItemIcon>
+        <AddCircleOutlineIcon />
+      </ListItemIcon>
+      <ListItemText primary="Registrar Indicador" />
+    </ListItem>
+  </div>
+);
+
+export default function ListItems(props) {
+  const usersTab = props.admin ? (
+    <ListItem component={Link} to={"/usuarios"} button>
+      <ListItemIcon>
+        <PeopleIcon />
+      </ListItemIcon>
+      <ListItemText primary="Usuarios" />
+    </ListItem>
+  ) : <span />;
+
+  return (
+    <div>
+      <ListItem component={Link} to={"/"} button>
+        <ListItemIcon>
+          <TrendingUpIcon />
+        </ListItemIcon>
+        <ListItemText primary="Indicadores" />
+      </ListItem>
+      <ListItem component={Link} to={`${props.admin ? 'admin' : 'user'}/solicitudes`} button>
+        <ListItemIcon>
+          <Badge badgeContent={4} color="secondary">
+            <AssignmentIcon />
+          </Badge>
+        </ListItemIcon>
+        <ListItemText primary="Solicitudes" />
+      </ListItem>
+      {usersTab}
+    </div>
+  );
+};

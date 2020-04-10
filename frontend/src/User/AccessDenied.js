@@ -4,7 +4,6 @@ import Container from '@material-ui/core/Container';
 import Paper from '@material-ui/core/Paper';
 import Title from '../Shared/Title';
 import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
 import MuiAlert from '@material-ui/lab/Alert';
 import Button from '@material-ui/core/Button';
 import Snackbar from '@material-ui/core/Snackbar';
@@ -35,6 +34,22 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+const options1 = [
+  'Servicio 1',
+  'Servicio 2',
+  'Servicio 3',
+  'Servicio 4',
+  'Servicio 5',
+];
+
+const options2 = [
+  'Indicador 1',
+  'Indicador 2',
+  'Indicador 3',
+  'Indicador 4',
+  'Indicador 5',
+];
+
 export default function AccessDenied() {
   const classes = useStyles();
   const [open, setOpen] = React.useState(false);
@@ -57,14 +72,10 @@ export default function AccessDenied() {
             <Title>Registrar Indicador</Title>
             <Grid container spacing={3}>
               <Grid item xs>
-                <Typography color="textSecondary">
-                  Dropdown Servicio
-                </Typography>
+                <Dropdown type="Servicio" options={options1} />
               </Grid>
               <Grid item xs>
-                <Typography color="textSecondary">
-                  Dropdown Indicador
-                </Typography>
+                <Dropdown type="Indicador" options={options2} />
               </Grid>
             </Grid>
             <Grid container alignItems="center" spacing={3}>
