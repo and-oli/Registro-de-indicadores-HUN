@@ -16,7 +16,7 @@ function Copyright() {
     <Typography variant="body2" color="textSecondary" align="center">
       {'Copyright © '}
       <Link color="inherit" href="https://material-ui.com/">
-        Your Website
+        HUN
       </Link>{' '}
       {new Date().getFullYear()}
       {'.'}
@@ -42,7 +42,7 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: 'column',
   },
   fixedHeight: {
-    height: 240,
+    height: theme.spacing(50),
   },
 }));
 
@@ -69,7 +69,7 @@ export default function MainPage() {
           </Grid>
           {/* Indicador Por Fecha */}
           <Grid item xs={12}>
-            <Paper className={fixedHeightPaper}>
+            <Paper className={classes.paper}>
               <IndicatorByDate />
             </Paper>
           </Grid>

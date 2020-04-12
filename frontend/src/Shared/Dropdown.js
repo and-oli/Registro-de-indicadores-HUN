@@ -23,7 +23,7 @@ export default function Dropdown(props) {
     setValue(event.target.value);
   }
   return (
-    <FormControl required variant="outlined" className={classes.formControl}>
+    <FormControl required variant="standard" className={classes.formControl}>
       <InputLabel htmlFor="dropdown">{props.type}</InputLabel>
       <Select
         native
