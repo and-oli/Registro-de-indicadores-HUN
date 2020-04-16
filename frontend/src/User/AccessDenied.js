@@ -7,6 +7,7 @@ import Grid from '@material-ui/core/Grid';
 import MuiAlert from '@material-ui/lab/Alert';
 import Button from '@material-ui/core/Button';
 import Snackbar from '@material-ui/core/Snackbar';
+import Dropdown from '../Shared/Dropdown';
 
 function Alert(props) {
   return <MuiAlert elevation={6} variant="filled" {...props} />;
@@ -50,7 +51,7 @@ const options2 = [
   'Indicador 5',
 ];
 
-export default function AccessDenied() {
+export default function AccessDenied(props) {
   const classes = useStyles();
   const [open, setOpen] = React.useState(false);
   const handleClick = () => {
@@ -63,6 +64,9 @@ export default function AccessDenied() {
 
     setOpen(false);
   };
+
+  const message = props.hasRequested ? <Alert severity="warning">Usted ya solicitó acceso a este indicador. Contáctese con el administrador para que le otorge permiso de registro.</Alert> 
+                                      : <Alert severity="error">Usted no tiene acceso a este indicador</Alert>;
   return (
     <main className={classes.content}>
       <div className={classes.appBarSpacer} />
@@ -81,7 +85,7 @@ export default function AccessDenied() {
             <Grid container alignItems="center" spacing={3}>
               <Grid item xs={2} />
               <Grid item xs={8}>
-                <Alert severity="warning">Usted no tiene acceso a este indicador</Alert>
+                {message}
               </Grid>
             </Grid>
             <Grid container spacing={3}>
@@ -96,14 +100,14 @@ export default function AccessDenied() {
                     Ha solicitado acceso exitosamente
                   </Alert>
                 </Snackbar>
-                <Button
+                {!props.hasRequested ? <Button
                   variant="contained"
                   color="primary"
                   className={classes.submit}
                   onClick={handleClick}
                 >
                   Solicitar Acceso
-                </Button>
+                </Button> : <span/>}
               </Grid>              
             </Grid>
           </Paper>

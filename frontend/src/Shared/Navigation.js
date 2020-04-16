@@ -135,7 +135,7 @@ export default function Navigation() {
         </Drawer>
         <Switch>
           <Route exact path="/">
-            <MainPage />
+            <MainPage admin={admin}/>
           </Route>
           <Route path="/admin/solicitudes">
             <UserRequests />

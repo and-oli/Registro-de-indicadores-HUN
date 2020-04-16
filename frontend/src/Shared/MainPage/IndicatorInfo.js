@@ -8,20 +8,22 @@ import TableRow from '@material-ui/core/TableRow';
 import Title from '../Title';
 import Dropdown from '../Dropdown';
 import Grid from '@material-ui/core/Grid';
+import Button from '@material-ui/core/Button';
+import TextField from '@material-ui/core/TextField';
 
 // Generate Info Data
-function createData(id, label, value) {
-  return { id, label, value };
+function createData(id, idText, label, value) {
+  return { id, idText, label, value };
 }
 
 const rows = [
-  createData(0, 'Nombre del indicador', 'Estrellas de Millos'),
-  createData(1, 'Definición del indicador', 'Campeonatos obtenidos por Millonarios FC'),
-  createData(2, 'Periodicidad', 'Semestral'),
-  createData(3, 'Origen o fuente de los datos', 'Esfuerzo Colectivo Albiazul'),
-  createData(4, 'Fórmula', 'E=MC^2'),
-  createData(5, 'Responsable de recolectar datos del indicador', 'Jorge Lizcano (Moneda)'),
-  createData(6, 'Responsable del indicador', 'Wuilker Fariñez'),
+  createData(0, "name", 'Nombre del indicador', 'Estrellas de Millos'),
+  createData(1, "definition", 'Definición del indicador', 'Campeonatos obtenidos por Millonarios FC'),
+  createData(2, "periodicity", 'Periodicidad', 'Semestral'),
+  createData(3, "dataSource", 'Origen o fuente de los datos', 'Esfuerzo Colectivo Albiazul'),
+  createData(4, "formula", 'Fórmula', 'E=MC^2'),
+  createData(5, "responsableData", 'Responsable de recolectar datos del indicador', 'Jorge Lizcano (Moneda)'),
+  createData(6, "responsableIndicator", 'Responsable del indicador', 'Wuilker Fariñez'),
 ];
 
 /*function preventDefault(event) {
@@ -48,10 +50,48 @@ const useStyles = makeStyles((theme) => ({
   thead: {
     fontWeight: "bold",
   },
+  submit: {
+    margin: theme.spacing(3, 2, 2),
+  },
 }));
 
-export default function IndicatorInfo() {
+export default function IndicatorInfo(props) {
   const classes = useStyles();
+  const [state, setState] = React.useState({
+    name: "",
+    definition: "",
+    periodicity: "",
+    dataSource: "",
+    formula: "",
+    unit: "",
+    responsableData: "",
+    responsableIndicator: "",
+    editing: false,
+  });
+  const handleClickEdit = () => {
+    setState({
+      editing: true,
+    });
+  }
+  const handleClickSave = () => {
+    for(let i = 0; i < rows.length; i++) {
+      rows[i].value = state[rows[i].idText] ? state[rows[i].idText] : rows[i].value;
+    }
+    setState({
+      editing: false,
+    });
+  }
+  const handleClickCancel = () => {
+    setState({
+      editing: false,
+    });
+  }
+  const handleChange = (event) => {
+    setState({
+      ...state,
+      [event.target.name]: event.target.value,
+    });
+  }
   return (
     <React.Fragment>
       <Title>Información del Indicador</Title>
@@ -65,14 +105,58 @@ export default function IndicatorInfo() {
       </Grid>
       <Table size="small">
         <TableBody>
-          {rows.map((row) => (
+          {rows.map((row,i) => (
             <TableRow key={row.id}>
               <TableCell className={classes.thead}>{row.label}</TableCell>
-              <TableCell>{row.value}</TableCell>
+              <TableCell>
+                {state.editing ? 
+                  <TextField
+                    variant="standard"
+                    margin="normal"
+                    fullWidth
+                    id={rows[i].idText}
+                    label={rows[i].label}
+                    name={rows[i].idText}
+                    value={state[rows[i].idText]}
+                    autoComplete={rows[i].idText}
+                    onChange={handleChange}
+                    defaultValue={rows[i].value}
+                    multiline
+                  /> : 
+                  row.value}
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
+      <Grid container spacing={3}>
+        <Grid item xs>
+          {
+            props.admin ? state.editing ? 
+            <div>
+              <Button
+                variant="contained"
+                color="primary"
+                className={classes.submit}
+                onClick={handleClickSave}
+              > Guardar </Button> 
+              <Button
+                variant="contained"
+                color="primary"
+                className={classes.submit}
+                onClick={handleClickCancel}
+              > Cancelar </Button> 
+            </div> : 
+            <Button
+              variant="contained"
+              color="primary"
+              className={classes.submit}
+              onClick={handleClickEdit}
+            > Editar Indicador </Button> : 
+            <span/>
+          }
+        </Grid>
+      </Grid>
     </React.Fragment>
   );
 }

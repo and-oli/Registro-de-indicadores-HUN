@@ -46,7 +46,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function MainPage() {
+export default function MainPage(props) {
   const classes = useStyles();
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
@@ -58,7 +58,7 @@ export default function MainPage() {
           {/* Información del Indicador */}
           <Grid item xs={12}>
             <Paper className={classes.paper}>
-              <IndicatorInfo />
+              <IndicatorInfo admin={props.admin} />
             </Paper>
           </Grid>
           {/* Chart */}

@@ -7,7 +7,6 @@ import ListSubheader from '@material-ui/core/ListSubheader';
 import TrendingUpIcon from '@material-ui/icons/TrendingUp';
 import PeopleIcon from '@material-ui/icons/People';
 import AssignmentIcon from '@material-ui/icons/Assignment';
-import SpellcheckIcon from '@material-ui/icons/Spellcheck';
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import Badge from '@material-ui/core/Badge';
@@ -21,12 +20,6 @@ export const secondaryListItemsAdmin = (
         <AccessTimeIcon />
       </ListItemIcon>
       <ListItemText primary="Autorizar Usuario" />
-    </ListItem>
-    <ListItem component={Link} to={"/editar-indicador"} button>
-      <ListItemIcon>
-        <SpellcheckIcon />
-      </ListItemIcon>
-      <ListItemText primary="Editar Indicador" />
     </ListItem>
     <ListItem component={Link} to={"/nuevo-indicador"} button>
       <ListItemIcon>
