@@ -129,9 +129,9 @@ export default function Navigation() {
           <Divider />
           <List>
             <ListItems admin={admin} />
+            {admin ? secondaryListItemsAdmin : secondaryListItemsUser}
           </List>
           <Divider />
-          <List>{admin ? secondaryListItemsAdmin : secondaryListItemsUser}</List>
         </Drawer>
         <Switch>
           <Route exact path="/">
@@ -145,9 +145,6 @@ export default function Navigation() {
           </Route>
           <Route path="/usuarios">
             <UsersInfo />
-          </Route>
-          <Route path="/autorizar">
-            <UserRequests />
           </Route>
           <Route path="/editar-indicador">
             <MainPage />

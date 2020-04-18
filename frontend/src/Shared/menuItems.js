@@ -7,20 +7,12 @@ import ListSubheader from '@material-ui/core/ListSubheader';
 import TrendingUpIcon from '@material-ui/icons/TrendingUp';
 import PeopleIcon from '@material-ui/icons/People';
 import AssignmentIcon from '@material-ui/icons/Assignment';
-import AccessTimeIcon from '@material-ui/icons/AccessTime';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import Badge from '@material-ui/core/Badge';
 import { Link } from 'react-router-dom';
 
 export const secondaryListItemsAdmin = (
   <div>
-    <ListSubheader inset>Acciones</ListSubheader>
-    <ListItem component={Link} to={"/autorizar"} button>
-      <ListItemIcon>
-        <AccessTimeIcon />
-      </ListItemIcon>
-      <ListItemText primary="Autorizar Usuario" />
-    </ListItem>
     <ListItem component={Link} to={"/nuevo-indicador"} button>
       <ListItemIcon>
         <AddCircleOutlineIcon />
@@ -32,7 +24,6 @@ export const secondaryListItemsAdmin = (
 
 export const secondaryListItemsUser = (
   <div>
-    <ListSubheader inset>Acciones</ListSubheader>
     <ListItem component={Link} to={"/registrar-indicador"} button>
       <ListItemIcon>
         <AddCircleOutlineIcon />
@@ -54,6 +45,7 @@ export default function ListItems(props) {
 
   return (
     <div>
+      <ListSubheader inset>Acciones</ListSubheader>
       <ListItem component={Link} to={"/"} button>
         <ListItemIcon>
           <TrendingUpIcon />
