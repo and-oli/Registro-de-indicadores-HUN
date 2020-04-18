@@ -9,7 +9,7 @@ function requests(dbCon) {
      */
     router.get('/by/:userId', token.checkToken, async function (req, res, next) {
         try {
-            if (!req.params.userId ) {
+            if (!req.params.userId) {
                 return res.json({ success: false, message: "Debe ingresar un id de usuario" });
             }
             const solicitudes =
@@ -27,7 +27,7 @@ function requests(dbCon) {
      */
     router.get('/to/:userId', token.checkToken, async function (req, res, next) {
         try {
-            if (!req.params.userId ) {
+            if (!req.params.userId) {
                 return res.json({ success: false, message: "Debe ingresar un id de usuario" });
             }
             const solicitudes =
@@ -45,11 +45,11 @@ function requests(dbCon) {
      */
     router.get('/reject/:idSolicitud', token.checkToken, async function (req, res, next) {
         try {
-            if (!req.params.idSolicitud ) {
+            if (!req.params.idSolicitud) {
                 return res.json({ success: false, message: "Debe ingresar un id de solicitud" });
             }
             const result =
-                await requestService.updateRequest (await dbCon, req.params.idSolicitud, false);
+                await requestService.updateRequest(await dbCon, req.params.idSolicitud, false);
             return res.json({ success: true, result, message: "" });
         } catch (error) {
             console.error(error);
@@ -74,10 +74,7 @@ function requests(dbCon) {
         if (!res.headersSent) {
             try {
                 const result = await requestService.postRequest(await dbCon, req.body)
-                if (result) {
-                    return res.json({ success: true, message: "Solicitud registrada!" });
-                }
-                return res.json({ success: false, message: "Ocurrió un error" });
+                res.json(result);
             } catch (error) {
                 console.error(error);
                 return res.json({ success: false, message: "Ocurrió un error" });
