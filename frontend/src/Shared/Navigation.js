@@ -84,8 +84,8 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function Navigation() {
-  const admin = true;
+export default function Navigation(props) {
+  const {admin} = props;
   const classes = useStyles();
   const [open, setOpen] = React.useState(false);
   const handleDrawerOpen = () => {

@@ -81,8 +81,9 @@ module.exports = {
                     res.json({
                         success: true,
                         idUsuario: result.idUsuario,
-                        message: "Disfrute el token",
-                        token
+                        message: `Bienvenido ${result.nombre} ${result.apellidos}`,
+                        admin: result.rol === "ADMINISTRADOR",
+                        token,
                     });
                 }
 

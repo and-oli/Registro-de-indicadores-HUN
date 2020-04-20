@@ -21,6 +21,9 @@ export default function Dropdown(props) {
 
   const handleChange = (event) => {
     setValue(event.target.value);
+    if(props.handleDropdownChange){
+      props.handleDropdownChange(event.target.value);
+    }
   }
   return (
     <FormControl required variant="standard" className={classes.formControl}>

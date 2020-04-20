@@ -51,6 +51,7 @@ export default function SignIn() {
           setLoading(false)
           if (responseJson.success) {
             localStorage.setItem("HUNToken", responseJson.token);
+            localStorage.setItem("HUNAdmin", responseJson.admin);
             window.location.reload();
             setMessage({ color: "green", text: responseJson.message })
           } else {
@@ -99,7 +100,7 @@ export default function SignIn() {
             autoComplete="current-password"
           />
           {loading ?
-            <div class="loader"></div> :
+            <div className="loader"></div> :
             <Button
               type="submit"
               fullWidth

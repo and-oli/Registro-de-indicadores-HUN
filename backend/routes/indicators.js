@@ -55,6 +55,24 @@ function indicators(dbCon) {
         }
 
     });
+    /**
+     * Modifica un indicador
+     */
+    router.put('/', (req, res, next) => token.checkTokenAdmin(req, res, next, true), async function (req, res, next) {
+        try {
+            console.log(req.body)
+            const indicador = await indicatorService.updateIndicator(await dbCon, req.body)
+            if(indicador){
+                return res.json({ success: true, indicador, message: "Indicador actualizado" });
+            }
+            return res.json({ success: false, message: "No hay indicadores con ese ID" });
+        } catch (error) {
+            console.error(error);
+            return res.json({ success: false, message: "Ocurrió un error" });
+        }
+
+    });
+
     router.post('/', (req, res, next) => token.checkTokenAdmin(req, res, next, true), async function (req, res, next) {
         if (!res.headersSent) {
             try {

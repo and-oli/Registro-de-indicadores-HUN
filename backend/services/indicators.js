@@ -1,6 +1,6 @@
 const moment = require("moment")
 module.exports = {
-    
+
     getIndicators: async function (dbCon) {
         const result = await dbCon.query`
             select *  from indicadores 
@@ -23,6 +23,34 @@ module.exports = {
     `;
         return result.recordset[0];
     },
+
+    updateIndicator: async function (dbCon, indicator) {
+        const { nombre,
+            idIndicador,
+            definicion,
+            origen,
+            formula,
+            unidadMedicion,
+            responsableDeRecolectarDatos,
+            responsableDelIndicador,
+            meta,
+        } = indicator;
+        const result = await dbCon.query`
+            update indicadores 
+            set
+                nombre =  ${nombre},
+                definicion =  ${definicion},
+                origen =  ${origen},
+                formula =  ${formula},
+                unidadMedicion =  ${unidadMedicion},
+                responsableDeRecolectarDatos =  ${responsableDeRecolectarDatos},
+                responsableDelIndicador =  ${responsableDelIndicador},
+                meta =  ${meta}
+            WHERE idIndicador =  ${idIndicador}
+                `;
+        return result.rowsAffected > 0
+    },
+
 
     postIndicator: async function (dbCon, indicator) {
         const { nombre,

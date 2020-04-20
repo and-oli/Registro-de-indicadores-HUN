@@ -1,28 +1,13 @@
 import React from 'react';
 import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core/styles';
-import Box from '@material-ui/core/Box';
-import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
-import Link from '@material-ui/core/Link';
 import Chart from './Chart';
 import IndicatorByDate from './IndicatorByDate';
 import IndicatorInfo from './IndicatorInfo';
 
-function Copyright() {
-  return (
-    <Typography variant="body2" color="textSecondary" align="center">
-      {'Copyright © '}
-      <Link color="inherit" href="https://material-ui.com/">
-        HUN
-      </Link>{' '}
-      {new Date().getFullYear()}
-      {'.'}
-    </Typography>
-  );
-}
 
 const useStyles = makeStyles((theme) => ({
   appBarSpacer: theme.mixins.toolbar,
@@ -49,7 +34,9 @@ const useStyles = makeStyles((theme) => ({
 export default function MainPage(props) {
   const classes = useStyles();
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
-
+  const handleIndicatorChange = function(){
+    
+  }
   return (
     <main className={classes.content}>
       <div className={classes.appBarSpacer} />
@@ -58,7 +45,7 @@ export default function MainPage(props) {
           {/* Información del Indicador */}
           <Grid item xs={12}>
             <Paper className={classes.paper}>
-              <IndicatorInfo admin={props.admin} />
+              <IndicatorInfo admin={props.admin} handleIndicatorChange ={handleIndicatorChange}  />
             </Paper>
           </Grid>
           {/* Chart */}
@@ -74,9 +61,6 @@ export default function MainPage(props) {
             </Paper>
           </Grid>
         </Grid>
-        <Box pt={4}>
-          <Copyright />
-        </Box>
       </Container>
     </main>
   );
