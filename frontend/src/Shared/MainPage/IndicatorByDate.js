@@ -9,21 +9,6 @@ import DateFnsUtils from '@date-io/date-fns';
 import esLocale from 'date-fns/locale/es'
 import { MuiPickersUtilsProvider, DatePicker } from '@material-ui/pickers';
 
-// Generate Indicator Data
-function createData(id, label, value) {
-  return { id, label, value };
-}
-
-const labelCellPair = [
-  createData(0, 'Valor:', 15),
-  createData(1, 'Usuario:', 'Benito Camelas'),
-  createData(2, 'Análisis cualitativo:', 'Millos necesita más estrellas'),
-  createData(3, 'Acción de mejora:', 'Cambiar directivas'),
-];
-
-/*function preventDefault(event) {
-  event.preventDefault();
-}*/
 
 const useStyles = makeStyles((theme) => ({
   depositContext: {
@@ -41,11 +26,49 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function IndicatorByDate() {
+const camelToText = function (camel) {
+  let text = camel.replace(/([A-Z])/g, " $1");
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
+export default function IndicatorByDate(props) {
   const classes = useStyles();
   const [selectedDate, setSelectedDate] = React.useState(new Date());
+  const [currentRecord, setCurrentRecord] = React.useState(null);
+  const [records, setRecords] = React.useState([]);
+
+  React.useEffect(
+    () => {
+      if (props.records.length > 0) {
+        setRecords(props.records.map(r => {
+          let date = new Date(r.fecha);
+          let rClone = JSON.parse(JSON.stringify(r))
+          delete rClone.fecha;
+          delete rClone.idRegistro;
+          delete rClone.idSolicitud;
+          delete rClone.idIndicador;
+          delete rClone.idUsuario;
+          delete rClone.periodo;
+          delete rClone.ultimoDelPeriodo;
+          return {
+            fecha: `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`,
+            ...rClone
+          }
+        })
+        )
+        let d = new Date(selectedDate);
+        let dateString = `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`
+        console.log(dateString, records)
+        setCurrentRecord(records.find(r => r.fecha === dateString))
+      }
+    }, [props]
+  )
   const handleDateChange = (date) => {
+    let d = new Date(date);
+    let dateString = `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`
     setSelectedDate(date);
+    console.log(date)
+    setCurrentRecord(records.find(r => r.fecha === dateString))
   };
   return (
     <React.Fragment>
@@ -64,28 +87,20 @@ export default function IndicatorByDate() {
           </MuiPickersUtilsProvider>
         </Grid>
       </Grid>
-      {/*<Typography component="p" variant="h4">
-        $3,024.00
-        </Typography>*/}
-      {/*<Typography color="textSecondary" className={classes.depositContext}>
-          on 15 March, 2019
-        </Typography>*/}
       <Table className={classes.table} size="small">
         <TableBody>
-        {labelCellPair.map((row) => (
-          <TableRow key={row.id}>
-            <TableCell className={classes.thead}>{row.label}</TableCell>
-            <TableCell className={classes.tcell}>{row.value}</TableCell>
-          </TableRow>
-        ))}
+          {
+            currentRecord ?
+              Object.keys(currentRecord).map((k, i) => (
+                <TableRow key={i}>
+                  <TableCell className={classes.thead}>{camelToText(k)}</TableCell>
+                  <TableCell className={classes.tcell}>{currentRecord[k]}</TableCell>
+                </TableRow>
+              )) :
+              <div>No hay registros para este indicador en esta fecha</div>
+          }
         </TableBody>
       </Table>
-        
-      {/*<div>
-        <Link color="primary" href="#" onClick={preventDefault}>
-          Dejé este código para entender los hooks y tener un ejemplo
-        </Link>
-      </div>*/}
     </React.Fragment>
   );
 }

@@ -115,15 +115,14 @@ module.exports = {
         from INDICADORES inner join PERIODOS on INDICADORES.idPeriodo = PERIODOS.idPeriodo  
         where idIndicador = ${idIndicador}
         `).recordset[0];
-        if (currentDatesAndPeriod) {
-
+        if (result) {
             const newStartDate = moment(result.inicioPeriodoActual).add(result.meses, "M").toString()
             const newEndDate = moment(result.finPeriodoActual).add(result.meses, "M").toString()
             const newPeriod = result.periodoActual + 1;
             await dbCon.query`
         update INDICADORES 
-        set inicioPeriodoActual = ${newStartDate}  
-        finPeriodoActual = ${newEndDate}  
+        set inicioPeriodoActual = ${newStartDate},  
+        finPeriodoActual = ${newEndDate},  
         periodoActual = ${newPeriod}  
         where idIndicador = ${idIndicador}
         `;

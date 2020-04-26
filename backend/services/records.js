@@ -6,7 +6,8 @@ module.exports = {
 
     getRecordsByIndicatorId: async function (dbCon, idIndicador) {
         const result = await dbCon.query`
-            select *  from REGISTROS 
+            select REGISTROS.*, USUARIOS.username as usuario from REGISTROS INNER JOIN USUARIOS 
+            ON USUARIOS.idUsuario = REGISTROS.idUsuario 
             where idIndicador = ${idIndicador}
         `;
         return result.recordset;
@@ -104,7 +105,7 @@ module.exports = {
             select idRegistro from REGISTROS
             where periodo = ${periodo - 1}
             `;
-            if (!(result[0] || periodo === 0)) {
+            if (!(result.recordset[0] || periodo === 0)) {
                 return { success: false, message: "Debe registrar un valor para este indicador para el último periodo sin registro." }
             }
 
@@ -147,7 +148,7 @@ module.exports = {
 
                     // Actualizar el periodo actual y su vigencia en el indicador.
 
-                    if (await indicatorsService.updatePeriod(idIndicador)) {
+                    if (await indicatorsService.updatePeriod(dbCon,idIndicador)) {
                         return { success: false, message: "No existe un indicador con ese id" }
                     }
                 }

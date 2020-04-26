@@ -34,9 +34,9 @@ const useStyles = makeStyles((theme) => ({
 export default function MainPage(props) {
   const classes = useStyles();
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
-  const handleIndicatorChange = function(){
-    
-  }
+  const [indicatorId, setIndicatorId] = React.useState(null)
+  const [records, setRecords] = React.useState([])
+
   return (
     <main className={classes.content}>
       <div className={classes.appBarSpacer} />
@@ -45,23 +45,29 @@ export default function MainPage(props) {
           {/* Información del Indicador */}
           <Grid item xs={12}>
             <Paper className={classes.paper}>
-              <IndicatorInfo admin={props.admin} handleIndicatorChange ={handleIndicatorChange}  />
+              <IndicatorInfo admin={props.admin} setIndicatorId={setIndicatorId} />
             </Paper>
           </Grid>
           {/* Chart */}
-          <Grid item xs={12}>
-            <Paper className={fixedHeightPaper}>
-              <Chart />
-            </Paper>
-          </Grid>
+          {
+            indicatorId &&
+            < Grid item xs={12}>
+              <Paper className={fixedHeightPaper}>
+                <Chart indicatorId={indicatorId} setRecords={setRecords}/>
+              </Paper>
+            </Grid>
+          }
           {/* Indicador Por Fecha */}
-          <Grid item xs={12}>
-            <Paper className={classes.paper}>
-              <IndicatorByDate />
-            </Paper>
-          </Grid>
+          {
+            indicatorId &&
+            < Grid item xs={12}>
+              <Paper className={classes.paper}>
+                <IndicatorByDate records={records} />
+              </Paper>
+            </Grid>
+          }
         </Grid>
-      </Container>
-    </main>
+      </Container >
+    </main >
   );
 }

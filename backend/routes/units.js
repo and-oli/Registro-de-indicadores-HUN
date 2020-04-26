@@ -6,15 +6,18 @@ const unitService = require("../services/units");
 function units(dbCon) {
 
     router.get('/', token.checkToken, async function (req, res, next) {
-        try {
-            const unidades = await unitService.getUnits(await dbCon);
-            return res.json({ success: true, unidades, message: "" });
+        if (!res.headersSent) {
 
-        } catch (error) {
-            console.error(error);
-            return res.json({ success: false, message: "Ocurrió un error" });
+            try {
+                const unidades = await unitService.getUnits(await dbCon);
+                return res.json({ success: true, unidades, message: "" });
+
+            } catch (error) {
+                console.error(error);
+                return res.json({ success: false, message: "Ocurrió un error" });
+            }
+
         }
-
     });
     router.post('/', (req, res, next) => token.checkTokenAdmin(req, res, next, true), async function (req, res) {
         if (!res.headersSent) {

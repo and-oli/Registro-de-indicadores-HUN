@@ -26,6 +26,7 @@ const camelToText = function (camel) {
 }
 
 export default function IndicatorInfo(props) {
+  let status;
   React.useEffect(
     () => {
       fetch("/units/", {
@@ -33,11 +34,14 @@ export default function IndicatorInfo(props) {
         headers: {
           'x-access-token': localStorage.getItem("HUNToken")
         },
-      }).then((response) => response.json())
+      }).then((response) =>{status = response.status; return response.json();} )
         .then((responseJson) => {
           setLoading(false)
           if (responseJson.success) {
             setUnits(responseJson.unidades)
+          } else if(status === 403){
+            localStorage.removeItem("HUNToken");
+            window.location.reload(); 
           }
         })
     }, []
@@ -114,6 +118,7 @@ export default function IndicatorInfo(props) {
             delete responseJson.indicador.periodoActual
             delete responseJson.indicador.unidad
             setIndicator(responseJson.indicador)
+            props.setIndicatorId(responseJson.indicador.idIndicador)
           }
         })
     }
