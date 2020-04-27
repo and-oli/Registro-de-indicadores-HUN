@@ -59,7 +59,7 @@ export default function IndicatorByDate(props) {
         let d = new Date(selectedDate);
         let dateString = `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`
         console.log(dateString, records)
-        setCurrentRecord(records.find(r => r.fecha === dateString))
+        setCurrentRecord(props.records.find(r => r.fecha === dateString))
       }
     }, [props]
   )
