@@ -43,7 +43,7 @@ function records(dbCon) {
     /**
      * Retorna los registros de un indicador en un periodo dado el id del indicador y el periodo
      */
-    router.get('/recordsByIndicatorId/:indicatorId/:period', token.checkToken, async function (req, res, next) {
+    router.get('/recordsByIndicatorIdByPeriod/:indicatorId/:period', token.checkToken, async function (req, res, next) {
         try {
             if (!req.params.indicatorId || !req.params.period ) {
                 return res.json({ success: false, message: "Debe ingresar un id de indicador y un periodo" });
@@ -61,7 +61,7 @@ function records(dbCon) {
     /**
      * Retorna el último registro de un indicador en un periodo dado el id del indicador y el periodo
      */
-    router.get('/lastRecordByIndicatorId/:indicatorId/:period', token.checkToken, async function (req, res, next) {
+    router.get('/lastRecordByIndicatorIdByPeriod/:indicatorId/:period', token.checkToken, async function (req, res, next) {
         try {
             if (!req.params.indicatorId || !req.params.period ) {
                 return res.json({ success: false, message: "Debe ingresar un id de indicador y un periodo" });

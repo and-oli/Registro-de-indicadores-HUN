@@ -5,9 +5,7 @@ import TableBody from '@material-ui/core/TableBody';
 import Title from '../Title';
 import { TableRow, TableCell } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid';
-import DateFnsUtils from '@date-io/date-fns';
-import esLocale from 'date-fns/locale/es'
-import { MuiPickersUtilsProvider, DatePicker } from '@material-ui/pickers';
+import Dropdown from '../Dropdown';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -17,6 +15,7 @@ const useStyles = makeStyles((theme) => ({
   thead: {
     fontWeight: "bold",
     borderBottom: "none",
+    width: "200px",
   },
   tcell: {
     borderBottom: "none",
@@ -33,74 +32,112 @@ const camelToText = function (camel) {
 
 export default function IndicatorByDate(props) {
   const classes = useStyles();
-  const [selectedDate, setSelectedDate] = React.useState(new Date());
-  const [currentRecord, setCurrentRecord] = React.useState(null);
+  const [currentRecords, setCurrentRecords] = React.useState([]);
   const [records, setRecords] = React.useState([]);
+  const [dates, setDates] = React.useState([]);
+  const [loading, setLoading] = React.useState(false);
 
   React.useEffect(
     () => {
       if (props.records.length > 0) {
-        setRecords(props.records.map(r => {
-          let date = new Date(r.fecha);
-          let rClone = JSON.parse(JSON.stringify(r))
-          delete rClone.fecha;
-          delete rClone.idRegistro;
-          delete rClone.idSolicitud;
-          delete rClone.idIndicador;
-          delete rClone.idUsuario;
-          delete rClone.periodo;
-          delete rClone.ultimoDelPeriodo;
-          return {
-            fecha: `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`,
-            ...rClone
-          }
-        })
-        )
-        let d = new Date(selectedDate);
-        let dateString = `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`
-        console.log(dateString, records)
-        setCurrentRecord(props.records.find(r => r.fecha === dateString))
+        setLoading(true)
+        fetch(`/records/recordsByIndicatorId/${props.indicatorId}`, {
+          method: 'GET',
+          headers: {
+            'x-access-token': localStorage.getItem("HUNToken")
+          },
+        }).then((response) => response.json())
+          .then((responseJson) => {
+            if (responseJson.success) {
+              setRecords(responseJson.registros.map(r => {
+                let date = new Date(r.fecha);
+                let rClone = JSON.parse(JSON.stringify(r))
+                delete rClone.fecha;
+                delete rClone.idRegistro;
+                delete rClone.idSolicitud;
+                delete rClone.idIndicador;
+                delete rClone.idUsuario;
+                delete rClone.ultimoDelPeriodo;
+                return {
+                  fecha: `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`,
+                  ...rClone
+                }
+              })
+              )
+            }
+            getDates();
+          })
+
       }
     }, [props]
   )
-  const handleDateChange = (date) => {
-    let d = new Date(date);
-    let dateString = `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`
-    setSelectedDate(date);
-    console.log(date)
-    setCurrentRecord(records.find(r => r.fecha === dateString))
-  };
+
+  function getDates() {
+    fetch(`/indicators/pastPeriodsDates/${props.indicatorId}`, {
+      method: 'GET',
+      headers: {
+        'x-access-token': localStorage.getItem("HUNToken")
+      },
+    }).then((response) => response.json())
+      .then((responseJson) => {
+        setLoading(false)
+        if (responseJson.success) {
+          setDates(responseJson.dates)
+        }
+      })
+  }
+
+  function handlePeriodChange(periodText) {
+    let currentPeriod = dates.find(d =>
+      `${d.startDate} - ${d.endDate}` === periodText
+    ).period
+    setCurrentRecords(
+      records.filter(r => r.periodo === currentPeriod)
+    )
+  }
   return (
     <React.Fragment>
-      <Title>Información por Fecha</Title>
-      <Grid container spacing={3}>
-        <Grid item xs>
-          <MuiPickersUtilsProvider utils={DateFnsUtils} locale={esLocale}>
-            <DatePicker
-              autoOk
-              variant="inline"
-              value={selectedDate}
-              label="Fecha"
-              onChange={handleDateChange}
-              format="dd/MM/yyyy"
-            />
-          </MuiPickersUtilsProvider>
-        </Grid>
-      </Grid>
-      <Table className={classes.table} size="small">
-        <TableBody>
-          {
-            currentRecord ?
-              Object.keys(currentRecord).map((k, i) => (
-                <TableRow key={i}>
-                  <TableCell className={classes.thead}>{camelToText(k)}</TableCell>
-                  <TableCell className={classes.tcell}>{currentRecord[k]}</TableCell>
-                </TableRow>
-              )) :
-              <div>No hay registros para este indicador en esta fecha</div>
-          }
-        </TableBody>
-      </Table>
+      {
+        loading ?
+          <div className="loader"></div> :
+          <div>
+            <Title>Información por Fecha</Title>
+            <Grid container spacing={3}>
+              <Grid item xs>
+                <Dropdown
+                  type="Periodo"
+                  options={dates.map(d => `${d.startDate} - ${d.endDate}`)}
+                  handleDropdownChange={handlePeriodChange}
+                />
+              </Grid>
+            </Grid>
+            {
+              currentRecords[0] ?
+                currentRecords.map((cr, j) => {
+                  return <Table className={classes.table} size="small">
+                    <TableBody style ={{border: "solid #d2d2d2 1px"}}>
+                      {
+                        Object.keys(cr).map((k, i) => {
+                          if (k !== "periodo") {
+                            return (
+                              <TableRow key={i + "" + j}>
+                                <TableCell className={classes.thead}>{camelToText(k)}</TableCell>
+                                <TableCell className={classes.tcell}>{cr[k]}</TableCell>
+                              </TableRow>
+                            )
+                          }
+                        })
+                      }
+                    </TableBody>
+                  </Table>
+                }) :
+                <div>
+                  No hay registros para este indicador en esta fecha
+                </div>
+            }
+          </div>
+      }
+
     </React.Fragment>
   );
 }

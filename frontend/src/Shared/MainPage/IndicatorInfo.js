@@ -26,9 +26,9 @@ const camelToText = function (camel) {
 }
 
 export default function IndicatorInfo(props) {
-  let status;
   React.useEffect(
     () => {
+      let status;
       fetch("/units/", {
         method: 'GET',
         headers: {

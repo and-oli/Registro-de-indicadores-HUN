@@ -55,6 +55,8 @@ function indicators(dbCon) {
         }
 
     });
+
+    
     /**
      * Modifica un indicador
      */
@@ -91,7 +93,7 @@ function indicators(dbCon) {
         }
     });
     /**
-     * Retorna la siguiente vigencia de un indicador de acuerdo a su periodicidad,
+     * Retorna la vigencia del periodo actual y del siguiente de un indicador de acuerdo a su periodicidad,
      * dado su id
      */
     router.get('/currentAndNextPeriodDates/:idIndicador', token.checkToken, async function (req, res) {
@@ -99,6 +101,22 @@ function indicators(dbCon) {
             try {
                 const nextPeriod = await indicatorService.getCurrentAndNextPeriodDates(await dbCon, req.params.idIndicador)
                 return res.json({ success: true, nextPeriod, message: "" });
+            } catch (error) {
+                console.error(error);
+                return res.json({ success: false, message: "Ocurrió un error" });
+            }
+        }
+    });
+
+    /**
+     * Retorna las vigencias de todos los periodos anteriores y la del actual de un indicador dado su id ante un.
+     * response: [{startDate,endDate,period}, ... ]
+     */
+    router.get('/pastPeriodsDates/:idIndicador', token.checkToken, async function (req, res) {
+        if (!res.headersSent) {
+            try {
+                const dates = await indicatorService.getPastPeriodsDates(await dbCon, req.params.idIndicador)
+                return res.json({ success: true, dates, message: "" });
             } catch (error) {
                 console.error(error);
                 return res.json({ success: false, message: "Ocurrió un error" });

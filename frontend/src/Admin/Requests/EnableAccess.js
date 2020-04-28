@@ -64,9 +64,6 @@ export default function EnableAccess(props) {
   const handleClick = () => {
     props.handleClose();
   }
-  //const now = new Date(Date.now());
-  //const date = `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`;
-  //console.log(new Date(date));
   const [state, setSate] = React.useState({
     initDate: new Date(new Date()),
     endDate: new Date(new Date()),

@@ -65,7 +65,6 @@ export default function UserRequests() {
   };
 
   const handleAccessDenied = () => {
-    console.log('falta implementar acción');
   }
 
   return (

@@ -121,7 +121,30 @@ module.exports = {
             const currentPeriod = result.periodoActual;
             const nextStartDate = moment(result.inicioPeriodoActual).add(result.meses, "M").toString()
             const nextEndDate = moment(result.finPeriodoActual).add(result.meses, "M").toString()
-            return {currentStartDate, currentEndDate, currentPeriod, nextStartDate, nextEndDate}
+            return { currentStartDate, currentEndDate, currentPeriod, nextStartDate, nextEndDate }
+        }
+        return false;
+    },
+    getPastPeriodsDates: async function (dbCon, idIndicador) {
+
+        const result = (await dbCon.query`
+        select INDICADORES.inicioPeriodoActual, INDICADORES.finPeriodoActual, INDICADORES.periodoActual, PERIODOS.meses 
+        from INDICADORES inner join PERIODOS on INDICADORES.idPeriodo = PERIODOS.idPeriodo  
+        where idIndicador = ${idIndicador}
+        `).recordset[0];
+        if (result) {
+            let currentPeriod = result.periodoActual;
+            let response = [];
+            for (let i = 0; i <= currentPeriod; i++) {
+                response.push(
+                    {
+                        startDate: moment(result.inicioPeriodoActual).subtract(result.meses * (currentPeriod - i), "M").toString(),
+                        endDate: moment(result.finPeriodoActual).subtract(result.meses * (currentPeriod - i), "M").toString(),
+                        period: i
+                    }
+                )
+            }
+            return response;
         }
         return false;
     },

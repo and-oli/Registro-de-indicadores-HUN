@@ -28,7 +28,6 @@ const useStyles = makeStyles((theme) => ({
 export default function UpdateIndicatorModal(props) {
     const classes = useStyles();
     const [modalStyle] = React.useState(getModalStyle);
-    const [open, setOpen] = React.useState(false);
     const [message, setMessage] = React.useState({ color: "green", text: "" });
     const [loading, setLoading] = React.useState(false);
     const confirmEdit = function () {

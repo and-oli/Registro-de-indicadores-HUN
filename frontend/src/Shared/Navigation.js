@@ -82,10 +82,16 @@ const useStyles = makeStyles((theme) => ({
       width: theme.spacing(9),
     },
   },
+  logout: {
+    fontSize: "15px",
+    "&:hover": {
+      cursor: 'pointer'
+    }
+  }
 }));
 
 export default function Navigation(props) {
-  const {admin} = props;
+  const { admin } = props;
   const classes = useStyles();
   const [open, setOpen] = React.useState(false);
   const handleDrawerOpen = () => {
@@ -111,6 +117,14 @@ export default function Navigation(props) {
           <Typography component="h1" variant="h6" color="inherit" noWrap className={classes.title}>
             Registro De Indicadores HUN
           </Typography>
+          <Typography component="h3" variant="h6" color="inherit" noWrap className={classes.logout}
+            onClick={() => {
+              localStorage.removeItem("HUNToken");
+              localStorage.removeItem("HUNAdmin");
+              window.location.reload()
+            }}>
+            Salir
+          </Typography>
         </Toolbar>
       </AppBar>
       <Router>
@@ -135,7 +149,7 @@ export default function Navigation(props) {
         </Drawer>
         <Switch>
           <Route exact path="/">
-            <MainPage admin={admin}/>
+            <MainPage admin={admin} />
           </Route>
           <Route path="/admin/solicitudes">
             <UserRequests />

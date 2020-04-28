@@ -8,7 +8,7 @@ function App() {
     <div className="App">
       {
         (localStorage.getItem("HUNToken")) ?
-          <Navigation admin ={(localStorage.getItem("HUNAdmin"))} />:
+          <Navigation admin ={(localStorage.getItem("HUNAdmin")) === "true"} />:
           <SignIn /> 
       }
     </div>

@@ -28,7 +28,7 @@ export const secondaryListItemsUser = (
       <ListItemIcon>
         <AddCircleOutlineIcon />
       </ListItemIcon>
-      <ListItemText primary="Registrar Indicador" />
+      <ListItemText primary="Registrar valor de indicador" />
     </ListItem>
   </div>
 );

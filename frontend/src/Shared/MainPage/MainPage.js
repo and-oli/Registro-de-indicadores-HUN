@@ -53,7 +53,7 @@ export default function MainPage(props) {
             indicatorId &&
             < Grid item xs={12}>
               <Paper className={fixedHeightPaper}>
-                <Chart indicatorId={indicatorId} setRecords={setRecords}/>
+                <Chart indicatorId={indicatorId} setRecords={setRecords} />
               </Paper>
             </Grid>
           }
@@ -62,7 +62,7 @@ export default function MainPage(props) {
             indicatorId &&
             < Grid item xs={12}>
               <Paper className={classes.paper}>
-                <IndicatorByDate records={records} />
+                <IndicatorByDate records={records} indicatorId={indicatorId} />
               </Paper>
             </Grid>
           }
