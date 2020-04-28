@@ -108,6 +108,23 @@ module.exports = {
         return result.recordset[0];
     },
 
+    getCurrentAndNextPeriodDates: async function (dbCon, idIndicador) {
+
+        const result = (await dbCon.query`
+        select INDICADORES.inicioPeriodoActual, INDICADORES.finPeriodoActual, INDICADORES.periodoActual, PERIODOS.meses 
+        from INDICADORES inner join PERIODOS on INDICADORES.idPeriodo = PERIODOS.idPeriodo  
+        where idIndicador = ${idIndicador}
+        `).recordset[0];
+        if (result) {
+            const currentStartDate = moment(result.inicioPeriodoActual).toString()
+            const currentEndDate = moment(result.finPeriodoActual).toString()
+            const currentPeriod = result.periodoActual;
+            const nextStartDate = moment(result.inicioPeriodoActual).add(result.meses, "M").toString()
+            const nextEndDate = moment(result.finPeriodoActual).add(result.meses, "M").toString()
+            return {currentStartDate, currentEndDate, currentPeriod, nextStartDate, nextEndDate}
+        }
+        return false;
+    },
     updatePeriod: async function (dbCon, idIndicador) {
 
         const result = (await dbCon.query`

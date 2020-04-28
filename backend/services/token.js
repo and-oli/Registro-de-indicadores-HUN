@@ -17,7 +17,7 @@ module.exports = {
         } else {
             return res.status(403).send({
                 success: false,
-                message: "No tiene permiso para acceder."
+                message: "No tiene permiso para realizar esta acción."
             });
         }
         next()
@@ -32,7 +32,7 @@ module.exports = {
                 else if (admin && decoded.rol !== "ADMINISTRADOR"){
                     return res.status(403).send({
                         success: false,
-                        message: "No tiene permiso para hacer esta accion."
+                        message: "No tiene permiso para hacer realizar esta acción."
                     });
                 }
                 else{
@@ -42,7 +42,7 @@ module.exports = {
         } else {
             return res.status(403).send({
                 success: false,
-                message: "No tiene permiso para acceder."
+                message: "No tiene permiso para realizar esta acción."
             });
         }
         next()

@@ -15,7 +15,8 @@ module.exports = {
 
     getLastRecordsByIndicatorId: async function (dbCon, idIndicador) {
         const result = await dbCon.query`
-            select *  from REGISTROS 
+        select REGISTROS.*, USUARIOS.username as usuario from REGISTROS INNER JOIN USUARIOS 
+        ON USUARIOS.idUsuario = REGISTROS.idUsuario  
             where idIndicador = ${idIndicador}
             and ultimoDelPeriodo = ${true}
         `;
@@ -49,13 +50,12 @@ module.exports = {
      * @param {*} dbCon el pool de conexiones a la base de datos.
      * @param {*} record el registro que se intenta subir 
      */
-    userCanPostRecord: async function (dbCon, record, idUsuario) {
+    userCanPostRecord: async function (dbCon, record) {
         const {
             idIndicador,
+            idUsuario,
         } = record;
-
         // Revisar si hay un objeto acceso vigente para el usuario al indicador.
-
         const acceses = await accessService.getAccessesByIndicatorIdAndUserId(dbCon, idIndicador, idUsuario);
         const currentTime = new Date().getTime() - (1000 * 3600 * 5) // El servidor en heroku estará en la hora 0 GMT, Colombia está en -5GMT
         const validAccess = acceses.find(a =>
@@ -66,6 +66,7 @@ module.exports = {
         if (validAccess) {
             return validaAccess
         }
+
         // Revisar si el indicador se puede registrar en la fecha actual
         if (await permissionsService.indicatorRegistryIsEnabled(dbCon, idIndicador)) {
 
@@ -92,10 +93,13 @@ module.exports = {
             accionMejora,
             valor,
             periodo,
+            numerador,
+            denominador,
             nuevoPeriodo
         } = record;
         const fecha = new Date(new Date().getTime() - (1000 * 3600 * 5)).toString();
-        const userPermissionToPost = await this.userCanPostRecord(dbCon, record, idUsuario);
+        record.idUsuario = idUsuario
+        const userPermissionToPost = await this.userCanPostRecord(dbCon, record);
         if (userPermissionToPost) {
 
             // Determinar si se puede ingresar el registro de este periodo si en la base de datos se encuentra 
@@ -127,6 +131,8 @@ module.exports = {
                 analisisCualitativo, 
                 accionMejora, 
                 valor,
+                numerador,
+                denominador,
                 periodo,
                 ultimoDelPeriodo
                 )
@@ -138,6 +144,8 @@ module.exports = {
                 ${analisisCualitativo},
                 ${accionMejora},
                 ${valor},
+                ${numerador},
+                ${denominador},
                 ${periodo},
                 ${true}
                 )`;
@@ -148,7 +156,7 @@ module.exports = {
 
                     // Actualizar el periodo actual y su vigencia en el indicador.
 
-                    if (await indicatorsService.updatePeriod(dbCon,idIndicador)) {
+                    if (await indicatorsService.updatePeriod(dbCon, idIndicador)) {
                         return { success: false, message: "No existe un indicador con ese id" }
                     }
                 }

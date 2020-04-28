@@ -78,14 +78,14 @@ function records(dbCon) {
 
     /**
      * Retorna un objeto que determina si un usuario tiene acceso vigente para ingresar un registro
-     * de un indicador dado el id del usuario y del indicador.
+     * de un indicador dado el id del usuario (en el token) y del indicador.
      */
-    router.get('/userCanPostRecord/:userId/:indicatorId', token.checkToken, async function (req, res, next) {
+    router.get('/userCanPostRecord/:indicatorId', token.checkToken, async function (req, res, next) {
         try {
-            if (!req.params.indicatorId || !req.params.userId) {
-                return res.json({ success: false, message: "Debe ingresar un id de indicador y de usuario" });
+            if (!req.params.indicatorId ) {
+                return res.json({ success: false, message: "Debe ingresar un id de indicador" });
             }
-            const record = { idIndicador: req.params.indicatorId, idUsuario: req.params.userId };
+            const record = { idIndicador: req.params.indicatorId, idUsuario: req.decoded.idUsuario };
             const result = 
                 await recordsService.userCanPostRecord(await dbCon, record);
             return res.json({ success: true, result, message: "" });
@@ -101,6 +101,8 @@ function records(dbCon) {
      *      idIndicador,
             analisisCualitativo,
             accionMejora,
+            numerador,
+            denominador,
             valor,
             periodo, Numero consecutivo que determina el periodo para el cual se registra el valor del indicador. Si no
                      hay registros para el indicador todavía, debe ser 0.

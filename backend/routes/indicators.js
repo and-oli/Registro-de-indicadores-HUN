@@ -60,7 +60,6 @@ function indicators(dbCon) {
      */
     router.put('/', (req, res, next) => token.checkTokenAdmin(req, res, next, true), async function (req, res, next) {
         try {
-            console.log(req.body)
             const indicador = await indicatorService.updateIndicator(await dbCon, req.body)
             if(indicador){
                 return res.json({ success: true, indicador, message: "Indicador actualizado" });
@@ -91,6 +90,22 @@ function indicators(dbCon) {
 
         }
     });
+    /**
+     * Retorna la siguiente vigencia de un indicador de acuerdo a su periodicidad,
+     * dado su id
+     */
+    router.get('/currentAndNextPeriodDates/:idIndicador', token.checkToken, async function (req, res) {
+        if (!res.headersSent) {
+            try {
+                const nextPeriod = await indicatorService.getCurrentAndNextPeriodDates(await dbCon, req.params.idIndicador)
+                return res.json({ success: true, nextPeriod, message: "" });
+            } catch (error) {
+                console.error(error);
+                return res.json({ success: false, message: "Ocurrió un error" });
+            }
+        }
+    });
+
     /**
      * Retorna las posibles periodicidaes que pueden tener los indicadores.
      * Es decir, las que están disponibles en la tabla PERIODOS
