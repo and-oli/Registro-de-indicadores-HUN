@@ -10,9 +10,8 @@ module.exports = {
 
     getUserByUsername: async function (dbCon, username) {
         const result = await dbCon.query`
-            select USUARIOS.*, UNIDADES.nombre AS unidad, ROLES.nombre as rol from usuarios 
+            select USUARIOS.*, ROLES.nombre as rol from usuarios 
             inner join roles on usuarios.idRol = roles.idRol 
-            inner join unidades on usuarios.idUnidad = unidades.idUnidad
             where username = ${username}
         `;
         return result.recordset[0];
@@ -20,10 +19,13 @@ module.exports = {
     
     postUser: async function (dbCon, user) {
         user.password = await bcrypt.hash(user.password, 5)
-        const {username, password, nombre, apellidos, idUnidad, idRol} = user;
+        const {username, password, nombre, apellidos, idRol} = user;
+        console.log(`
+        insert into usuarios (username, password, nombre, apellidos, idRol)
+        values (${username},${password},${nombre},${apellidos},${idRol})`);
         const result = await dbCon.query`
-        insert into usuarios (username, password, nombre, apellidos, idUnidad, idRol)
-        values (${username},${password},${nombre},${apellidos},${idUnidad},${idRol})`;
+        insert into usuarios (username, password, nombre, apellidos, idRol)
+        values (${username},${password},${nombre},${apellidos},${idRol})`;
         return result.rowsAffected > 0
     },
 
