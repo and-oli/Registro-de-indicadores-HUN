@@ -45,7 +45,7 @@ export default function IndicatorInfo(props) {
           }
         })
     }, []
-  )
+  );
   const classes = useStyles();
   const [loading, setLoading] = React.useState(false)
   const [units, setUnits] = React.useState([])

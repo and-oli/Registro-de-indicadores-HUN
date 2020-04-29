@@ -26,7 +26,7 @@ export default function Dropdown(props) {
     }
   }
   return (
-    <FormControl required variant="standard" className={classes.formControl}>
+    <FormControl required variant={props.variant ? props.variant : "standard"} className={classes.formControl}>
       <InputLabel htmlFor="dropdown">{props.type}</InputLabel>
       <Select
         native
