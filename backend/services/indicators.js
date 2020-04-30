@@ -53,18 +53,18 @@ module.exports = {
 
 
     postIndicator: async function (dbCon, indicator) {
-        const { nombre,
-            definicion,
-            idPeriodo,
-            idUnidad,
-            origen,
+        const { name,
+            definition,
+            idPeriod,
+            idUnit,
+            dataSource,
             formula,
-            unidadMedicion,
-            responsableDeRecolectarDatos,
-            responsableDelIndicador,
-            meta,
-            inicioPeriodoActual,
-            finPeriodoActual,
+            unitMeasurement,
+            responsableData,
+            responsableIndicator,
+            goal,
+            startCurrentPeriod,
+            endCurrentPeriod,
         } = indicator;
         const result = await dbCon.query`
             insert into indicadores (
@@ -83,18 +83,18 @@ module.exports = {
                 periodoActual
                 )
             values (
-                ${nombre},
-                ${definicion},
-                ${idPeriodo},
-                ${idUnidad},
-                ${origen},
+                ${name},
+                ${definition},
+                ${idPeriod},
+                ${idUnit},
+                ${dataSource},
                 ${formula},
-                ${unidadMedicion},
-                ${responsableDeRecolectarDatos},
-                ${responsableDelIndicador},
-                ${meta},
-                ${inicioPeriodoActual},
-                ${finPeriodoActual},
+                ${unitMeasurement},
+                ${responsableData},
+                ${responsableIndicator},
+                ${goal},
+                ${startCurrentPeriod},
+                ${endCurrentPeriod},
                 0
                 )`;
         return result.rowsAffected > 0
@@ -173,7 +173,7 @@ module.exports = {
 
     getPeriods: async function (dbCon) {
         const result = await dbCon.query`
-            select *  from PERIODOS 
+            select * from PERIODOS 
         `;
         return result.recordset;
     },
