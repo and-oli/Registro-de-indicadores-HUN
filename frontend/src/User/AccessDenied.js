@@ -1,13 +1,10 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core';
 import Container from '@material-ui/core/Container';
-import Paper from '@material-ui/core/Paper';
-import Title from '../Shared/Title';
 import Grid from '@material-ui/core/Grid';
 import MuiAlert from '@material-ui/lab/Alert';
 import Button from '@material-ui/core/Button';
 import Snackbar from '@material-ui/core/Snackbar';
-import Dropdown from '../Shared/Dropdown';
 
 function Alert(props) {
   return <MuiAlert elevation={6} variant="filled" {...props} />;
@@ -35,27 +32,14 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const options1 = [
-  'Servicio 1',
-  'Servicio 2',
-  'Servicio 3',
-  'Servicio 4',
-  'Servicio 5',
-];
-
-const options2 = [
-  'Indicador 1',
-  'Indicador 2',
-  'Indicador 3',
-  'Indicador 4',
-  'Indicador 5',
-];
-
 export default function AccessDenied(props) {
   const classes = useStyles();
   const [open, setOpen] = React.useState(false);
+  const [hasRequested, setRequested] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
   const handleClick = () => {
     setOpen(true);
+    setRequested(true);
   }
   const handleClose = (event, reason) => {
     if (reason === 'clickaway') {
@@ -65,23 +49,11 @@ export default function AccessDenied(props) {
     setOpen(false);
   };
 
-  const message = props.hasRequested ? <Alert severity="warning">Usted ya solicitó acceso a este indicador. Contáctese con el administrador para que le otorge permiso de registro.</Alert> 
-                                      : <Alert severity="error">Usted no tiene acceso a este indicador</Alert>;
+  const message = props.hasRequested || hasRequested ? <Alert severity="warning">Usted ya solicitó acceso a este indicador. Contáctese con el administrador para que le otorge permiso de registro.</Alert> 
+                                      : <Alert severity="error">No tiene permiso para editar este indicador en este momento.</Alert>;
   return (
-    <main className={classes.content}>
-      <div className={classes.appBarSpacer} />
       <Container maxWidth="lg" className={classes.container}>
         <React.Fragment>
-          <Paper>
-            <Title>Registrar Indicador</Title>
-            <Grid container spacing={3}>
-              <Grid item xs>
-                <Dropdown type="Servicio" options={options1} />
-              </Grid>
-              <Grid item xs>
-                <Dropdown type="Indicador" options={options2} />
-              </Grid>
-            </Grid>
             <Grid container alignItems="center" spacing={3}>
               <Grid item xs={2} />
               <Grid item xs={8}>
@@ -100,7 +72,7 @@ export default function AccessDenied(props) {
                     Ha solicitado acceso exitosamente
                   </Alert>
                 </Snackbar>
-                {!props.hasRequested ? <Button
+                {!props.hasRequested && !hasRequested ? <Button
                   variant="contained"
                   color="primary"
                   className={classes.submit}
@@ -110,9 +82,7 @@ export default function AccessDenied(props) {
                 </Button> : <span/>}
               </Grid>              
             </Grid>
-          </Paper>
         </React.Fragment>
       </Container>
-    </main>
   );
 }

@@ -129,7 +129,6 @@ function indicators(dbCon) {
      * Es decir, las que están disponibles en la tabla PERIODOS
      */
     router.get('/periods/all', token.checkToken, async function (req, res, next) {
-        console.log("Esta entrando a donde es");
         if (!res.headersSent) {
             try {
                 const periodos = await indicatorService.getPeriods(await dbCon)

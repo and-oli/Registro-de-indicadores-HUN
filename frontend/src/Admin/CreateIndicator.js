@@ -6,6 +6,12 @@ import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import moment from 'moment';
+import Snackbar from '@material-ui/core/Snackbar';
+import MuiAlert from '@material-ui/lab/Alert';
+
+function Alert(props) {
+  return <MuiAlert elevation={6} variant="filled" {...props} />;
+}
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -95,6 +101,11 @@ export default function CreateIndicador() {
   const [loading, setLoading] = React.useState(false);
   const [units, setUnits] = React.useState([]);
   const [periods, setPeriods] = React.useState([]);
+  //Snack attributes:
+  const [success, setSuccess] = React.useState(false);
+  const [message, setMessage] = React.useState("");
+  const [open, setOpen] = React.useState(false);
+  //
   const [state, setState] = React.useState({
     name: "",
     definition: "",
@@ -120,6 +131,14 @@ export default function CreateIndicador() {
       alert("Snack de error");
     }
   }
+
+  const handleClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    setOpen(false);
+  };
  
   const handleChange = (event) => {
     setState({
@@ -128,10 +147,13 @@ export default function CreateIndicador() {
     });
   };
 
-  const handleClick = () => {
+  const handleClick = (event) => {
+    event.preventDefault();
     let status;
     if(validateData(state)) {
-      alert("Cambiar esto por un snack");
+      setMessage("Ocurrío un error con el formato de los datos. Porfavor revise e intene de nuevo.");
+      setSuccess(false);
+      setOpen(true);
     } else {
       fetch("/indicators/", {
         method: "POST",
@@ -143,14 +165,17 @@ export default function CreateIndicador() {
         }).then((response) => {status = response.status; return response.json()})
         .then((responseJson) => {
           setLoading(false);
+          setMessage(responseJson.message);
+          setSuccess(responseJson.success);
           if (responseJson.success) {
-            alert("Exito, poner snakc");
+            setOpen(true);
+            window.location.reload();
           } else if (status === 403) {
-            alert("Fracaso, poner snnack");
+            setOpen(true);
             localStorage.removeItem("HUNToken");
             window.location.reload();
           } else {
-            alert("Fracaso, poner snnack");
+            setOpen(true);
           }
         });
     }
@@ -305,7 +330,7 @@ export default function CreateIndicador() {
                   fullWidth
                   id="startCurrentPeriod"
                   label="Escoger primer periodo"
-                  defaultValue={`${new Date().getFullYear()}-${new Date().getMonth()+1 < 10 ? "0" + (new Date().getMonth()+1): new Date().getMonth()+1}-${new Date().getDate()}`}
+                  defaultValue={`${new Date().getFullYear()}-${new Date().getMonth()+1 < 10 ? "0" + (new Date().getMonth()+1): new Date().getMonth()+1}-${new Date().getDate() < 10 ? "0" + (new Date().getDate()): new Date().getDate()}`}
                   name="startCurrentPeriod"
                   autoComplete="startCurrentPeriod"
                   type="date"
@@ -325,6 +350,16 @@ export default function CreateIndicador() {
           </Paper>
         </React.Fragment>
       </Container>
+      <Snackbar open={open} 
+        autoHideDuration={6000} 
+        onClose={handleClose} 
+        anchorOrigin={{vertical: 'top', horizontal: 'center' }}
+        key={'top,center'}
+      >
+        <Alert onClose={handleClose} severity={success?"success":"error"}>
+          {message}
+        </Alert>
+      </Snackbar>
     </main>
   );
 }

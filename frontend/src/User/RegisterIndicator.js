@@ -9,6 +9,7 @@ import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import Checkbox from '@material-ui/core/Checkbox';
 import Dropdown from '../Shared/Dropdown';
+import AccessDenied from './AccessDenied';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -244,7 +245,7 @@ export default function RegisterIndicator() {
                 loading ?
                   <div className="loader"></div> :
                   indicator && !userIsAllowed ?
-                    <div > No tiene permiso para editar este indicador en este momento. Comuníquese con un administrador.</div> :
+                    <AccessDenied /> :
                     indicator &&
                     <Grid
                       container
