@@ -5,7 +5,7 @@ const requestService = require("../services/requests");
 
 function requests(dbCon) {
     /**
-     * Retorna las solicitudes hechas a un usuario dado su id
+     * Retorna las solicitudes hechas por un usuario dado su id
      */
     router.get('/by/:userId', token.checkToken, async function (req, res, next) {
         try {
@@ -23,15 +23,12 @@ function requests(dbCon) {
     });
 
     /**
-     * Retorna las solicitudes hechas por un usuario dado su id
+     * Retorna las solicitudes en espera
      */
-    router.get('/to/:userId', token.checkToken, async function (req, res, next) {
+    router.get('/onHold', token.checkToken, async function (req, res, next) {
         try {
-            if (!req.params.userId) {
-                return res.json({ success: false, message: "Debe ingresar un id de usuario" });
-            }
             const solicitudes =
-                await requestService.getRequestsToUser(await dbCon, req.params.userId);
+                await requestService.getRequestsOnhold(await dbCon);
             return res.json({ success: true, solicitudes, message: "" });
         } catch (error) {
             console.error(error);
@@ -62,11 +59,7 @@ function requests(dbCon) {
      * Body:
      * {
             idSolicitante, 
-            idAdministrador,
             idIndicador, 
-            idEstado, 
-            fechaInicio, 
-            fechaFin, 
             comentario, 
         }
      */
@@ -82,6 +75,27 @@ function requests(dbCon) {
 
         }
     });
+    /**
+     * Verifica si una solicitud ya se ha ingresado
+     * Body:
+     * {
+            idIndicador
+        }
+     */
+    router.post('/requestExists', token.checkToken, async function (req, res, next) {
+        if (!res.headersSent) {
+            try {
+                req.body.idSolicitante =  req.decoded.idUsuario
+                const requestExists = await requestService.requestExists(await dbCon, req.body)
+                return res.json({ success: true, requestExists, message: "" });
+            } catch (error) {
+                console.error(error);
+                return res.json({ success: false, message: "Ocurrió un error" });
+            }
+
+        }
+    });
+
     return router
 }
 

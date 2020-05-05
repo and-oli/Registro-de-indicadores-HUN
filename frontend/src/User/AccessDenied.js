@@ -45,44 +45,66 @@ export default function AccessDenied(props) {
     if (reason === 'clickaway') {
       return;
     }
-
     setOpen(false);
   };
 
-  const message = props.hasRequested || hasRequested ? <Alert severity="warning">Usted ya solicitó acceso a este indicador. Contáctese con el administrador para que le otorge permiso de registro.</Alert> 
-                                      : <Alert severity="error">No tiene permiso para editar este indicador en este momento.</Alert>;
+  React.useEffect(
+    () => {
+      setLoading(true)
+      let data = { idIndicador: props.indicatorId }
+      fetch("/requests/requestExists/", {
+        method: 'POST',
+        headers: {
+          'x-access-token': localStorage.getItem("HUNToken"),
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+      }).then((response) => response.json())
+        .then((responseJson) => {
+          setLoading(false)
+          if (responseJson.success) {
+            setRequested(responseJson.requestExists)
+          }
+        })
+    }, []
+  )
+  const message = hasRequested ? <Alert severity="warning">Usted ya solicitó acceso a este indicador. Contáctese con el administrador para que le otorge permiso de registro.</Alert>
+    : <Alert severity="error">No tiene permiso para editar este indicador en este momento.</Alert>;
   return (
-      <Container maxWidth="lg" className={classes.container}>
-        <React.Fragment>
-            <Grid container alignItems="center" spacing={3}>
-              <Grid item xs={2} />
-              <Grid item xs={8}>
-                {message}
-              </Grid>
-            </Grid>
-            <Grid container spacing={3}>
-              <Grid item xs>
-                <Snackbar open={open} 
-                  autoHideDuration={6000} 
-                  onClose={handleClose} 
-                  anchorOrigin={{vertical: 'top', horizontal: 'center' }}
-                  key={'top,center'}
-                >
-                  <Alert onClose={handleClose} severity="success">
-                    Ha solicitado acceso exitosamente
+    loading ?
+    <div className="loader"></div> :
+    <Container maxWidth="lg" className={classes.container}>
+      <React.Fragment>
+        <Grid container alignItems="center" spacing={3}>
+          <Grid item xs={2} />
+          <Grid item xs={8}>
+            {message}
+          </Grid>
+        </Grid>
+        <Grid container spacing={3}>
+          <Grid item xs>
+            <Snackbar open={open}
+              autoHideDuration={6000}
+              onClose={handleClose}
+              anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+              key={'top,center'}
+            >
+              <Alert onClose={handleClose} severity="success">
+                Ha solicitado acceso exitosamente
                   </Alert>
-                </Snackbar>
-                {!props.hasRequested && !hasRequested ? <Button
-                  variant="contained"
-                  color="primary"
-                  className={classes.submit}
-                  onClick={handleClick}
-                >
-                  Solicitar Acceso
-                </Button> : <span/>}
-              </Grid>              
-            </Grid>
-        </React.Fragment>
-      </Container>
+            </Snackbar>
+            {!hasRequested ? <Button
+              variant="contained"
+              color="primary"
+              className={classes.submit}
+              onClick={handleClick}
+            >
+              Solicitar Acceso
+                </Button> : <span />}
+          </Grid>
+        </Grid>
+      </React.Fragment>
+    </Container>
   );
 }

@@ -77,7 +77,7 @@ function indicators(dbCon) {
     router.post('/', (req, res, next) => token.checkTokenAdmin(req, res, next, true), async function (req, res, next) {
         if (!res.headersSent) {
             try {
-                if (await indicatorService.getIndicatorByNameAndUnitId(await dbCon, req.body.nombre, req.body.idUnidad)) {
+                if (await indicatorService.getIndicatorByNameAndUnitId(await dbCon, req.body.name, req.body.idUnit)) {
                     return res.json({ success: true, message: "Ya existe un indicador con ese nombre en esa unidad" });
                 }
                 const result = await indicatorService.postIndicator(await dbCon, req.body)

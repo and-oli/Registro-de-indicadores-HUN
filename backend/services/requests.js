@@ -8,13 +8,6 @@ module.exports = {
         return result.recordset;
     },
 
-    getRequestsToUser: async function (dbCon, idUsuario) {
-        const result = await dbCon.query`
-            select *  from SOLICITUDES 
-            where idAdministrador = ${idUsuario}
-        `;
-        return result.recordset;
-    },
     updateRequest: async function (dbCon, idSolicitud, approved) {
         const state = approved ? "APROBADA" : "RECHAZADA"
         const idEstado = (await dbCon.query`
@@ -29,42 +22,35 @@ module.exports = {
         `;
         return result.recordset;
     },
-
+    getRequestsOnhold: async function (dbCon, request) {
+        const result = await dbCon.query`
+            select * from SOLICITUDES 
+            inner join ESTADOS 
+            ON ESTADOS.idEstado = SOLICITUDES.idEstado 
+            where ESTADOS.nombre = 'EN ESPERA'
+                `;
+        return result.recordset[0];
+    },
     requestExists: async function (dbCon, request) {
         const {
             idSolicitante,
-            idAdministrador,
             idIndicador,
-            fechaInicio,
-            fechaFin
         } = request;
         const result = await dbCon.query`
-            select fechaInicio, fechaFin from SOLICITUDES 
-            where idSolicitante = ${idSolicitante}
-            and idAdministrador = ${idAdministrador}
-            and idIndicador = ${idIndicador}
+            select * from SOLICITUDES 
+            inner join ESTADOS 
+            ON ESTADOS.idEstado = SOLICITUDES.idEstado 
+            where SOLICITUDES.idSolicitante = ${idSolicitante}
+            and SOLICITUDES.idIndicador = ${idIndicador}
+            and ESTADOS.nombre = 'EN ESPERA'
                 `;
-
-        for (let resultItem of result.recordset) {
-            const currentRequestInitialTime = new Date(resultItem.fechaInicio).getTime();
-            const currentRequestEndTime = new Date(resultItem.fechaFin).getTime();
-            const initialTime = new Date(fechaInicio).getTime();
-            const endTime = new Date(fechaFin).getTime();
-            if (initialTime >= currentRequestInitialTime && initialTime <= currentRequestEndTime ||
-                endTime >= currentRequestInitialTime && endTime <= currentRequestEndTime) {
-                return resultItem;
-            }
-        }
-        return false;
+        return result.recordset[0];
     },
 
     postRequest: async function (dbCon, request) {
         const {
             idSolicitante,
-            idAdministrador,
             idIndicador,
-            fechaInicio,
-            fechaFin,
             comentario,
         } = request;
         const requestIsInDb = await this.requestExists(dbCon, request)
@@ -77,20 +63,14 @@ module.exports = {
             const result = await dbCon.query`
             insert into SOLICITUDES (
                 idSolicitante, 
-                idAdministrador,
                 idIndicador, 
                 idEstado, 
-                fechaInicio, 
-                fechaFin, 
                 comentario
                 )
             values (
                 ${idSolicitante},
-                ${idAdministrador},
                 ${idIndicador},
                 ${idEstado},
-                ${fechaInicio},
-                ${fechaFin},
                 ${comentario}
                 )`;
             return {
