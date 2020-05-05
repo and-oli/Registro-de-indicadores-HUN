@@ -42,7 +42,7 @@ const useStyles = makeStyles((theme) => ({
 
 const validateData = (data) => {
   for(let key in data) {
-    if(key === "startCurrentPeriod" && new Date(data[key]).getTime() < new Date().getTime()) return key
+    if(key === "startCurrentPeriod" && (moment(data[key]).isAfter(data["endCurrentPeriod"]) || moment(data[key]).isBefore(moment.now()))) return key
     else if(!data[key]) return key;
   }
   return "";
@@ -122,13 +122,32 @@ export default function CreateIndicador() {
   });
 
   const handleDateChange = (event) => {
-    const month = getMonth(state.idPeriod, periods);
-    if(month) {
-      state.startCurrentPeriod = moment(event.target.value).toString();
-      state.endCurrentPeriod = moment(event.target.value).add(month, "M").toString();
-      setState(state);
+    const start = event.target.name === "startCurrentPeriod" ? true : false;
+    const date = moment(event.target.value);
+    if(date.date() > 28) {
+      setMessage("El día del mes debe ser entre 1 y 28"); 
+      setSuccess(false);
+      setOpen(true);
+    }
+    if(start) {
+      console.log(date.isBefore(state.endCurrentPeriod));
+      if((state.endCurrentPeriod && date.isBefore(state.endCurrentPeriod)) || !state.endCurrentPeriod) {
+        state.startCurrentPeriod = date;
+        setState(state);
+      }  else {
+        setMessage("La fecha de inicio debe ser anterior a la ficha de finalización.");
+        setSuccess(false);
+        setOpen(true);
+      }
     } else {
-      alert("Snack de error");
+      if((state.startCurrentPeriod && date.isAfter(state.startCurrentPeriod)) || !state.startCurrentPeriod) {
+        state.endCurrentPeriod = date;
+        setState(state);
+      } else {
+        setMessage("La fecha de finalización debe ser posterior a la fecha de inicio.");
+        setSuccess(false);
+        setOpen(true);
+      }
     }
   }
 
@@ -329,10 +348,23 @@ export default function CreateIndicador() {
                   required
                   fullWidth
                   id="startCurrentPeriod"
-                  label="Escoger primer periodo"
+                  label="Fecha inicio de la primera vigencia"
                   defaultValue={`${new Date().getFullYear()}-${new Date().getMonth()+1 < 10 ? "0" + (new Date().getMonth()+1): new Date().getMonth()+1}-${new Date().getDate() < 10 ? "0" + (new Date().getDate()): new Date().getDate()}`}
                   name="startCurrentPeriod"
                   autoComplete="startCurrentPeriod"
+                  type="date"
+                  onChange={handleDateChange}
+                />
+                <TextField
+                  variant="outlined"
+                  margin="normal"
+                  required
+                  fullWidth
+                  id="endCurrentPeriod"
+                  label="Fecha fin de la primera vigencia"
+                  defaultValue={`${new Date().getFullYear()}-${new Date().getMonth()+1 < 10 ? "0" + (new Date().getMonth()+1): new Date().getMonth()+1}-${new Date().getDate() < 10 ? "0" + (new Date().getDate()): new Date().getDate()}`}
+                  name="endCurrentPeriod"
+                  autoComplete="endCurrentPeriod"
                   type="date"
                   onChange={handleDateChange}
                 />

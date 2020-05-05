@@ -64,7 +64,8 @@ export default function UserRequests() {
     setOpen(false);
   };
 
-  const handleAccessDenied = () => {
+  const handleAccessDenied = (event) => {
+    
   }
 
   return (
@@ -93,7 +94,7 @@ export default function UserRequests() {
                         edge="start"
                         color="inherit"
                         aria-label="grant access"
-                        onClick={handleOpen}
+                        onClick={() => handleOpen()}
                         >
                           <CheckCircleOutlineIcon className={classes.grantAccess} />
                         </IconButton>
@@ -116,7 +117,7 @@ export default function UserRequests() {
           </Paper>
         </React.Fragment>
       </Container>
-      <EnableAccess open={open} handleClose={handleClose}/>
+      <EnableAccess setOpen={setOpen} open={open}/>
     </main>
   );
 }
