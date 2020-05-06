@@ -54,9 +54,9 @@ export default function ListItems(props) {
       </ListItem>
       <ListItem component={Link} to={`${props.admin ? 'admin' : 'user'}/solicitudes`} button>
         <ListItemIcon>
-          <Badge badgeContent={4} color="secondary">
+          {props.requests > 0 && props.admin ? <Badge badgeContent={props.requests} color="secondary">
             <AssignmentIcon />
-          </Badge>
+          </Badge> : <AssignmentIcon />}
         </ListItemIcon>
         <ListItemText primary="Solicitudes" />
       </ListItem>

@@ -40,23 +40,40 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-function createData(id, user, indicator) {
-  return { id, user, indicator };
-}
-  
-const rows = [
-  createData(0, 'Frozen yoghurt', 'Indicador 1'),
-  createData(1, 'Ice cream sandwich', 'Indicador 3'),
-  createData(2, 'Eclair', 'Indicador 4'),
-  createData(3, 'Cupcake', 'Indicador 5'),
-  createData(4, 'Gingerbread', 'Indicador 6'),
-];
-
-export default function UserRequests() {
+export default function UserRequests(props) {
+  const userRequests = props.userRequests;
+  React.useEffect(
+    () => {
+      let status;
+      if (userRequests.length > 0) {
+        fetch(`/requests/onHold/usersIndicators/${userRequests[0].idEstado[0]}/`, {
+          method: 'GET',
+          headers: {
+            'x-access-token': localStorage.getItem("HUNToken")
+          },
+        }).then((response) =>{status = response.status; return response.json();} )
+          .then((responseJson) => {
+            setLoading(false);
+            if (responseJson.success) {
+              setRows(responseJson.solicitudes);
+            } else if(status === 403){
+              localStorage.removeItem("HUNToken");
+              window.location.reload(); 
+            }
+          });
+      }
+    }, []
+  );
   const classes = useStyles();
   const [open, setOpen] = React.useState(false);
+  const [rows, setRows] = React.useState([]);
+  const [selectedUser, setSelectedUser] = React.useState(null);
+  const [approve, setApprove] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
 
-  const handleOpen = () => {
+  const handleOpen = (row) => {
+    setSelectedUser(row);
+    setApprove(true);
     setOpen(true);
   };
 
@@ -64,13 +81,15 @@ export default function UserRequests() {
     setOpen(false);
   };
 
-  const handleAccessDenied = (event) => {
-    
+  const handleAccessDenied = (row) => {
+    setSelectedUser(row);
+    setApprove(false);
+    setOpen(true);
   }
 
   return (
     <main className={classes.content}>
-      <div className={classes.appBarSpacer} />
+      <div className={classes.appBarSpacer}/>
       <Container maxWidth="lg" className={classes.container}>
         <React.Fragment>
           <Paper>
@@ -84,17 +103,17 @@ export default function UserRequests() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {rows.map((row) => (
-                  <TableRow key={row.id}>
-                    <TableCell align="left">{row.user}</TableCell>
-                    <TableCell align="left">{row.indicator}</TableCell>
+                {props.userRequests.length ? rows.map((row) => (
+                  <TableRow key={row.idSolicitud}>
+                    <TableCell align="left">{`${row.nombre[0]} ${row.apellidos}`}</TableCell>
+                    <TableCell align="left">{row.nombre[1]}</TableCell>
                     <TableCell align="left">
                       <Tooltip title="Habilitar acceso">
                         <IconButton
                         edge="start"
                         color="inherit"
                         aria-label="grant access"
-                        onClick={() => handleOpen()}
+                        onClick={() => handleOpen(row)}
                         >
                           <CheckCircleOutlineIcon className={classes.grantAccess} />
                         </IconButton>
@@ -104,20 +123,20 @@ export default function UserRequests() {
                           edge="start"
                           color="inherit"
                           aria-label="deny access"
-                          onClick={handleAccessDenied}
+                          onClick={() => handleAccessDenied(row)}
                         >
                           <HighlightOffIcon className={classes.denyAccess} />
                         </IconButton>
                       </Tooltip>
                     </TableCell>
                   </TableRow>
-                ))}
+                )) : <TableRow><TableCell colSpan={3} align="center">No hay solicitudes en este momento.</TableCell></TableRow>}
               </TableBody>
             </Table>
           </Paper>
         </React.Fragment>
       </Container>
-      <EnableAccess setOpen={setOpen} open={open}/>
+      <EnableAccess closeModal={handleClose} open={open} approve={approve} user={selectedUser}/>
     </main>
   );
 }

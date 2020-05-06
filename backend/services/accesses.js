@@ -21,7 +21,7 @@ module.exports = {
         const result = await dbCon.query`
             insert into ACCESOS (idUsuario, idIndicador, idSolicitud,fechaInicio,fechaFin)
             values (${idUsuario},${idIndicador},${idSolicitud},${fechaInicio},${fechaFin})`;
-        return result.rowsAffected > 0
+        return result.rowsAffected > 0;
     },
 
 }

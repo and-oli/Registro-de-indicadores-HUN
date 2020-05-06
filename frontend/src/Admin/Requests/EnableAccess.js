@@ -7,6 +7,13 @@ import esLocale from 'date-fns/locale/es'
 import { MuiPickersUtilsProvider, DatePicker } from '@material-ui/pickers';
 import Grid from '@material-ui/core/Grid';
 import Title from '../../Shared/Title';
+import MuiAlert from '@material-ui/lab/Alert';
+import moment from 'moment';
+import Snackbar from '@material-ui/core/Snackbar';
+
+function Alert(props) {
+  return <MuiAlert elevation={6} variant="filled" {...props} />;
+}
 
 function getModalStyle() {
     const top = 50;
@@ -22,66 +29,91 @@ function getModalStyle() {
 const useStyles = makeStyles((theme) => ({
     paper: {
         position: 'absolute',
-        width: "30%",
+        width: "50%",
         textAlign: "center",
         backgroundColor: theme.palette.background.paper,
         boxShadow: theme.shadows[5],
         padding: theme.spacing(2, 4, 3),
     },
     submit: {
-      margin: theme.spacing(3, 0, 0),
+      margin: theme.spacing(3, 1.5, 0),
     },
 }));
 
 export default function EnableAccess(props) {
     const classes = useStyles();
     const [modalStyle] = React.useState(getModalStyle);
-    const [message, setMessage] = React.useState({ color: "green", text: "" });
     const [loading, setLoading] = React.useState(false);
+    const [open, setOpen] = React.useState(false);
+    const [success, setSuccess] = React.useState(false);
+    const [message, setMessage] = React.useState("");
 
-    const [state, setSate] = React.useState({
-      initDate: new Date(new Date()),
-      endDate: new Date(new Date()),
-    });
-  
+    const [initDate, setInintDate] = React.useState(new Date(new Date()));
+    const [endDate, setEndDate] = React.useState(new Date(new Date()));
+
     const handleInitDateChange = (date) => {
-      setSate({
-        initDate: date,
-      });
+      setInintDate(date);
     };
   
     const handleEndDateChange = (date) => {
-      setSate({
-        endDate: date,
-      });
+      setEndDate(date);
     };
 
     const handleClick = () => {
       props.setOpen(false);
     }
 
-    const confirmEdit = function () {
-        setLoading(true)
-        fetch("/indicators/", {
-            method: 'PUT',
-            headers: {
+    const handleClose = (event, reason) => {
+      if (reason === 'clickaway') {
+        return;
+      }
+  
+      setOpen(false);
+    };
+
+    const confirmAccess = function (event,approved) {
+        setLoading(true);
+        event.preventDefault();
+        const approve = approved ? "approve" : "reject";
+        const method = approved ? 'POST' : 'PUT';
+        const baseURL = approve ? '/accesses/' : `/requests/${approve}/${props.user.idSolicitud}/`;
+        const canFetch = approved ? moment(initDate).isBefore(endDate) && moment(initDate).isSameOrAfter(moment.now()) : true;
+        if(canFetch) {
+          fetch(baseURL, {
+              method: method,
+              headers: {
                 'x-access-token': localStorage.getItem("HUNToken"),
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(props.indicator)
-        }).then((response) => response.json())
-            .then((responseJson) => {
-                setLoading(false)
-                if (responseJson.success) {
-                    setMessage({text:responseJson.message, color:"green"})
-                    props.confirmEdit()
-                } else{
-                    setMessage({text:responseJson.message, color:"red"})
-                }
-            })
+              },
+              body: JSON.stringify({
+                idUsuario: props.user.idUsuario, 
+                idIndicador: props.user.idIndicador[0], 
+                idSolicitud: props.user.idSolicitud, 
+                fechaInicio: initDate,
+                fechaFin: endDate,
+              })
+          }).then((response) => response.json())
+              .then((responseJson) => {
+                  setLoading(false);
+                  setSuccess(responseJson.success);
+                  if (responseJson.success) {
+                      setMessage(approve ? "Acceso consedido exitosamennte" : "Acceso negado exitosamente");
+                      setOpen(true);
+                      props.closeModal();
+                      window.location.reload();
+                  } else{
+                    setMessage(responseJson.message);
+                    setOpen(true);
+                  }
+              });
+        } else {
+          setSuccess(false);
+          setMessage("Revise que las fechas sean consistentes.");
+          setOpen(true);
+        }
     }
-    const body = (
+    const bodyApprove = (
       <div className={classes.paper} style={modalStyle}>
       <Title>Habilitar Acceso</Title>
       <MuiPickersUtilsProvider utils={DateFnsUtils} locale={esLocale}>
@@ -90,7 +122,7 @@ export default function EnableAccess(props) {
             <DatePicker
               autoOk
               variant="inline"
-              value={state.initDate}
+              value={initDate}
               label="Fecha desde"
               onChange={handleInitDateChange}
               format="dd/MM/yyyy"
@@ -100,7 +132,7 @@ export default function EnableAccess(props) {
             <DatePicker
               autoOk
               variant="inline"
-              value={state.endDate}
+              value={endDate}
               label="Fecha hasta"
               onChange={handleEndDateChange}
               format="dd/MM/yyyy"
@@ -114,7 +146,7 @@ export default function EnableAccess(props) {
             variant="contained"
             color="primary"
             className={classes.submit}
-            onClick={handleClick}
+            onClick={(event) => confirmAccess(event,true)}
           >
             Aceptar
           </Button>
@@ -122,14 +154,53 @@ export default function EnableAccess(props) {
     </div>
     );
 
+    const bodyReject = (
+      <div className={classes.paper} style={modalStyle}>
+      <Title>Negar Acceso</Title>
+        {props.user ? <Alert severity="warning">¿Está seguro que desea negar el acceso del indicador {props.user.nombre[1]} al usuario {`${props.user.nombre[0]} ${props.user.apellidos}`}?</Alert> : <div/>}
+      <Grid item xs={12}>
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            className={classes.submit}
+            onClick={(event) => confirmAccess(event,false)}
+          >
+            Aceptar
+          </Button>
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            className={classes.submit}
+            onClick={() => props.closeModal()}
+          >
+            Cancelar
+          </Button>
+      </Grid>
+    </div>
+    );
+
     return (
+      <>
         <Modal
             open={props.open}
-            onClose={() => props.setOpen(false)}
+            onClose={() => props.closeModal()}
             aria-labelledby="simple-modal-title"
             aria-describedby="simple-modal-description"
         >
-            {body}
+            {props.approve ? bodyApprove : bodyReject}
         </Modal>
+        <Snackbar open={open} 
+        autoHideDuration={6000} 
+        onClose={handleClose} 
+        anchorOrigin={{vertical: 'top', horizontal: 'center' }}
+        key={'top,center'}
+      >
+        <Alert onClose={handleClose} severity={success?"success":"error"}>
+          {message}
+        </Alert>
+      </Snackbar>
+      </>
     );
 }

@@ -37,10 +37,24 @@ function requests(dbCon) {
 
     });
 
+    /** 
+     * Retorna los usuarios con solicitudes en espera y el respectivo indicador al cual solicitó acceso
+    */
+   router.get('/onHold/usersIndicators/:idEstado', token.checkToken, async function (req, res, next) {
+        try {
+            const solicitudes =
+                await requestService.getUsersAndIndicatorsWithRequestsOnHold(await dbCon, req.params.idEstado);
+            return res.json({ success: true, solicitudes, message: "" });
+        } catch (error) {
+            console.error(error);
+            return res.json({ success: false, message: "Ocurrió un error" });
+        }
+    });
+
     /**
      * Cambia el estado de una solicitud a RECHAZADA
      */
-    router.get('/reject/:idSolicitud', token.checkToken, async function (req, res, next) {
+    router.put('/reject/:idSolicitud', token.checkToken, async function (req, res, next) {
         try {
             if (!req.params.idSolicitud) {
                 return res.json({ success: false, message: "Debe ingresar un id de solicitud" });

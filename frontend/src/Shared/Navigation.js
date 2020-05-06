@@ -91,9 +91,31 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function Navigation(props) {
+  React.useEffect(
+    () => {
+      let status;
+      fetch("/requests/onHold/", {
+        method: 'GET',
+        headers: {
+          'x-access-token': localStorage.getItem("HUNToken")
+        },
+      }).then((response) =>{status = response.status; return response.json();} )
+        .then((responseJson) => {
+          setLoading(false);
+          if (responseJson.success) {
+            setUserRequests(responseJson.solicitudes);
+          } else if(status === 403){
+            localStorage.removeItem("HUNToken");
+            window.location.reload(); 
+          }
+        });
+    }, []
+  );
   const { admin } = props;
   const classes = useStyles();
   const [open, setOpen] = React.useState(false);
+  const [userRequests, setUserRequests] = React.useState([]);
+  const [loading, setLoading] = React.useState(false);
   const handleDrawerOpen = () => {
     setOpen(true);
   };
@@ -142,7 +164,7 @@ export default function Navigation(props) {
           </div>
           <Divider />
           <List>
-            <ListItems admin={admin} />
+            <ListItems admin={admin} requests={userRequests.length}/>
             {admin ? secondaryListItemsAdmin : secondaryListItemsUser}
           </List>
           <Divider />
@@ -152,7 +174,7 @@ export default function Navigation(props) {
             <MainPage admin={admin} />
           </Route>
           <Route path="/admin/solicitudes">
-            <UserRequests />
+            {userRequests.length ? <UserRequests userRequests={userRequests}/> :  <UserRequests userRequests={userRequests}/>}
           </Route>
           <Route path="/user/solicitudes">
             <AccessRequests />

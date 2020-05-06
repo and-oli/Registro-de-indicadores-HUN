@@ -29,7 +29,7 @@ module.exports = {
             ON ESTADOS.idEstado = SOLICITUDES.idEstado 
             where ESTADOS.nombre = 'EN ESPERA'
                 `;
-        return result.recordset[0];
+        return result.recordset;
     },
     requestExists: async function (dbCon, request) {
         const {
@@ -82,7 +82,19 @@ module.exports = {
             success: false,
             message: `Usted ya había ingresado una solicitud para este indicador en las fechas ${requestIsInDb.fechaInicio} y ${requestIsInDb.fechaFin}. `
         }
-    }
+    },
+
+    getUsersAndIndicatorsWithRequestsOnHold: async function (dbCon, idEstado) {
+        const result = await dbCon.query`
+            select * from SOLICITUDES 
+            inner join USUARIOS 
+            ON USUARIOS.idUsuario = SOLICITUDES.idSolicitante 
+            inner join INDICADORES
+            ON INDICADORES.idIndicador = SOLICITUDES.idIndicador
+            where SOLICITUDES.idEstado = ${idEstado}
+            `;
+        return result.recordset;
+    },
 
 
 }
