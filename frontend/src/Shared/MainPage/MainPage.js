@@ -35,7 +35,6 @@ export default function MainPage(props) {
   const classes = useStyles();
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
   const [indicatorId, setIndicatorId] = React.useState(null)
-  const [records, setRecords] = React.useState([])
 
   return (
     <main className={classes.content}>
@@ -53,7 +52,7 @@ export default function MainPage(props) {
             indicatorId &&
             < Grid item xs={12}>
               <Paper className={fixedHeightPaper}>
-                <Chart indicatorId={indicatorId} setRecords={setRecords} />
+                <Chart indicatorId={indicatorId}  />
               </Paper>
             </Grid>
           }
@@ -62,7 +61,7 @@ export default function MainPage(props) {
             indicatorId &&
             < Grid item xs={12}>
               <Paper className={classes.paper}>
-                <IndicatorByDate records={records} indicatorId={indicatorId} />
+                <IndicatorByDate indicatorId={indicatorId} />
               </Paper>
             </Grid>
           }

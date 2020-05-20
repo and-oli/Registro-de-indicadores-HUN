@@ -116,7 +116,6 @@ export default function RegisterIndicator() {
 
   const handleIndicatorChange = (newIndicator) => {
     let currentIndicator = indicators.find(u => u.nombre === newIndicator);
-    console.log(currentIndicator, newIndicator)
     if (currentIndicator) {
       setLoading(true)
       setIndicator(currentIndicator)

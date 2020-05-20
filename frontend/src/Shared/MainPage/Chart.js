@@ -21,7 +21,6 @@ export default function Chart(props) {
         .then((responseJson) => {
           setLoading(false)
           if (responseJson.success) {
-            props.setRecords(responseJson.registros)
             setData(responseJson.registros.map(r => {
               let d = new Date(r.fecha)
               let dtf = new Intl.DateTimeFormat('sp', { year: 'numeric', month: 'numeric', day: '2-digit' })
@@ -42,6 +41,8 @@ export default function Chart(props) {
       {
         loading ?
           <div className="loader"></div> :
+          data.length === 0 ?
+          <div>No hay registros para este indicador todavía</div> :
           <ResponsiveContainer>
             <LineChart
               data={data}

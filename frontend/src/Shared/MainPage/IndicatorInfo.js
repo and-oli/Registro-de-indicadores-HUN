@@ -29,6 +29,11 @@ export default function IndicatorInfo(props) {
   React.useEffect(
     () => {
       let status;
+      let params = (new URL(document.location)).searchParams;
+      let indicatorIdParam = params.get('indicator');
+      if (indicatorIdParam){
+        fetchIndicator(indicatorIdParam)
+      }
       fetch("/units/", {
         method: 'GET',
         headers: {
@@ -80,6 +85,7 @@ export default function IndicatorInfo(props) {
   }
 
   const handleUnitChange = (newUnit) => {
+    props.setIndicatorId(null)
     let currentUnit = units.find(u => u.nombre === newUnit);
     if (currentUnit) {
       setUnit(currentUnit)
@@ -99,29 +105,34 @@ export default function IndicatorInfo(props) {
     }
   }
   const handleIndicatorChange = (newIndicator) => {
+    props.setIndicatorId(null)
     let currentIndicator = indicators.find(u => u.nombre === newIndicator);
     if (currentIndicator) {
       setIndicator(currentIndicator)
-      fetch(`/indicators/${currentIndicator.idIndicador}`, {
-        method: 'GET',
-        headers: {
-          'x-access-token': localStorage.getItem("HUNToken")
-        },
-      }).then((response) => response.json())
-        .then((responseJson) => {
-          setLoading(false)
-          if (responseJson.success) {
-            delete responseJson.indicador.idPeriodo
-            delete responseJson.indicador.idUnidad
-            delete responseJson.indicador.inicioPeriodoActual
-            delete responseJson.indicador.finPeriodoActual
-            delete responseJson.indicador.periodoActual
-            delete responseJson.indicador.unidad
-            setIndicator(responseJson.indicador)
-            props.setIndicatorId(responseJson.indicador.idIndicador)
-          }
-        })
+      fetchIndicator(currentIndicator.idIndicador)
     }
+  }
+  const fetchIndicator = (indicatorId) =>{
+    fetch(`/indicators/${indicatorId}`, {
+      method: 'GET',
+      headers: {
+        'x-access-token': localStorage.getItem("HUNToken")
+      },
+    }).then((response) => response.json())
+      .then((responseJson) => {
+        setLoading(false)
+        if (responseJson.success) {
+          delete responseJson.indicador.idPeriodo
+          delete responseJson.indicador.idUnidad
+          delete responseJson.indicador.inicioPeriodoActual
+          delete responseJson.indicador.finPeriodoActual
+          delete responseJson.indicador.periodoActual
+          delete responseJson.indicador.unidad
+          setIndicator(responseJson.indicador)
+          props.setIndicatorId(responseJson.indicador.idIndicador)
+        }
+      })
+
   }
 
   return (

@@ -14,9 +14,19 @@ function users(dbCon) {
             console.error(error);
             return res.json({ success: false, message: "Ocurrió un error" });
         }
+    });
+    
+    router.get('/employees', token.checkToken, async function (req, res, next) {
+        try {
+            const users = await userService.getEmployeesFull(await dbCon);
+            return res.json({ success: true, users, message: "" });
+
+        } catch (error) {
+            console.error(error);
+            return res.json({ success: false, message: "Ocurrió un error" });
+        }
 
     });
-
     /**
      * Agrega un nuevo usuario
      */

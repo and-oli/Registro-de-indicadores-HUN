@@ -130,7 +130,6 @@ export default function CreateIndicador() {
       setOpen(true);
     }
     if(start) {
-      console.log(date.isBefore(state.endCurrentPeriod));
       if((state.endCurrentPeriod && date.isBefore(state.endCurrentPeriod)) || !state.endCurrentPeriod) {
         state.startCurrentPeriod = date;
         setState(state);

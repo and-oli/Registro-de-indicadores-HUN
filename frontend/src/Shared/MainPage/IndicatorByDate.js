@@ -39,7 +39,6 @@ export default function IndicatorByDate(props) {
 
   React.useEffect(
     () => {
-      if (props.records.length > 0) {
         setLoading(true)
         fetch(`/records/recordsByIndicatorId/${props.indicatorId}`, {
           method: 'GET',
@@ -67,9 +66,7 @@ export default function IndicatorByDate(props) {
             }
             getDates();
           })
-
-      }
-    }, [props]
+    }, []
   )
 
   function getDates() {
@@ -81,6 +78,7 @@ export default function IndicatorByDate(props) {
     }).then((response) => response.json())
       .then((responseJson) => {
         setLoading(false)
+        console.log(responseJson)
         if (responseJson.success) {
           setDates(responseJson.dates)
         }
@@ -132,7 +130,7 @@ export default function IndicatorByDate(props) {
                   </Table>
                 }) :
                 <div>
-                  No hay registros para este indicador en esta fecha
+                  No hay registros para este indicador en este periodo
                 </div>
             }
           </div>
