@@ -53,12 +53,6 @@ const camelToText = function (camel) {
   return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
 }
 
-const getMonth = (idPeriod, periods) => {
-  for(let i = 0; i < periods.length; i++) {
-    if(periods[i].idPeriodo === parseInt(idPeriod)) return periods[i].meses;
-  }
-  return 0;
-}
 
 
 export default function CreateIndicador() {
@@ -105,7 +99,6 @@ export default function CreateIndicador() {
   const [success, setSuccess] = React.useState(false);
   const [message, setMessage] = React.useState("");
   const [open, setOpen] = React.useState(false);
-  //
   const [state, setState] = React.useState({
     name: "",
     definition: "",

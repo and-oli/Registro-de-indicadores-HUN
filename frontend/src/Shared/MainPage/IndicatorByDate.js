@@ -66,7 +66,7 @@ export default function IndicatorByDate(props) {
             }
             getDates();
           })
-    }, []
+    }, [props]
   )
 
   function getDates() {

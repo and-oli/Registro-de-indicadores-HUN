@@ -9,7 +9,7 @@ module.exports = {
     },
     getIndicatorsNamesByUnitId: async function (dbCon, idUnidad) {
         const result = await dbCon.query`
-            select nombre, idIndicador  from indicadores 
+            select nombre, idIndicador, idUnidad  from indicadores 
             where idUnidad = ${idUnidad}
         `;
         return result.recordset;

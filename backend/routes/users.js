@@ -29,6 +29,8 @@ function users(dbCon) {
     });
     /**
      * Agrega un nuevo usuario
+     * Body: { username, password, nombre, apellidos, idRol, permissions}
+     * Si idRol no está presente, se le asigna al usuario el id de rol correspondiente a empleado
      */
     router.post('/', async function (req, res) {
         try {
@@ -39,45 +41,10 @@ function users(dbCon) {
             const result = await userService.postUser(await dbCon, req.body);
             if (result) {
                 req.body.password = passCopy;
-                return token.getToken(await dbCon, req, res)
+                return res.json({ success: true, message: "¡Usuario creado!" });
             } else {
                 return res.json({ success: false, message: "Ocurrió un error" });
             }
-        } catch (error) {
-            console.error(error);
-            return res.json({ success: false, message: "Ocurrió un error" });
-        }
-    });
-    /**
-     * Agrega un registro a la tabla USUARIOS_INDICADORES
-     * Body: {idIndicador,idUsuario}
-     */
-    router.post('/addUserIndicatorPermission', async function (req, res) {
-        try {
-            const result = await userService.addUserIndicatorPermission(await dbCon, req.body);
-            if (result) {
-                return res.json({ success: true, message: "Permiso añadido exitosamente" });
-            }
-            return res.json({ success: false, message: "Ocurrió un error" });
-
-        } catch (error) {
-            console.error(error);
-            return res.json({ success: false, message: "Ocurrió un error" });
-        }
-    });
-    /**
-     * Agrega un registro a la tabla USUARIOS_UNIDADES
-     * Body: {idUnidad,idUsuario}
-     * 
-     */
-    router.post('/addUserUnitPermission', async function (req, res) {
-        try {
-            const result = await userService.addUserUnitPermission(await dbCon, req.body);
-            if (result) {
-                return res.json({ success: true, message: "Permiso añadido exitosamente" });
-            }
-            return res.json({ success: false, message: "Ocurrió un error" });
-
         } catch (error) {
             console.error(error);
             return res.json({ success: false, message: "Ocurrió un error" });

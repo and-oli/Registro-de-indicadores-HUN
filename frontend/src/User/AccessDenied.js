@@ -67,7 +67,7 @@ export default function AccessDenied(props) {
             setRequested(responseJson.requestExists)
           }
         })
-    }, []
+    }, [props]
   )
   const message = hasRequested ? <Alert severity="warning">Usted ya solicitó acceso a este indicador. Contáctese con el administrador para que le otorge permiso de registro.</Alert>
     : <Alert severity="error">No tiene permiso para editar este indicador en este momento.</Alert>;

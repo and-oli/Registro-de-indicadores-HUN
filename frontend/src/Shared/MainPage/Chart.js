@@ -33,7 +33,7 @@ export default function Chart(props) {
             )
           }
         })
-    }, []
+    }, [props.indicatorId]
   )
   return (
     <React.Fragment>

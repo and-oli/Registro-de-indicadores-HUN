@@ -62,7 +62,6 @@ export default function RegisterIndicator() {
     }, []
   )
   const [userIsAllowed, setUserIsAllowed] = React.useState(false);
-  const [unit, setUnit] = React.useState(null);
   const [indicator, setIndicator] = React.useState(null);
   const [units, setUnits] = React.useState([]);
   const [indicators, setIndicators] = React.useState([]);
@@ -97,7 +96,6 @@ export default function RegisterIndicator() {
   const handleUnitChange = (newUnit) => {
     let currentUnit = units.find(u => u.nombre === newUnit);
     if (currentUnit) {
-      setUnit(currentUnit)
       setIndicator(null)
       fetch(`/indicators/names/${currentUnit.idUnidad}`, {
         method: 'GET',

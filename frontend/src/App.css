@@ -11,7 +11,36 @@
   margin: 0 auto !important;
   display: block;
 }
+.highlight-off-icon{
+  color:red;
+  visibility: hidden;
+  margin-left: 10px;
+}
+.edit-user-icon{
+  color:blue;
+  visibility: hidden;
+  margin-left: 10px;
+}
+.selected-indicator{
+  margin: 10px;
+}
+.selected-indicator:hover > .highlight-off-icon  {
+  visibility: initial;
+  cursor: pointer;
+}
+.user-table{
+  display: inline-block!important;
+}
 
+.MuiTable-root {
+  display: inline!important;
+  border-spacing: 0;
+  border-collapse: collapse;
+}
+div:hover > .edit-user-icon  {
+  visibility: initial;
+  cursor: pointer;
+}
 /* Safari */
 @-webkit-keyframes spin {
   0% { -webkit-transform: rotate(0deg); }

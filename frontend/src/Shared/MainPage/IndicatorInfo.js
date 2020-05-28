@@ -132,7 +132,6 @@ export default function IndicatorInfo(props) {
           props.setIndicatorId(responseJson.indicador.idIndicador)
         }
       })
-
   }
 
   return (

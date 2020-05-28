@@ -43,7 +43,6 @@ const useStyles = makeStyles((theme) => ({
 export default function EnableAccess(props) {
     const classes = useStyles();
     const [modalStyle] = React.useState(getModalStyle);
-    const [loading, setLoading] = React.useState(false);
     const [open, setOpen] = React.useState(false);
     const [success, setSuccess] = React.useState(false);
     const [message, setMessage] = React.useState("");
@@ -59,9 +58,6 @@ export default function EnableAccess(props) {
       setEndDate(date);
     };
 
-    const handleClick = () => {
-      props.setOpen(false);
-    }
 
     const handleClose = (event, reason) => {
       if (reason === 'clickaway') {
@@ -72,7 +68,6 @@ export default function EnableAccess(props) {
     };
 
     const confirmAccess = function (event,approved) {
-        setLoading(true);
         event.preventDefault();
         const approve = approved ? "approve" : "reject";
         const method = approved ? 'POST' : 'PUT';
@@ -95,7 +90,6 @@ export default function EnableAccess(props) {
               })
           }).then((response) => response.json())
               .then((responseJson) => {
-                  setLoading(false);
                   setSuccess(responseJson.success);
                   if (responseJson.success) {
                       setMessage(approve ? "Acceso consedido exitosamennte" : "Acceso negado exitosamente");

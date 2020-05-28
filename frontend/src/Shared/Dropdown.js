@@ -33,9 +33,6 @@ export default function Dropdown(props) {
         value={value}
         onChange={handleChange}
         label={props.type}
-        inputProps={{
-          id: 'dropdown',
-        }}
       >
         <option aria-label="None" value="" />
         {props.options.map((option) => (

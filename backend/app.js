@@ -11,6 +11,7 @@ const units= require('./routes/units')(dbCon);
 const accesses= require('./routes/accesses')(dbCon);
 const requests= require('./routes/requests')(dbCon);
 const records= require('./routes/records')(dbCon);
+const permissions= require('./routes/permissions')(dbCon);
 
 const app = express();
 
@@ -29,6 +30,7 @@ app.use('/units',  units);
 app.use('/accesses',  accesses);
 app.use('/requests',  requests);
 app.use('/records',  records);
+app.use('/permissions',  permissions);
 
 
 // error handler

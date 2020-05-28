@@ -19,7 +19,6 @@ import CreateIndicator from '../Admin/CreateIndicator';
 import UserRequests from '../Admin/Requests/UserRequests';
 import UsersInfo from '../Admin/UserInfo/UsersInfo';
 import RegisterIndicator from '../User/RegisterIndicator';
-//import AccessDenied from '../User/AccessDenied';
 import AccessRequests from '../User/Requests/AccessRequests';
 
 const drawerWidth = 240;
@@ -101,7 +100,6 @@ export default function Navigation(props) {
         },
       }).then((response) =>{status = response.status; return response.json();} )
         .then((responseJson) => {
-          setLoading(false);
           if (responseJson.success) {
             setUserRequests(responseJson.solicitudes);
           } else if(status === 403){
@@ -115,7 +113,6 @@ export default function Navigation(props) {
   const classes = useStyles();
   const [open, setOpen] = React.useState(false);
   const [userRequests, setUserRequests] = React.useState([]);
-  const [loading, setLoading] = React.useState(false);
   const handleDrawerOpen = () => {
     setOpen(true);
   };

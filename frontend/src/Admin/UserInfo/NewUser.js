@@ -5,7 +5,7 @@ import Modal from '@material-ui/core/Modal';
 import Backdrop from '@material-ui/core/Backdrop';
 import { useSpring, animated } from 'react-spring/web.cjs'; // web.cjs is required for IE 11 support
 import Title from '../../Shared/Title';
-import Button from '@material-ui/core/Button';
+import PermissionsConfig from './PermissionsConfig';
 import TextField from '@material-ui/core/TextField';
 
 const useStyles = makeStyles((theme) => ({
@@ -57,12 +57,15 @@ Fade.propTypes = {
 };
 
 export default function NewUser(props) {
+
   const classes = useStyles();
   const [state, setState] = React.useState({
     name: "",
     username: "",
-    password: "",
+    lastName: "",
   });
+  const [message, setMessage] = React.useState({ color: "green", text: "" });
+  const [loading, setLoading] = React.useState(false);
 
   const handleChange = (event) => {
     setState({
@@ -71,9 +74,36 @@ export default function NewUser(props) {
     });
   };
 
-  const handleClick = () => {
-    alert(state.name);
+
+  const accept = (selectedIndicators) => {
+    setLoading(true)
+    let data = {
+      username: state.username,
+      nombre: state.name,
+      apellidos: state.lastName,
+      password: state.username, // De manera temporal se le asigna la cédula como contraseña
+      permissions: selectedIndicators,
+    }
+    console.log(data)
+    fetch("/users/", {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data)
+    }).then((response) => response.json())
+      .then((responseJson) => {
+        setLoading(false)
+        if (responseJson.success) {
+
+          setMessage({ color: "green", text: responseJson.message })
+        } else {
+          setMessage({ color: "red", text: responseJson.message })
+        }
+      })
   }
+
   return (
     <Modal
       aria-labelledby="spring-modal-title"
@@ -87,56 +117,57 @@ export default function NewUser(props) {
         timeout: 500,
       }}
     >
+
       <Fade in={props.open}>
-        <div className={classes.paper}>
-          <Title>Nuevo Usuario</Title>
-          <form className={classes.root} noValidate autoComplete="off">
-              <TextField
-              variant="outlined"
-              margin="normal"
-              required
-              fullWidth
-              id="name"
-              label="Nombre"
-              name="name"
-              autoComplete="name"
-              onChange={handleChange}
-              autoFocus
-              />
-              <TextField
-                variant="outlined"
-                margin="normal"
-                required
-                fullWidth
-                id="username"
-                label="Usuario"
-                name="username"
-                autoComplete="username"
-                onChange={handleChange}
-              />
-              <TextField
-                variant="outlined"
-                margin="normal"
-                required
-                fullWidth
-                type="password"
-                id="password"
-                label="Contraseña"
-                name="password"
-                autoComplete="password"
-                onChange={handleChange}
-              />
-              <Button
-                type="submit"
-                variant="contained"
-                color="primary"
-                className={classes.submit}
-                onClick={handleClick}
-              >
-                Crear
-              </Button>
-            </form>
-        </div>
+        {
+          loading ?
+            <div className="loader"></div> :
+            <div className={classes.paper}>
+              <Title>Nuevo Usuario</Title>
+              <form className={classes.root} noValidate autoComplete="off">
+                <TextField
+                  variant="outlined"
+                  margin="normal"
+                  required
+                  fullWidth
+                  id="name"
+                  label="Nombre"
+                  name="name"
+                  autoComplete="name"
+                  onChange={handleChange}
+                  autoFocus
+                />
+                <TextField
+                  variant="outlined"
+                  margin="normal"
+                  required
+                  fullWidth
+                  id="lastName"
+                  label="Apellidos"
+                  name="lastName"
+                  autoComplete="lastName"
+                  onChange={handleChange}
+                  autoFocus
+                />
+                <TextField
+                  variant="outlined"
+                  margin="normal"
+                  type="number"
+                  required
+                  fullWidth
+                  id="username"
+                  label="Cédula"
+                  name="username"
+                  autoComplete="username"
+                  onChange={handleChange}
+                />
+                <PermissionsConfig accept={accept} />
+                <div style={{ color: message.color }}>
+                  {message.text}
+                </div>
+              </form>
+            </div>
+        }
       </Fade>
     </Modal>
   );

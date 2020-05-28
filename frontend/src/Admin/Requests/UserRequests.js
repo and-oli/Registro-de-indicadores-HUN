@@ -53,7 +53,6 @@ export default function UserRequests(props) {
           },
         }).then((response) =>{status = response.status; return response.json();} )
           .then((responseJson) => {
-            setLoading(false);
             if (responseJson.success) {
               setRows(responseJson.solicitudes);
             } else if(status === 403){
@@ -69,7 +68,6 @@ export default function UserRequests(props) {
   const [rows, setRows] = React.useState([]);
   const [selectedUser, setSelectedUser] = React.useState(null);
   const [approve, setApprove] = React.useState(false);
-  const [loading, setLoading] = React.useState(false);
 
   const handleOpen = (row) => {
     setSelectedUser(row);

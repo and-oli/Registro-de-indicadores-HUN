@@ -8,6 +8,8 @@ import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import Button from '@material-ui/core/Button';
 import NewUser from './NewUser';
+import EditIcon from '@material-ui/icons/Edit';
+import EditUser from './EditUser';
 
 const useStyles = makeStyles((theme) => ({
   appBarSpacer: theme.mixins.toolbar,
@@ -44,6 +46,7 @@ const useStyles = makeStyles((theme) => ({
 export default function UsersInfo() {
   React.useEffect(
     () => {
+      setLoading(true)
       let status;
       fetch("/users/employees/", {
         method: 'GET',
@@ -65,6 +68,9 @@ export default function UsersInfo() {
   const [users, setUsers] = React.useState([])
   const classes = useStyles();
   const [open, setOpen] = React.useState(false);
+  const [editUserModalOpen, setEditUserModalOpen] = React.useState(false);
+  const [currentUserId, setCurrentUserId] = React.useState(null);
+  const [currentUserPermissions, setCurrentUserPermissions] = React.useState([]);
   const [loading, setLoading] = React.useState(false);
 
   const handleOpen = () => {
@@ -75,7 +81,30 @@ export default function UsersInfo() {
     setOpen(false);
   };
 
-  const goTo = (ind) =>{
+  const handleEditUserModalOpen = (open, userId, indicators, units) => {
+    if (open) {
+      let myCurrentUserPermissions = indicators.map(ind => {
+        return {
+          nombre: ind.nombreIndicador,
+          idIndicador: ind.idIndicador,
+          idUnidad: ind.idUnidad,
+        }
+      })
+      units.forEach(element => {
+        myCurrentUserPermissions.push({
+          nombre: `TODOS (${element.nombreUnidad})`,
+          idIndicador: -1,
+          idUnidad: element.idUnidad
+        })
+      });
+      setCurrentUserId(userId)
+      setCurrentUserPermissions(myCurrentUserPermissions)
+    }
+    setEditUserModalOpen(open);
+  };
+
+
+  const goTo = (ind) => {
     window.location = `/?indicator=${ind.idIndicador}`
   }
   return (
@@ -94,49 +123,62 @@ export default function UsersInfo() {
             >
               Nuevo Usuario
             </Button>
-            <Table size="small">
-              {users.map((u, i) => (
-                <TableBody key={i}  style = {{padding: "42px", display:"table", width: "80%",margin: "53px auto", border: "solid #d2d2d2 1px"}}>
-                  <TableRow>
-                    <TableCell className={classes.thead}>Usuario</TableCell>
-                    <TableCell>
-                      {u.username}
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className={classes.thead}>Nombre</TableCell>
-                    <TableCell>
-                      {u.nombre + " " + u.apellidos}
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className={classes.thead}>Unidades</TableCell>
-                    <TableCell>
-                      {u.unidades.join(", ")}
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className={classes.thead}>Indicadores</TableCell>
-                    <TableCell>
-                      {u.indicadores.map((ind, j) =>
-                        <span
-                          key={j}
-                          className={classes.cellContent}
-                          onClick={()=>goTo(ind)}
-                        >
-                          {ind.nombreIndicador + ", "}
-                        </span>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-
-              ))}
-            </Table>
+            {
+              loading ?
+                <div className="loader"></div> :
+                users.map((u, i) => (
+                  <div key={i} style={{ marginTop: "20px" }}>
+                    <Table size="small">
+                      <TableBody className="user-table" >
+                        <TableRow>
+                          <TableCell className={classes.thead}>Usuario</TableCell>
+                          <TableCell>
+                            {u.username}
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className={classes.thead}>Nombre</TableCell>
+                          <TableCell>
+                            {u.nombre + " " + u.apellidos}
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className={classes.thead}>Unidades</TableCell>
+                          <TableCell>
+                            {u.unidades.map(und => und.nombreUnidad).join(", ")}
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className={classes.thead}>Indicadores</TableCell>
+                          <TableCell>
+                            {u.indicadores.map((ind, j) =>
+                              <span
+                                key={j}
+                                className={classes.cellContent}
+                                onClick={() => goTo(ind)}
+                              >
+                                {ind.nombreIndicador + ", "}
+                              </span>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                    <EditIcon
+                      className="edit-user-icon"
+                      onClick={() => { handleEditUserModalOpen(true, u.idUsuario, u.indicadores, u.unidades) }}
+                    />
+                  </div>
+                ))}
           </Paper>
         </React.Fragment>
       </Container>
       <NewUser open={open} handleClose={handleClose} />
+      <EditUser
+        open={editUserModalOpen}
+        handleEditUserModalOpen={handleEditUserModalOpen}
+        currentUserId={currentUserId}
+        currentUserPermissions={currentUserPermissions} />
     </main>
   );
 }
