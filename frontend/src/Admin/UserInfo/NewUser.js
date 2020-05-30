@@ -84,7 +84,6 @@ export default function NewUser(props) {
       password: state.username, // De manera temporal se le asigna la cédula como contraseña
       permissions: selectedIndicators,
     }
-    console.log(data)
     fetch("/users/", {
       method: 'POST',
       headers: {

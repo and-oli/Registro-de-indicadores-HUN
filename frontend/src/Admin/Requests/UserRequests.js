@@ -44,7 +44,6 @@ export default function UserRequests(props) {
   React.useEffect(
     () => {
       let status;
-      console.log(props.userRequests.length)
       if (props.userRequests.length > 0) {
         fetch(`/requests/onHold/usersIndicators/${props.userRequests[0].idEstado}/`, {
           method: 'GET',

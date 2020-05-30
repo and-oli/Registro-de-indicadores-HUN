@@ -169,7 +169,8 @@ export default function RegisterIndicator() {
   }
 
 
-  const submit = () => {
+  const submit = (e) => {
+    e.preventDefault()
     setMessage({ color: "green", text: "" })
     if (
       state.analysis.trim() !== "" &&

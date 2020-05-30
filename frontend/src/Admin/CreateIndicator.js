@@ -127,7 +127,6 @@ export default function CreateIndicador() {
         state.startCurrentPeriod = date;
         setState(state);
       } else {
-        console.log(date, state.endCurrentPeriod, date.isBefore(state.endCurrentPeriod))
         setMessage("La fecha de inicio debe ser anterior a la fecha de finalización.");
         setSuccess(false);
         setOpen(true);

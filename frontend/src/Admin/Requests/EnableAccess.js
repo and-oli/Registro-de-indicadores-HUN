@@ -47,8 +47,8 @@ export default function EnableAccess(props) {
     const [success, setSuccess] = React.useState(false);
     const [message, setMessage] = React.useState("");
 
-    const [initDate, setInintDate] = React.useState(new Date(new Date()));
-    const [endDate, setEndDate] = React.useState(new Date(new Date()));
+    const [initDate, setInintDate] = React.useState(new Date());
+    const [endDate, setEndDate] = React.useState(new Date());
 
     const handleInitDateChange = (date) => {
       setInintDate(date);
@@ -72,7 +72,7 @@ export default function EnableAccess(props) {
         const approve = approved ? "approve" : "reject";
         const method = approved ? 'POST' : 'PUT';
         const baseURL = approved ? '/accesses/' : `/requests/${approve}/${props.user.idSolicitud}/`;
-        const canFetch = approved ? moment(initDate).isBefore(endDate) && moment(initDate).isSameOrAfter(moment.now()) : true;
+        const canFetch = approved ? moment(initDate).isBefore(endDate) && moment(endDate).isAfter(moment.now()) : true;
         if(canFetch) {
           fetch(baseURL, {
               method: method,
@@ -92,7 +92,7 @@ export default function EnableAccess(props) {
               .then((responseJson) => {
                   setSuccess(responseJson.success);
                   if (responseJson.success) {
-                      setMessage(approve ? "Acceso consedido exitosamennte" : "Acceso negado exitosamente");
+                      setMessage(approve ? "Acceso concedido exitosamennte" : "Acceso negado exitosamente");
                       setOpen(true);
                       props.closeModal();
                       window.location.reload();

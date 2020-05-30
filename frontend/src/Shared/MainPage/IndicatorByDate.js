@@ -78,7 +78,6 @@ export default function IndicatorByDate(props) {
     }).then((response) => response.json())
       .then((responseJson) => {
         setLoading(false)
-        console.log(responseJson)
         if (responseJson.success) {
           setDates(responseJson.dates)
         }
