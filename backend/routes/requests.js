@@ -72,14 +72,14 @@ function requests(dbCon) {
      * Ingresa una nueva solicitud.
      * Body:
      * {
-            idSolicitante, 
             idIndicador, 
             comentario, 
         }
      */
-    router.post('/', (req, res, next) => token.checkTokenAdmin(req, res, next, true), async function (req, res, next) {
+    router.post('/', token.checkToken, async function (req, res, next) {
         if (!res.headersSent) {
             try {
+                req.body.idSolicitante =  req.decoded.idUsuario
                 const result = await requestService.postRequest(await dbCon, req.body)
                 res.json(result);
             } catch (error) {

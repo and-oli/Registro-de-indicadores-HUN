@@ -98,13 +98,13 @@ export default function Navigation(props) {
         headers: {
           'x-access-token': localStorage.getItem("HUNToken")
         },
-      }).then((response) =>{status = response.status; return response.json();} )
+      }).then((response) => { status = response.status; return response.json(); })
         .then((responseJson) => {
           if (responseJson.success) {
             setUserRequests(responseJson.solicitudes);
-          } else if(status === 403){
+          } else if (status === 403) {
             localStorage.removeItem("HUNToken");
-            window.location.reload(); 
+            window.location.reload();
           }
         });
     }, []
@@ -161,7 +161,7 @@ export default function Navigation(props) {
           </div>
           <Divider />
           <List>
-            <ListItems admin={admin} requests={userRequests.length}/>
+            <ListItems admin={admin} requests={userRequests.length} />
             {admin ? secondaryListItemsAdmin : secondaryListItemsUser}
           </List>
           <Divider />
@@ -171,7 +171,7 @@ export default function Navigation(props) {
             <MainPage admin={admin} />
           </Route>
           <Route path="/admin/solicitudes">
-            {userRequests.length ? <UserRequests userRequests={userRequests}/> :  <UserRequests userRequests={userRequests}/>}
+            <UserRequests userRequests={userRequests} />
           </Route>
           <Route path="/user/solicitudes">
             <AccessRequests />
@@ -190,7 +190,6 @@ export default function Navigation(props) {
           </Route>
         </Switch>
       </Router>
-      {/*<AccessDenied />*/}
     </div>
   );
 }

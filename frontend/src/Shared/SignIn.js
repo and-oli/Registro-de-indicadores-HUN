@@ -78,11 +78,9 @@ export default function SignIn() {
             required
             fullWidth
             id="email"
-            type="email"
             label="Correo Electrónico"
             name="email"
             value={username}
-            autoComplete="email"
             autoFocus
           />
           <TextField

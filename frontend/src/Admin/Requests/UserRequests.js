@@ -41,12 +41,12 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function UserRequests(props) {
-  const userRequests = props.userRequests;
   React.useEffect(
     () => {
       let status;
-      if (userRequests.length > 0) {
-        fetch(`/requests/onHold/usersIndicators/${userRequests[0].idEstado[0]}/`, {
+      console.log(props.userRequests.length)
+      if (props.userRequests.length > 0) {
+        fetch(`/requests/onHold/usersIndicators/${props.userRequests[0].idEstado}/`, {
           method: 'GET',
           headers: {
             'x-access-token': localStorage.getItem("HUNToken")
@@ -61,7 +61,7 @@ export default function UserRequests(props) {
             }
           });
       }
-    }, []
+    }, [props]
   );
   const classes = useStyles();
   const [open, setOpen] = React.useState(false);

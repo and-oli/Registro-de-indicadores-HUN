@@ -71,7 +71,7 @@ export default function EnableAccess(props) {
         event.preventDefault();
         const approve = approved ? "approve" : "reject";
         const method = approved ? 'POST' : 'PUT';
-        const baseURL = approve ? '/accesses/' : `/requests/${approve}/${props.user.idSolicitud}/`;
+        const baseURL = approved ? '/accesses/' : `/requests/${approve}/${props.user.idSolicitud}/`;
         const canFetch = approved ? moment(initDate).isBefore(endDate) && moment(initDate).isSameOrAfter(moment.now()) : true;
         if(canFetch) {
           fetch(baseURL, {

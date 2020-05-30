@@ -5,6 +5,7 @@ import Grid from '@material-ui/core/Grid';
 import MuiAlert from '@material-ui/lab/Alert';
 import Button from '@material-ui/core/Button';
 import Snackbar from '@material-ui/core/Snackbar';
+import TextField from '@material-ui/core/TextField';
 
 function Alert(props) {
   return <MuiAlert elevation={6} variant="filled" {...props} />;
@@ -37,10 +38,43 @@ export default function AccessDenied(props) {
   const [open, setOpen] = React.useState(false);
   const [hasRequested, setRequested] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
+  const [comment, setComment] = React.useState("");
+  const [severity, setSeverity] = React.useState("");
+  const [responseMessage, setResponseMessage] = React.useState("");
+
   const handleClick = () => {
-    setOpen(true);
-    setRequested(true);
+    setLoading(true)
+    let data = {
+      idIndicador: props.indicatorId,
+      comentario: comment
+    }
+    fetch("/requests/", {
+      method: 'POST',
+      headers: {
+        'x-access-token': localStorage.getItem("HUNToken"),
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data)
+    }).then((response) => response.json())
+      .then((responseJson) => {
+        setLoading(false)
+        if (responseJson.success) {
+          setOpen(true);
+          setSeverity("success")
+          setRequested(true);
+        }
+        else{
+          setOpen(true);
+          setSeverity("error")
+        }
+        setResponseMessage(responseJson.message)
+      })
   }
+  const handleCommentChange = (event) => {
+    setComment(event.target.value);
+  };
+
   const handleClose = (event, reason) => {
     if (reason === 'clickaway') {
       return;
@@ -90,18 +124,33 @@ export default function AccessDenied(props) {
               anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
               key={'top,center'}
             >
-              <Alert onClose={handleClose} severity="success">
-                Ha solicitado acceso exitosamente
+              <Alert onClose={handleClose} severity={severity}>
+                {responseMessage}
                   </Alert>
             </Snackbar>
-            {!hasRequested ? <Button
+            {!hasRequested ? 
+            <div>
+              <TextField
+                margin="normal"
+                id="comment"
+                label="Comentario"
+                name="comment"
+                onChange={handleCommentChange}
+                value={comment}
+                autoFocus
+              ></TextField>
+              <br/>
+            <Button
               variant="contained"
               color="primary"
               className={classes.submit}
               onClick={handleClick}
-            >
+              >
               Solicitar Acceso
-                </Button> : <span />}
+                </Button> 
+              </div>
+                : <span />
+                }
           </Grid>
         </Grid>
       </React.Fragment>

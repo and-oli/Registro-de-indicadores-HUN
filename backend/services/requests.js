@@ -24,7 +24,7 @@ module.exports = {
     },
     getRequestsOnhold: async function (dbCon, request) {
         const result = await dbCon.query`
-            select * from SOLICITUDES 
+            select SOLICITUDES.* from SOLICITUDES 
             inner join ESTADOS 
             ON ESTADOS.idEstado = SOLICITUDES.idEstado 
             where ESTADOS.nombre = 'EN ESPERA'
