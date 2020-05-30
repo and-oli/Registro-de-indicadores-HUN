@@ -57,14 +57,14 @@ module.exports = {
         } = record;
         // Revisar si hay un objeto acceso vigente para el usuario al indicador.
         const acceses = await accessService.getAccessesByIndicatorIdAndUserId(dbCon, idIndicador, idUsuario);
-        const currentTime = new Date().getTime() - (1000 * 3600 * 5) // El servidor en heroku estará en la hora 0 GMT, Colombia está en -5GMT
+        const currentTime = new Date().getTime() // El servidor en heroku estará en la hora 0 GMT, Colombia está en -5GMT
         const validAccess = acceses.find(a =>
             moment(a.fechaInicio).valueOf() <= currentTime &&
             moment(a.fechaFin).valueOf() >= currentTime
-        )
+            )
 
         if (validAccess) {
-            return validaAccess
+            return validAccess
         }
 
         // Revisar si el indicador se puede registrar en la fecha actual

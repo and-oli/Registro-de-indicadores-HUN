@@ -10,7 +10,7 @@ module.exports = {
         SELECT inicioPeriodoActual, finPeriodoActual FROM INDICADORES 
         WHERE idIndicador = ${idIndicador}
         `;
-        const currentTime = new Date().getTime() - (1000 * 3600 * 5) // El servidor en heroku estará en la hora 0 GMT, Colombia está en -5GMT
+        const currentTime = new Date().getTime() // El servidor en heroku estará en la hora 0 GMT, Colombia está en -5GMT
         if (result.recordset[0] && result.recordset[0].inicioPeriodoActual && result.recordset[0].finPeriodoActual) {
             const time1 = new Date(result.recordset[0].inicioPeriodoActual).getTime()
             const time2 = new Date(result.recordset[0].finPeriodoActual).getTime()
