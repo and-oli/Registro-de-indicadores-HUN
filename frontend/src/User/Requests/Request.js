@@ -43,12 +43,14 @@ export default function Request(props) {
             <Title>{props.label}</Title>
             <Table size="small">
               <TableBody>
-                {props.rows.map((row) => (
-                  <TableRow key={row.label}>
-                    <TableCell className={classes.thead} align="left">{row.label}</TableCell>
-                    <TableCell className={classes.tcell} align="left">{row.value}</TableCell>
-                  </TableRow>
-                ))}
+                <TableRow>
+                  <TableCell className={classes.thead} align="left">Indicador</TableCell>
+                  <TableCell className={classes.tcell} align="left">{props.request.nombre[0]}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className={classes.thead} align="left">Estado</TableCell>
+                  <TableCell className={classes.tcell} align="left">{props.request.nombre[1]}</TableCell>
+                </TableRow>
               </TableBody>
             </Table>
           </Paper>

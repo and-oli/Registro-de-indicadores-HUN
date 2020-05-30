@@ -34,29 +34,29 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function createData(id, request, data) {
-  return { id, request, data };
-}
-
-const rows = [
-  createData(0, 'Solicitud 1', [{label: 'Indicador', value: 'Indicador 1',},
-                                {label: 'Fecha Solicitud', value: '20/08/2020',},
-                                {label: 'Estado', value: 'Pendiente',},]),
-  createData(1, 'Solicitud 2', [{label: 'Indicador', value: 'Indicador 2',},
-                                {label: 'Fecha Solicitud', value: '20/08/2020',},
-                                {label: 'Estado', value: 'Pendiente',},]),
-  createData(2, 'Solicitud 3', [{label: 'Indicador', value: 'Indicador 3',},
-                                {label: 'Fecha Solicitud', value: '20/08/2020',},
-                                {label: 'Estado', value: 'Pendiente',},]),
-  createData(3, 'Solicitud 4', [{label: 'Indicador', value: 'Indicador 4',},
-                                {label: 'Fecha Solicitud', value: '20/08/2020',},
-                                {label: 'Estado', value: 'Pendiente',},]),
-  createData(4, 'Solicitud 5', [{label: 'Indicador', value: 'Indicador 5',},
-                                {label: 'Fecha Solicitud', value: '20/08/2020',},
-                                {label: 'Estado', value: 'Pendiente',},]),
-];
-
 export default function AccessRequests() {
+  React.useEffect(
+    () => {
+      let status;
+      fetch(`/requests/by/${localStorage.getItem("HUNUserId")}`, {
+        method: 'GET',
+        headers: {
+          'x-access-token': localStorage.getItem("HUNToken")
+        },
+      }).then((response) =>{status = response.status; return response.json();} )
+        .then((responseJson) => {
+          setLoading(false)
+          if (responseJson.success) {
+            setRequests(responseJson.solicitudes);
+          } else if(status === 403){
+            localStorage.removeItem("HUNToken");
+            window.location.reload(); 
+          }
+        })
+    }, []
+  );
+  const [loading, setLoading] = React.useState(false);
+  const [requests, setRequests] = React.useState([]);
   const classes = useStyles();
   return (
     <main className={classes.content}>
@@ -64,17 +64,17 @@ export default function AccessRequests() {
       <Container maxWidth="lg" className={classes.container}>
         <React.Fragment>
           <Paper>
-            <Title>Información de usuarios</Title>
+            <Title>Información de solicitudes realizadas</Title>
             <Table size="small">
               <TableBody>
-                {rows.map((row, i) => (
-                  <TableRow key={row.id}>
+                {requests.map((row, i) => (
+                  <TableRow key={row.idSolicitud}>
                     <TableCell>
                       <TreeView
                         defaultCollapseIcon={<ExpandMoreIcon />}
                         defaultExpandIcon={<ChevronRightIcon />}
                       >
-                        <TreeItem nodeId={`${row.id}`} label={row.request} children={<Request label={row.request} rows={row.data} />} />
+                        <TreeItem nodeId={`${row.idSolicitud}`} label={`Solicitud ${i+1}`} children={<Request label={`Solicitud ${i+1}`} request={row} />} />
                       </TreeView>
                     </TableCell>
                   </TableRow>
