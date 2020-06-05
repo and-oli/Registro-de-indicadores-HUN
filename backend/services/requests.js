@@ -2,7 +2,9 @@ module.exports = {
 
     getRequestsByUser: async function (dbCon, idUsuario) {
         const result = await dbCon.query`
-            select *  from SOLICITUDES 
+            select *  from SOLICITUDES
+            inner join INDICADORES on INDICADORES.idIndicador = SOLICITUDES.idIndicador
+            inner join ESTADOS on ESTADOS.idEstado = SOLICITUDES.idEstado
             where idSolicitante = ${idUsuario}
         `;
         return result.recordset;
