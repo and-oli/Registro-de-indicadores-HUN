@@ -41,6 +41,12 @@ div:hover > .edit-user-icon  {
   visibility: initial;
   cursor: pointer;
 }
+.registry-by-date{
+  border: solid #d2d2d2 1px;
+  display: block !important;
+  margin: 10px auto;
+  width: 70%;
+}
 /* Safari */
 @-webkit-keyframes spin {
   0% { -webkit-transform: rotate(0deg); }

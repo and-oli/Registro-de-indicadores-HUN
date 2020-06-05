@@ -78,7 +78,7 @@ export default function SignIn() {
             required
             fullWidth
             id="email"
-            label="Correo Electrónico"
+            label="Cédula"
             name="email"
             value={username}
             autoFocus

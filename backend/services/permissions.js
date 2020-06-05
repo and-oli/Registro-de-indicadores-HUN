@@ -14,7 +14,7 @@ module.exports = {
         if (result.recordset[0] && result.recordset[0].inicioPeriodoActual && result.recordset[0].finPeriodoActual) {
             const time1 = new Date(result.recordset[0].inicioPeriodoActual).getTime()
             const time2 = new Date(result.recordset[0].finPeriodoActual).getTime()
-            return currentTime >= time1 && currentTime <= time2;
+            return currentTime >= time1 && (currentTime <= time2 || (currentTime - time2) < (24 * 3600 * 1000)); // Incluir el último día
         }
         return false
 

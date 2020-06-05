@@ -9,7 +9,7 @@ module.exports = {
     },
     getIndicatorsNamesByUnitId: async function (dbCon, idUnidad) {
         const result = await dbCon.query`
-            select nombre, idIndicador, idUnidad  from indicadores 
+            select nombre, idIndicador, idUnidad,tipo  from indicadores 
             where idUnidad = ${idUnidad}
         `;
         return result.recordset;
@@ -65,6 +65,7 @@ module.exports = {
             goal,
             startCurrentPeriod,
             endCurrentPeriod,
+            indicatorType,
         } = indicator;
         const result = await dbCon.query`
             insert into indicadores (
@@ -80,6 +81,7 @@ module.exports = {
                 meta, 
                 inicioPeriodoActual,
                 finPeriodoActual,
+                tipo,
                 periodoActual
                 )
             values (
@@ -95,6 +97,7 @@ module.exports = {
                 ${goal},
                 ${startCurrentPeriod},
                 ${endCurrentPeriod},
+                ${indicatorType},
                 0
                 )`;
         return result.rowsAffected > 0

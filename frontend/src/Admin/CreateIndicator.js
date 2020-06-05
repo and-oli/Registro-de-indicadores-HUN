@@ -8,6 +8,7 @@ import TextField from '@material-ui/core/TextField';
 import moment from 'moment';
 import Snackbar from '@material-ui/core/Snackbar';
 import MuiAlert from '@material-ui/lab/Alert';
+import Checkbox from '@material-ui/core/Checkbox';
 
 function Alert(props) {
   return <MuiAlert elevation={6} variant="filled" {...props} />;
@@ -99,6 +100,7 @@ export default function CreateIndicador() {
   const [success, setSuccess] = React.useState(false);
   const [message, setMessage] = React.useState("");
   const [open, setOpen] = React.useState(false);
+  const [indicatorType, setIndicatorType] = React.useState(false);
   const [state, setState] = React.useState({
     name: "",
     definition: "",
@@ -156,20 +158,23 @@ export default function CreateIndicador() {
       [event.target.name]: event.target.value,
     });
   };
-
+  const handleTypeChange = (e) => {
+    console.log(e.target.checked)
+    setIndicatorType(e.target.checked)
+  }
   const handleClick = (event) => {
     event.preventDefault();
     let status;
     setLoading(true);
     if (validateData(state)) {
-      setMessage("Ocurrío un error con el formato de los datos. Por favor asuegurese de haber ingresado todos los datos correctamente.");
+      setMessage("Ocurrío un error con el formato de los datos. Por favor asegúrese de haber ingresado todos los datos correctamente.");
       setSuccess(false);
       setLoading(false);
       setOpen(true);
     } else {
       fetch("/indicators/", {
         method: "POST",
-        body: JSON.stringify(state),
+        body: JSON.stringify({...state, indicatorType}),
         headers: {
           'x-access-token': localStorage.getItem("HUNToken"),
           'Content-Type': 'application/json',
@@ -359,6 +364,16 @@ export default function CreateIndicador() {
                 type="date"
                 onChange={handleDateChange}
               />
+              <div>
+
+                <Checkbox
+                  checked={indicatorType}
+                  onChange={handleTypeChange}
+                  color="primary"
+                  inputProps={{ 'aria-label': 'Requiere numerador y denominador' }}
+                />
+                Requiere numerador y denominador
+                </div>
               {
                 loading ?
                   <div className="loader"></div> :

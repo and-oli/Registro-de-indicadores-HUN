@@ -71,6 +71,7 @@ export default function RegisterIndicator() {
   const [registerForNextPeriod, setRegisterForNextPeriod] = React.useState(false);
   const [currentPeriodNumber, setCurrentPeriodNumber] = React.useState(null);
   const [message, setMessage] = React.useState({ color: "green", text: "" });
+  const [result, setResult] = React.useState("");
 
   const [state, setState] = React.useState({
     analysis: "",
@@ -78,7 +79,6 @@ export default function RegisterIndicator() {
     checked: false,
     numerator: "",
     denominator: "",
-    result: "",
   });
 
   const handleChange = (event) => {
@@ -87,9 +87,21 @@ export default function RegisterIndicator() {
       [event.target.name]: event.target.value,
     });
   };
+  const calculateResult = (event) => {
+    let numerator = event.target.name === "numerator" ? Number.parseFloat(event.target.value) : state.numerator ? state.numerator : 0;
+    let denominator = event.target.name === "denominator" ? Number.parseFloat(event.target.value) : state.denominator ? state.denominator : null;
 
+    if (indicator) {
+      if (indicator.tipo && numerator && denominator) {
+        setResult(numerator / denominator)
+      } else if (!indicator.tipo && numerator) {
+        setResult(numerator)
+      }
+    }
+  }
   const handleCheck = (event) => {
     setState({
+      ...state,
       checked: event.target.checked
     })
   }
@@ -175,8 +187,8 @@ export default function RegisterIndicator() {
     if (
       state.analysis.trim() !== "" &&
       state.numerator.trim() !== "" &&
-      state.denominator.trim() !== "" &&
-      state.result.trim() !== "" &&
+      Number.parseFloat(state.numerator.trim()) > 0 &&
+      (state.denominator.trim() !== "" && Number.parseFloat(state.denominator.trim()) > 0 || !indicator.tipo) &&
       (state.improvement.trim() !== "" || !state.checked)
     ) {
       setLoading(true)
@@ -184,9 +196,9 @@ export default function RegisterIndicator() {
         idIndicador: indicator.idIndicador,
         analisisCualitativo: state.analysis.trim(),
         accionMejora: state.checked ? state.improvement.trim() : "",
-        valor: state.result,
+        valor: result,
         numerador: state.numerator,
-        denominador: state.denominator,
+        denominador: indicator.tipo ? state.denominator : "-",
         periodo: registerForNextPeriod ? currentPeriodNumber + 1 : currentPeriodNumber,
         nuevoPeriodo: registerForNextPeriod,
       }
@@ -209,7 +221,7 @@ export default function RegisterIndicator() {
         })
     }
     else {
-      setMessage({ color: "red", text: "Ingrese todos los datos" })
+      setMessage({ color: "red", text: "Ingrese todos los datos correctamente" })
     }
 
   }
@@ -244,7 +256,7 @@ export default function RegisterIndicator() {
                 loading ?
                   <div className="loader"></div> :
                   indicator && !userIsAllowed ?
-                    <AccessDenied indicatorId={indicator.idIndicador}/> :
+                    <AccessDenied indicatorId={indicator.idIndicador} /> :
                     indicator &&
                     <Grid
                       container
@@ -283,9 +295,11 @@ export default function RegisterIndicator() {
                           margin="normal"
                           required
                           id="analysis"
-                          label="Analísis Cualitativo"
+                          label="Análisis Cualitativo"
                           name="analysis"
                           autoComplete="analysis"
+                          multiline
+                          rowsMax={7}
                           onChange={handleChange}
                           autoFocus
                         />
@@ -305,6 +319,8 @@ export default function RegisterIndicator() {
                           label="Requiere mejora"
                           name="improvement"
                           autoComplete="improvement"
+                          multiline
+                          rowsMax={7}
                           onChange={handleChange}
                           disabled={!state.checked}
                         />
@@ -326,33 +342,38 @@ export default function RegisterIndicator() {
                               type="number"
                               name="numerator"
                               autoComplete="numerator"
-                              onChange={handleChange}
+                              onChange={(event) => { handleChange(event); calculateResult(event); }}
                             />
                           </Grid>
+                          {
+                            indicator.tipo &&
+                            <Grid item xs={3}>
+                              <TextField
+                                variant="outlined"
+                                margin="normal"
+                                required
+                                id="denominator"
+                                type="number"
+                                label="Denominador"
+                                name="denominator"
+                                autoComplete="denominator"
+                                onChange={(event) => { handleChange(event); calculateResult(event); }}
+                              />
+                            </Grid>
+                          }
                           <Grid item xs={3}>
                             <TextField
                               variant="outlined"
                               margin="normal"
                               required
-                              id="denominator"
-                              type="number"
-                              label="Denominador"
-                              name="denominator"
-                              autoComplete="denominator"
-                              onChange={handleChange}
-                            />
-                          </Grid>
-                          <Grid item xs={3}>
-                            <TextField
-                              variant="outlined"
-                              margin="normal"
-                              required
+                              disabled
                               id="result"
                               type="number"
                               label="Resultado"
                               name="result"
                               autoComplete="result"
                               onChange={handleChange}
+                              value={result}
                             />
                           </Grid>
                         </Grid>

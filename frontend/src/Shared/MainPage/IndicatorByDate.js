@@ -112,7 +112,7 @@ export default function IndicatorByDate(props) {
               currentRecords[0] ?
                 currentRecords.map((cr, j) => {
                   return <Table className={classes.table} size="small">
-                    <TableBody style ={{border: "solid #d2d2d2 1px"}}>
+                    <TableBody className="registry-by-date">
                       {
                         Object.keys(cr).map((k, i) => {
                           if (k !== "periodo") {
