@@ -85,7 +85,7 @@ export default function IndicatorInfo(props) {
   }
 
   const handleUnitChange = (newUnit) => {
-    props.setIndicatorId(null)
+    props.setIndicator(null)
     let currentUnit = units.find(u => u.nombre === newUnit);
     if (currentUnit) {
       setUnit(currentUnit)
@@ -105,7 +105,7 @@ export default function IndicatorInfo(props) {
     }
   }
   const handleIndicatorChange = (newIndicator) => {
-    props.setIndicatorId(null)
+    props.setIndicator(null)
     let currentIndicator = indicators.find(u => u.nombre === newIndicator);
     if (currentIndicator) {
       setIndicator(currentIndicator)
@@ -129,7 +129,7 @@ export default function IndicatorInfo(props) {
           delete responseJson.indicador.periodoActual
           delete responseJson.indicador.unidad
           setIndicator(responseJson.indicador)
-          props.setIndicatorId(responseJson.indicador.idIndicador)
+          props.setIndicator(responseJson.indicador)
         }
       })
   }
@@ -170,7 +170,7 @@ export default function IndicatorInfo(props) {
                           onChange={handleChange}
                           multiline = {k !== "meta"}
                         /> :
-                        indicator[k]}
+                      <span>{indicator[k]}</span>}
                     </TableCell>
                   </TableRow>
                 ))}
