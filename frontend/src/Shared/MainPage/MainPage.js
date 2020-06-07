@@ -27,14 +27,14 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: 'column',
   },
   fixedHeight: {
-    height: theme.spacing(50),
+    height: theme.spacing(60),
   },
 }));
 
 export default function MainPage(props) {
   const classes = useStyles();
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
-  const [indicatorId, setIndicatorId] = React.useState(null)
+  const [indicator, setIndicator] = React.useState(null)
 
   return (
     <main className={classes.content}>
@@ -44,24 +44,24 @@ export default function MainPage(props) {
           {/* Información del Indicador */}
           <Grid item xs={12}>
             <Paper className={classes.paper}>
-              <IndicatorInfo admin={props.admin} setIndicatorId={setIndicatorId} />
+              <IndicatorInfo admin={props.admin} setIndicator={setIndicator} />
             </Paper>
           </Grid>
           {/* Chart */}
           {
-            indicatorId &&
+            indicator &&
             < Grid item xs={12}>
               <Paper className={fixedHeightPaper}>
-                <Chart indicatorId={indicatorId}  />
+                <Chart indicator={indicator}  />
               </Paper>
             </Grid>
           }
           {/* Indicador Por Fecha */}
           {
-            indicatorId &&
+            indicator &&
             < Grid item xs={12}>
               <Paper className={classes.paper}>
-                <IndicatorByDate indicatorId={indicatorId} />
+                <IndicatorByDate indicatorId={indicator.idIndicador} />
               </Paper>
             </Grid>
           }
