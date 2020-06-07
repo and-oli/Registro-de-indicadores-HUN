@@ -1,11 +1,8 @@
 import React from 'react';
-import { makeStyles, TableRow } from '@material-ui/core';
+import { makeStyles, Table, TableBody, TableRow, TableCell } from '@material-ui/core';
 import Container from '@material-ui/core/Container';
 import Paper from '@material-ui/core/Paper';
 import Title from '../../Shared/Title';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
 import Button from '@material-ui/core/Button';
 import NewUser from './NewUser';
 import EditIcon from '@material-ui/icons/Edit';
@@ -18,14 +15,12 @@ const useStyles = makeStyles((theme) => ({
     height: '100vh',
     overflow: 'auto',
   },
-  thead: {
-    fontWeight: "bold",
-  },
   cellContent: {
     "&:hover": {
       cursor: 'pointer',
       textDecoration: 'underline'
-    }
+    },
+    display: "block",
   },
   container: {
     paddingTop: theme.spacing(4),
@@ -33,9 +28,16 @@ const useStyles = makeStyles((theme) => ({
   },
   paper: {
     padding: theme.spacing(2),
-    display: 'flex',
-    overflow: 'auto',
-    flexDirection: 'column',
+  },
+  thead: {
+    fontWeight: "bold",
+    paddingLeft: "20px",
+    textAlign: "center",
+    width: "20%",
+  },
+  tcell: {
+    textAlign: "center",
+    overflowWrap: "break-word",
   },
   submit: {
     margin: theme.spacing(3, 0, 2),
@@ -71,6 +73,7 @@ export default function UsersInfo() {
   const [editUserModalOpen, setEditUserModalOpen] = React.useState(false);
   const [currentUserId, setCurrentUserId] = React.useState(null);
   const [currentUserPermissions, setCurrentUserPermissions] = React.useState([]);
+  const [currentUserAccesses, setCurrentUserAccesses] = React.useState([]);
   const [loading, setLoading] = React.useState(false);
 
   const handleOpen = () => {
@@ -81,7 +84,7 @@ export default function UsersInfo() {
     setOpen(false);
   };
 
-  const handleEditUserModalOpen = (open, userId, indicators, units) => {
+  const handleEditUserModalOpen = (open, userId, indicators, units, accesses) => {
     if (open) {
       let myCurrentUserPermissions = indicators.map(ind => {
         return {
@@ -99,20 +102,21 @@ export default function UsersInfo() {
       });
       setCurrentUserId(userId)
       setCurrentUserPermissions(myCurrentUserPermissions)
+      setCurrentUserAccesses(accesses)
     }
     setEditUserModalOpen(open);
   };
 
 
-  const goTo = (ind) => {
-    window.location = `/?indicator=${ind.idIndicador}`
+  const goTo = (idIndicador) => {
+    window.location = `/?indicator=${idIndicador}`
   }
   return (
     <main className={classes.content}>
       <div className={classes.appBarSpacer} />
       <Container maxWidth="lg" className={classes.container}>
         <React.Fragment>
-          <Paper>
+          <Paper className={classes.paper}>
             <Title>Información de usuarios</Title>
             <Button
               type="submit"
@@ -127,37 +131,52 @@ export default function UsersInfo() {
               loading ?
                 <div className="loader"></div> :
                 users.map((u, i) => (
-                  <div key={i} style={{ marginTop: "20px" }}>
-                    <Table size="small">
-                      <TableBody className="user-table" >
-                        <TableRow>
+                  <Paper className="user-info-paper" key={i}>
+                    <Table className="user-info-table">
+                      <TableBody>
+                        <TableRow className="user-info-content">
                           <TableCell className={classes.thead}>Usuario</TableCell>
-                          <TableCell>
+                          <TableCell className={classes.tcell}>
                             {u.username}
                           </TableCell>
                         </TableRow>
-                        <TableRow>
+
+                        <TableRow className="user-info-content">
                           <TableCell className={classes.thead}>Nombre</TableCell>
-                          <TableCell>
+                          <TableCell className={classes.tcell}>
                             {u.nombre + " " + u.apellidos}
                           </TableCell>
                         </TableRow>
-                        <TableRow>
+                        <TableRow className="user-info-content">
                           <TableCell className={classes.thead}>Unidades</TableCell>
-                          <TableCell>
+                          <TableCell className={classes.tcell}>
                             {u.unidades.map(und => und.nombreUnidad).join(", ")}
                           </TableCell>
                         </TableRow>
-                        <TableRow>
+                        <TableRow className="user-info-content ">
                           <TableCell className={classes.thead}>Indicadores</TableCell>
-                          <TableCell>
+                          <TableCell className={classes.tcell}>
                             {u.indicadores.map((ind, j) =>
                               <span
                                 key={j}
                                 className={classes.cellContent}
-                                onClick={() => goTo(ind)}
+                                onClick={() => goTo(ind.idIndicador)}
                               >
-                                {ind.nombreIndicador + ", "}
+                                {ind.nombreIndicador}
+                              </span>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                        <TableRow className="user-info-content user-info-table">
+                          <TableCell className={classes.thead}>Accesos</TableCell>
+                          <TableCell className={classes.tcell}>
+                            {u.accesos.map((acc, j) =>
+                              <span
+                                key={j}
+                                className={classes.cellContent}
+                                onClick={() => goTo(acc.idIndicadorDelAcceso)}
+                              >
+                                {acc.nombreIndicadorDelAcceso}
                               </span>
                             )}
                           </TableCell>
@@ -166,10 +185,11 @@ export default function UsersInfo() {
                     </Table>
                     <EditIcon
                       className="edit-user-icon"
-                      onClick={() => { handleEditUserModalOpen(true, u.idUsuario, u.indicadores, u.unidades) }}
+                      onClick={() => { handleEditUserModalOpen(true, u.idUsuario, u.indicadores, u.unidades, u.accesos) }}
                     />
-                  </div>
-                ))}
+                  </Paper>
+                ))
+            }
           </Paper>
         </React.Fragment>
       </Container>
@@ -178,7 +198,9 @@ export default function UsersInfo() {
         open={editUserModalOpen}
         handleEditUserModalOpen={handleEditUserModalOpen}
         currentUserId={currentUserId}
-        currentUserPermissions={currentUserPermissions} />
+        currentUserPermissions={currentUserPermissions}
+        currentUserAccesses={currentUserAccesses}
+      />
     </main>
   );
 }

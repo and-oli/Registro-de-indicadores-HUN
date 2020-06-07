@@ -159,7 +159,6 @@ export default function CreateIndicador() {
     });
   };
   const handleTypeChange = (e) => {
-    console.log(e.target.checked)
     setIndicatorType(e.target.checked)
   }
   const handleClick = (event) => {

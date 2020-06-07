@@ -11,17 +11,35 @@ module.exports = {
     },
 
     postAccess: async function (dbCon, access) {
-        const {idUsuario, 
-            idIndicador, 
-            idSolicitud, 
+        const { idUsuario,
+            idIndicador,
+            idSolicitud,
             fechaInicio,
-            fechaFin, 
+            fechaFin,
         } = access;
         await requestService.updateRequest(dbCon, idSolicitud, true)
         const result = await dbCon.query`
             insert into ACCESOS (idUsuario, idIndicador, idSolicitud,fechaInicio,fechaFin)
             values (${idUsuario},${idIndicador},${idSolicitud},${fechaInicio},${fechaFin})`;
         return result.rowsAffected > 0;
+    },
+
+    removeMultipleAccesses: async function (dbCon, data) {
+        if (data.length > 0) {
+            let conditionList = ""
+            for (let i = 0; i < data.length; i++) {
+                conditionList += `( idAcceso = ${data[i]} )`
+                if (i < data.length - 1) {
+                    conditionList += "OR "
+                }
+            }
+            const result = (await dbCon.request()
+                .query(`
+        delete from ACCESOS 
+        where ${conditionList}`));
+            return result.rowsAffected > 0
+        }
+        return true
     },
 
 }

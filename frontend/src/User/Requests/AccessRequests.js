@@ -7,10 +7,6 @@ import Request from './Request';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
-import TreeView from '@material-ui/lab/TreeView';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import ChevronRightIcon from '@material-ui/icons/ChevronRight';
-import TreeItem from '@material-ui/lab/TreeItem';
 
 const useStyles = makeStyles((theme) => ({
   appBarSpacer: theme.mixins.toolbar,
@@ -43,19 +39,17 @@ export default function AccessRequests() {
         headers: {
           'x-access-token': localStorage.getItem("HUNToken")
         },
-      }).then((response) =>{status = response.status; return response.json();} )
+      }).then((response) => { status = response.status; return response.json(); })
         .then((responseJson) => {
-          setLoading(false)
           if (responseJson.success) {
             setRequests(responseJson.solicitudes);
-          } else if(status === 403){
+          } else if (status === 403) {
             localStorage.removeItem("HUNToken");
-            window.location.reload(); 
+            window.location.reload();
           }
         })
     }, []
   );
-  const [loading, setLoading] = React.useState(false);
   const [requests, setRequests] = React.useState([]);
   const classes = useStyles();
   return (
@@ -70,12 +64,7 @@ export default function AccessRequests() {
                 {requests.map((row, i) => (
                   <TableRow key={row.idSolicitud}>
                     <TableCell>
-                      <TreeView
-                        defaultCollapseIcon={<ExpandMoreIcon />}
-                        defaultExpandIcon={<ChevronRightIcon />}
-                      >
-                        <TreeItem nodeId={`${row.idSolicitud}`} label={`Solicitud ${i+1}`} children={<Request label={`Solicitud ${i+1}`} request={row} />} />
-                      </TreeView>
+                      <Request label={`Solicitud ${i + 1}`} request={row} />
                     </TableCell>
                   </TableRow>
                 ))}

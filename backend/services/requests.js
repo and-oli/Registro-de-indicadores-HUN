@@ -2,10 +2,14 @@ module.exports = {
 
     getRequestsByUser: async function (dbCon, idUsuario) {
         const result = await dbCon.query`
-            select *  from SOLICITUDES
-            inner join INDICADORES on INDICADORES.idIndicador = SOLICITUDES.idIndicador
-            inner join ESTADOS on ESTADOS.idEstado = SOLICITUDES.idEstado
-            where idSolicitante = ${idUsuario}
+        select INDICADORES.nombre as indicador, UNIDADES.nombre as unidad, SOLICITUDES.fecha as fechaSolicitud,
+        ESTADOS.nombre as estado,  accesos.fechaInicio as inicioAcceso, accesos.fechaFin as finAcceso 
+        from SOLICITUDES
+        inner join INDICADORES on INDICADORES.idIndicador = SOLICITUDES.idIndicador
+        inner join ESTADOS on ESTADOS.idEstado = SOLICITUDES.idEstado
+        inner join UNIDADES on UNIDADES.idUnidad = INDICADORES.idUnidad
+        left join ACCESOS on ACCESOS.idSolicitud = SOLICITUDES.idSolicitud
+        where idSolicitante = ${idUsuario}
         `;
         return result.recordset;
     },
@@ -67,12 +71,14 @@ module.exports = {
                 idSolicitante, 
                 idIndicador, 
                 idEstado, 
+                fecha, 
                 comentario
                 )
             values (
                 ${idSolicitante},
                 ${idIndicador},
                 ${idEstado},
+                ${new Date()},
                 ${comentario}
                 )`;
             return {

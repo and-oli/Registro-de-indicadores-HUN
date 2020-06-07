@@ -96,6 +96,7 @@ export default function UserRequests(props) {
                 <TableRow>
                   <TableCell align="left">Usuario Solicitante</TableCell>
                   <TableCell align="left">Indicador Solicitado</TableCell>
+                  <TableCell align="left">Comentario</TableCell>
                   <TableCell align="left">Acciones</TableCell>
                 </TableRow>
               </TableHead>
@@ -104,6 +105,7 @@ export default function UserRequests(props) {
                   <TableRow key={row.idSolicitud}>
                     <TableCell align="left">{`${row.nombre[0]} ${row.apellidos}`}</TableCell>
                     <TableCell align="left">{row.nombre[1]}</TableCell>
+                    <TableCell align="left">{row.comentario}</TableCell>
                     <TableCell align="left">
                       <Tooltip title="Habilitar acceso">
                         <IconButton

@@ -28,14 +28,19 @@
   visibility: initial;
   cursor: pointer;
 }
-.user-table{
-  display: inline-block!important;
+.user-info-paper{
+  width: 50%;
+  margin: 20px auto;
 }
-
-.MuiTable-root {
-  display: inline!important;
-  border-spacing: 0;
-  border-collapse: collapse;
+.user-info-content{
+  text-align: left;
+  padding-top: 20px;
+  position: relative;
+}
+.user-info-table{
+  table-layout: fixed;
+  padding-top: 20px;
+  position: relative;
 }
 div:hover > .edit-user-icon  {
   visibility: initial;
@@ -47,6 +52,8 @@ div:hover > .edit-user-icon  {
   margin: 10px auto;
   width: 70%;
 }
+
+
 /* Safari */
 @-webkit-keyframes spin {
   0% { -webkit-transform: rotate(0deg); }

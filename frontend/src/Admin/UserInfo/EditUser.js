@@ -6,6 +6,7 @@ import Backdrop from '@material-ui/core/Backdrop';
 import { useSpring, animated } from 'react-spring/web.cjs'; // web.cjs is required for IE 11 support
 import Title from '../../Shared/Title';
 import PermissionsConfig from './PermissionsConfig';
+import AccessesConfig from './AccessesConfig';
 
 const useStyles = makeStyles((theme) => ({
     modal: {
@@ -61,9 +62,13 @@ export default function EditUser(props) {
     const [message, setMessage] = React.useState({ color: "green", text: "" });
     const [loading, setLoading] = React.useState(false);
     const [done, setDone] = React.useState(false);
+    const [accessesToDelete, setAccessesToDelete] = React.useState([]);
 
-
-
+    const deleteAccess = (access) => {
+        let newAccesses = [...accessesToDelete]
+        newAccesses.push(access)
+        setAccessesToDelete(newAccesses)
+    }
 
     const accept = (selectedIndicators) => {
         setLoading(true)
@@ -135,8 +140,23 @@ export default function EditUser(props) {
                                                 .then((responseJson) => {
                                                     setLoading(false)
                                                     if (responseJson.success) {
-                                                        setMessage({ color: "green", text: "Permisos modificados, refresque la aplicación" })
-                                                        setDone(true)
+                                                        fetch("/accesses/removeMultipleAccesses/", {
+                                                            method: 'POST',
+                                                            headers: {
+                                                                'Accept': 'application/json',
+                                                                'Content-Type': 'application/json',
+                                                            },
+                                                            body: JSON.stringify({ list: accessesToDelete.map(a => a.idAcceso) })
+                                                        }).then((response) => response.json())
+                                                            .then((responseJson) => {
+                                                                setLoading(false)
+                                                                if (responseJson.success) {
+                                                                    setMessage({ color: "green", text: "Permisos modificados, refresque la aplicación" })
+                                                                    setDone(true)
+                                                                } else {
+                                                                    setMessage({ color: "red", text: responseJson.message })
+                                                                }
+                                                            })
                                                     } else {
                                                         setMessage({ color: "red", text: responseJson.message })
                                                     }
@@ -176,10 +196,14 @@ export default function EditUser(props) {
                     loading ?
                         <div className="loader"></div> :
                         <div className={classes.paper}>
-                            <Title>Nuevo Usuario</Title>
+                            <Title>Editar permisos y accesos</Title>
                             {
-                                !done &&
-                                <PermissionsConfig accept={accept} currentUserPermissions={props.currentUserPermissions} />
+                                !done && (
+                                    <div>
+                                        <AccessesConfig deleteAccess={deleteAccess} currentUserAccesses={props.currentUserAccesses} />
+                                        <PermissionsConfig accept={accept} currentUserPermissions={props.currentUserPermissions} />
+                                    </div>
+                                )
                             }
                             <div style={{ color: message.color }}>
                                 {message.text}

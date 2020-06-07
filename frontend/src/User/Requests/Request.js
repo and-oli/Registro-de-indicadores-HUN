@@ -39,17 +39,33 @@ export default function Request(props) {
   return (
       <Container maxWidth="lg" className={classes.container}>
         <React.Fragment>
-          <Paper>
+          <Paper className={classes.paper}>
             <Title>{props.label}</Title>
             <Table size="small">
               <TableBody>
                 <TableRow>
                   <TableCell className={classes.thead} align="left">Indicador</TableCell>
-                  <TableCell className={classes.tcell} align="left">{props.request.nombre[0]}</TableCell>
+                  <TableCell className={classes.tcell} align="left">{props.request.indicador}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className={classes.thead} align="left">unidad</TableCell>
+                  <TableCell className={classes.tcell} align="left">{props.request.unidad}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className={classes.thead} align="left">Estado</TableCell>
-                  <TableCell className={classes.tcell} align="left">{props.request.nombre[1]}</TableCell>
+                  <TableCell className={classes.tcell} align="left">{props.request.estado}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className={classes.thead} align="left">Fecha de solicitud</TableCell>
+                  <TableCell className={classes.tcell} align="left">{props.request.fechaSolicitud}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className={classes.thead} align="left">Fecha de inicio del acceso</TableCell>
+                  <TableCell className={classes.tcell} align="left">{props.request.inicioAcceso|| "No aplica"}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className={classes.thead} align="left">Fecha de fin del acceso</TableCell>
+                  <TableCell className={classes.tcell} align="left">{props.request.finAcceso|| "No aplica"}</TableCell>
                 </TableRow>
               </TableBody>
             </Table>

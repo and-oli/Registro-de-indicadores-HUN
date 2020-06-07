@@ -60,8 +60,8 @@ module.exports = {
         const currentTime = new Date().getTime() // El servidor en heroku estará en la hora 0 GMT, Colombia está en -5GMT
         const validAccess = acceses.find(a =>
             moment(a.fechaInicio).valueOf() <= currentTime &&
-            moment(a.fechaFin).valueOf() >= currentTime
-            )
+            moment(a.fechaFin).valueOf() >= (currentTime - 24 * 3600 * 1000)
+        )
 
         if (validAccess) {
             return validAccess

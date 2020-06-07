@@ -188,7 +188,7 @@ export default function RegisterIndicator() {
       state.analysis.trim() !== "" &&
       state.numerator.trim() !== "" &&
       Number.parseFloat(state.numerator.trim()) > 0 &&
-      (state.denominator.trim() !== "" && Number.parseFloat(state.denominator.trim()) > 0 || !indicator.tipo) &&
+      ((state.denominator.trim() !== "" && Number.parseFloat(state.denominator.trim()) > 0) || !indicator.tipo) &&
       (state.improvement.trim() !== "" || !state.checked)
     ) {
       setLoading(true)

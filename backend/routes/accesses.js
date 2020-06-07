@@ -46,6 +46,24 @@ function accesses(dbCon) {
 
         }
     });
+
+     /**
+     * Elimina una lista de accesos de la tabla ACCESOS
+     * Body: {list: [idAcceso]}
+     */
+    router.post('/removeMultipleAccesses', async function (req, res) {
+        try {
+            const result = await accessService.removeMultipleAccesses(await dbCon, req.body.list);
+            if (result) {
+                return res.json({ success: true, message: "Accesos eliminados exitosamente" });
+            }
+            return res.json({ success: false, message: "Ocurrió un error" });
+
+        } catch (error) {
+            console.error(error);
+            return res.json({ success: false, message: "Ocurrió un error" });
+        }
+    });
     return router
 }
 

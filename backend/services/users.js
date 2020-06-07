@@ -1,25 +1,37 @@
 const bcrypt = require("bcrypt");
 const permissionsService = require("./permissions")
+const moment = require("moment")
 
 module.exports = {
 
     getUsers: async function (dbCon) {
-        const result = (await dbCon.request()
+        let result = (await dbCon.request()
             .query('select * from usuarios')).recordset;
         return result;
     },
 
     getEmployeesFull: async function (dbCon) {
 
-        const result = (await dbCon.query`
+        let result = (await dbCon.query`
         select usuarios.*, indicadores.idIndicador as idIndicador,indicadores.nombre as nombreIndicador, 
         indicadores.idUnidad as idUnidadIndicador, unidades.nombre as nombreUnidad, unidades.idUnidad as idUnidad
+        ,x.nombreIndicadorDelAcceso, x.fechaInicioAccesoIndicador,x.fechaFinAccesoIndicador, idAcceso,
+        x.nombreUnidadDelAccesoAlIndicador, x.idIndicadorDelAcceso
         from usuarios 
         inner join roles on usuarios.idRol = roles.idRol
         left join  usuarios_unidades on usuarios.idUsuario = usuarios_unidades.idUsuario 
         left join  usuarios_indicadores on usuarios.idUsuario = usuarios_indicadores.idUsuario
         left join unidades on usuarios_unidades.idUnidad = unidades.idUnidad
         left join indicadores on usuarios_indicadores.idIndicador = indicadores.idIndicador
+        left join 
+            (select  accesos.idUsuario as idUsuario, indicadores.nombre as nombreIndicadorDelAcceso, 
+            indicadores.idIndicador as idIndicadorDelAcceso, ACCESOS.idAcceso,
+            ACCESOS.fechaInicio as fechaInicioAccesoIndicador, ACCESOS.fechaFin as fechaFinAccesoIndicador, 
+            UNIDADES.nombre as nombreUnidadDelAccesoAlIndicador
+            from ACCESOS inner join indicadores on ACCESOS.idIndicador = INDICADORES.idIndicador 
+            inner join UNIDADES on INDICADORES.idUnidad = UNIDADES.idUnidad
+            ) as x 
+        on x.idUsuario = USUARIOS.idUsuario
         where roles.nombre = 'EMPLEADO'
     `).recordset;
         let users = {}
@@ -35,25 +47,48 @@ module.exports = {
                     nombreUnidad: element.nombreUnidad,
                     idUnidad: element.idUnidad
                 }] : [];
+                let firstAccess = []
+                if (element.idAcceso && accessHasValidDate(element)) {
+                    firstAccess = [{
+                        nombreIndicadorDelAcceso: element.nombreIndicadorDelAcceso,
+                        nombreUnidadDelAccesoAlIndicador: element.nombreUnidadDelAccesoAlIndicador,
+                        fechaInicioAccesoIndicador: element.fechaInicioAccesoIndicador,
+                        fechaFinAccesoIndicador: element.fechaFinAccesoIndicador,
+                        idAcceso: element.idAcceso,
+                        idIndicadorDelAcceso: element.idIndicadorDelAcceso,
+                    }];
+                }
+
                 users[element.idUsuario] = {
                     username: element.username,
                     nombre: element.nombre,
                     apellidos: element.apellidos,
                     indicadores: firstIndicator,
                     unidades: firstUnit,
+                    accesos: firstAccess,
                 };
             } else {
-                if (element.idIndicador && !users[element.idUsuario].indicadores.find(ind => ind.idIndicador === element.idIndicador)) {
-                    users[element.idUsuario].indicadores.push({ 
-                        idIndicador: element.idIndicador, 
+                if (element.idIndicador && !users[element.idUsuario].indicadores.findIndex(ind => ind.idIndicador === element.idIndicador)) {
+                    users[element.idUsuario].indicadores.push({
+                        idIndicador: element.idIndicador,
                         nombreIndicador: element.nombreIndicador,
                         idUnidad: element.idUnidadIndicador,
-                     })
+                    })
                 }
-                if (element.nombreUnidad && users[element.idUsuario].unidades.find(und => und.nombreUnidad === element.nombreUnidad) === -1) {
+                if (element.nombreUnidad && users[element.idUsuario].unidades.findIndex(und => und.nombreUnidad === element.nombreUnidad) === -1) {
                     users[element.idUsuario].unidades.push({
                         nombreUnidad: element.nombreUnidad,
                         idUnidad: element.idUnidad
+                    })
+                }
+                if (element.idAcceso && users[element.idUsuario].accesos.findIndex(acc => acc.idAcceso === element.idAcceso) === -1 && accessHasValidDate(element)) {
+                    users[element.idUsuario].accesos.push({
+                        nombreIndicadorDelAcceso: element.nombreIndicadorDelAcceso,
+                        nombreUnidadDelAccesoAlIndicador: element.nombreUnidadDelAccesoAlIndicador,
+                        fechaInicioAccesoIndicador: element.fechaInicioAccesoIndicador,
+                        fechaFinAccesoIndicador: element.fechaFinAccesoIndicador,
+                        idAcceso: element.idAcceso,
+                        idIndicadorDelAcceso: element.idIndicadorDelAcceso,
                     })
                 }
             }
@@ -108,9 +143,11 @@ module.exports = {
             console.error("Ocurrió un error al agregar el usuario")
             return false
         }
-
-
-
     },
+}
 
+function accessHasValidDate(element) {
+    const currentTime = new Date().getTime() // El servidor en heroku estará en la hora 0 GMT, Colombia está en -5GMT
+    return moment(element.fechaInicioAccesoIndicador).valueOf() <= currentTime &&
+        moment(element.fechaFinAccesoIndicador).valueOf() >= (currentTime - 24 * 3600 * 1000)
 }
