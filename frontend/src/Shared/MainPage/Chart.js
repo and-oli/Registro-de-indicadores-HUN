@@ -110,7 +110,7 @@ export default function Chart(props) {
             >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="month" stroke={theme.palette.text.secondary} padding={{ left: 30, right: 30 }} height={60} tick={<CustomizedAxisTick/>}/>
-              <YAxis stroke={theme.palette.text.secondary} domain={['auto', 'auto']}>
+              <YAxis stroke={theme.palette.text.secondary} domain={[dataMin => (dataMin < 0 ? Math.floor(dataMin*1.1) : 0), dataMax => (dataMax > props.indicator.meta ? Math.ceil(dataMax*1.1) : Math.ceil(props.indicator.meta*1.1))]}>
                 <Label
                   angle={270}
                   position="left"
