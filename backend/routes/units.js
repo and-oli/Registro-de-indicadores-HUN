@@ -27,10 +27,26 @@ function units(dbCon) {
                 }
                 const result = await unitService.postUnit(await dbCon, req.body);
                 if (result) {
-                    return res.json({ success: true, message: "Unidad añadida exitosamente" });
+                    return res.json({ success: true, message: "Unidad añadida exitosamente, refresque la aplicación." });
                 } else {
                     return res.json({ success: false, message: "Ocurrió un error" });
 
+                }
+
+            } catch (error) {
+                console.error(error);
+                return res.json({ success: false, message: "Ocurrió un error" });
+            }
+
+        }
+    });
+    router.delete('/:unitId', (req, res, next) => token.checkTokenAdmin(req, res, next, true), async function (req, res) {
+        if (!res.headersSent) {
+            try {
+                if (await unitService.deleteUnit(await dbCon, req.params.unitId)) {
+                    return res.json({ success: true, message: "Unidad eliminada exitosamente, refresque la aplicación." });
+                } else {
+                    return res.json({ success: false, message: "Ocurrió un error" });
                 }
 
             } catch (error) {

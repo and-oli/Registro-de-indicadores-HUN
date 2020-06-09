@@ -52,7 +52,25 @@ div:hover > .edit-user-icon  {
   margin: 10px auto;
   width: 70%;
 }
+.delete-unit{
+  color:red;
+  visibility: hidden;
+  margin-left: 45px;
+  bottom: 10px;
+  position: absolute;
+}
+.new-unit{
+  color:#3f51b5;
+  visibility: hidden;
+  margin-left: 10px;
+  bottom: 10px;
+  position: absolute;
+}
 
+div:hover > .delete-unit, div:hover> .new-unit  {
+  visibility: initial;
+  cursor: pointer;
+}
 
 /* Safari */
 @-webkit-keyframes spin {

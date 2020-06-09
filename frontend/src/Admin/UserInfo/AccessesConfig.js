@@ -18,7 +18,7 @@ export default function PermissionsConfig(props) {
     return (
         <div style={{ border: "solid #d2d2d2 1px", borderRadius: "5px", padding: "10px" }}>
             <span style={{ color: "#3f51b5" }}>
-                Accesos temporales del usuario del usuario
+                Accesos temporales del usuario
             </span>
             {
                 currentUserAccesses.map((acc, i) => (

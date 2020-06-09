@@ -18,6 +18,11 @@ module.exports = {
         insert into UNIDADES (nombre)
         values (${unit.nombre})`;
         return result.rowsAffected > 0
+    },
+    deleteUnit: async function (dbCon, unitId) {
+        const result = await dbCon.query`
+        delete from  UNIDADES
+        where idUnidad = (${unitId})`;
+        return result.rowsAffected > 0
     }
-
 }

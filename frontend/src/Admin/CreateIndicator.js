@@ -9,6 +9,10 @@ import moment from 'moment';
 import Snackbar from '@material-ui/core/Snackbar';
 import MuiAlert from '@material-ui/lab/Alert';
 import Checkbox from '@material-ui/core/Checkbox';
+import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
+import HighlightOffIcon from '@material-ui/icons/HighlightOff';
+import NewUnitModal from './NewUnitModal';
+import DeleteUnitModal from './DeleteUnitModal';
 
 function Alert(props) {
   return <MuiAlert elevation={6} variant="filled" {...props} />;
@@ -101,6 +105,8 @@ export default function CreateIndicador() {
   const [message, setMessage] = React.useState("");
   const [open, setOpen] = React.useState(false);
   const [indicatorType, setIndicatorType] = React.useState(false);
+  const [newUnitModalVisible, setNewUnitModalVisible] = React.useState(false);
+  const [deleteUnitModalVisible, setDeleteUnitModalVisible] = React.useState(false);
   const [state, setState] = React.useState({
     name: "",
     definition: "",
@@ -173,7 +179,7 @@ export default function CreateIndicador() {
     } else {
       fetch("/indicators/", {
         method: "POST",
-        body: JSON.stringify({...state, indicatorType}),
+        body: JSON.stringify({ ...state, indicatorType }),
         headers: {
           'x-access-token': localStorage.getItem("HUNToken"),
           'Content-Type': 'application/json',
@@ -207,26 +213,39 @@ export default function CreateIndicador() {
             <Title>Nuevo Indicador</Title>
 
             <form className={classes.root} noValidate autoComplete="off">
-              <TextField
-                margin="normal"
-                required
-                id="idUnit"
-                label="Unidad"
-                name="idUnit"
-                autoComplete="idUnit"
-                onChange={handleChange}
-                select
-                value={state.idUnit}
-                SelectProps={{ native: true }}
-                autoFocus
-              >
-                <option aria-label="None" value="" />
+              <div style={{ position: "relative" }}>
+                <TextField
+                  margin="normal"
+                  required
+                  id="idUnit"
+                  label="Unidad"
+                  name="idUnit"
+                  autoComplete="idUnit"
+                  onChange={handleChange}
+                  select
+                  value={state.idUnit}
+                  SelectProps={{ native: true }}
+                  autoFocus
+                >
+                  <option aria-label="None" value="" />
+                  {
+                    units.map((option) => (
+                      <option key={option.nombre} value={option.idUnidad}>{option.nombre}</option>
+                    ))
+                  }
+                </TextField>
+                <AddCircleOutlineIcon
+                  className="new-unit"
+                  onClick={() => setNewUnitModalVisible(true)}
+                />
                 {
-                  units.map((option) => (
-                    <option key={option.nombre} value={option.idUnidad}>{option.nombre}</option>
-                  ))
+                  state.idUnit &&
+                  <HighlightOffIcon
+                  className="delete-unit"
+                  onClick={() => setDeleteUnitModalVisible(true)}
+                  />
                 }
-              </TextField>
+              </div>
               <TextField
                 variant="outlined"
                 margin="normal"
@@ -400,6 +419,8 @@ export default function CreateIndicador() {
           {message}
         </Alert>
       </Snackbar>
+      <NewUnitModal open={newUnitModalVisible} close={()=>setNewUnitModalVisible(false)}/>
+      <DeleteUnitModal open={deleteUnitModalVisible} close={()=>setDeleteUnitModalVisible(false)} unitId={state.idUnit}/>
     </main>
   );
 }

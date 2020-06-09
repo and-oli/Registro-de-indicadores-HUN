@@ -153,7 +153,7 @@ export default function IndicatorInfo(props) {
             <Table size="small">
               <TableBody>
                 {Object.keys(indicator).map((k, i) => (
-                  (k !== "periodicidad" || !editing)&& k!=="idIndicador" &&
+                  (k !== "periodicidad" || !editing)&& k!=="idIndicador" && k!=="tipo" &&
                   <TableRow key={i}>
                     <TableCell className={classes.thead}>{camelToText(k)}</TableCell>
                     <TableCell>
