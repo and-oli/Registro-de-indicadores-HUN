@@ -120,7 +120,6 @@ module.exports = {
                             set ultimoDelPeriodo = 0
                             where periodo = ${periodo}
                             `;
-
             // Insertar el registro
             const result2 = await dbCon.query`
             insert into REGISTROS (

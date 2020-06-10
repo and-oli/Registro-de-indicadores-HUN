@@ -198,7 +198,7 @@ export default function RegisterIndicator() {
         accionMejora: state.checked ? state.improvement.trim() : "",
         valor: result,
         numerador: state.numerator,
-        denominador: indicator.tipo ? state.denominator : "-",
+        denominador: indicator.tipo ? state.denominator : 0,
         periodo: registerForNextPeriod ? currentPeriodNumber + 1 : currentPeriodNumber,
         nuevoPeriodo: registerForNextPeriod,
       }
@@ -296,6 +296,7 @@ export default function RegisterIndicator() {
                           required
                           id="analysis"
                           label="Análisis Cualitativo"
+                          value={state.analysis}
                           name="analysis"
                           autoComplete="analysis"
                           multiline
@@ -320,6 +321,7 @@ export default function RegisterIndicator() {
                           name="improvement"
                           autoComplete="improvement"
                           multiline
+                          value={state.improvement}
                           rowsMax={7}
                           onChange={handleChange}
                           disabled={!state.checked}
@@ -340,6 +342,7 @@ export default function RegisterIndicator() {
                               id="numerator"
                               label="Numerador"
                               type="number"
+                              value={state.numerator}
                               name="numerator"
                               autoComplete="numerator"
                               onChange={(event) => { handleChange(event); calculateResult(event); }}
@@ -354,6 +357,7 @@ export default function RegisterIndicator() {
                                 required
                                 id="denominator"
                                 type="number"
+                                value={state.denominator}
                                 label="Denominador"
                                 name="denominator"
                                 autoComplete="denominator"

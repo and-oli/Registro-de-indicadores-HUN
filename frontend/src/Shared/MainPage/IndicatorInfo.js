@@ -31,7 +31,7 @@ export default function IndicatorInfo(props) {
       let status;
       let params = (new URL(document.location)).searchParams;
       let indicatorIdParam = params.get('indicator');
-      if (indicatorIdParam){
+      if (indicatorIdParam) {
         fetchIndicator(indicatorIdParam)
       }
       fetch("/units/", {
@@ -39,14 +39,14 @@ export default function IndicatorInfo(props) {
         headers: {
           'x-access-token': localStorage.getItem("HUNToken")
         },
-      }).then((response) =>{status = response.status; return response.json();} )
+      }).then((response) => { status = response.status; return response.json(); })
         .then((responseJson) => {
           setLoading(false)
           if (responseJson.success) {
             setUnits(responseJson.unidades)
-          } else if(status === 403){
+          } else if (status === 403) {
             localStorage.removeItem("HUNToken");
-            window.location.reload(); 
+            window.location.reload();
           }
         })
     }, []
@@ -112,7 +112,7 @@ export default function IndicatorInfo(props) {
       fetchIndicator(currentIndicator.idIndicador)
     }
   }
-  const fetchIndicator = (indicatorId) =>{
+  const fetchIndicator = (indicatorId) => {
     fetch(`/indicators/${indicatorId}`, {
       method: 'GET',
       headers: {
@@ -134,6 +134,7 @@ export default function IndicatorInfo(props) {
       })
   }
 
+
   return (
     <React.Fragment>
       <Title>Información del Indicador</Title>
@@ -153,7 +154,7 @@ export default function IndicatorInfo(props) {
             <Table size="small">
               <TableBody>
                 {Object.keys(indicator).map((k, i) => (
-                  (k !== "periodicidad" || !editing)&& k!=="idIndicador" && k!=="tipo" &&
+                  (k !== "periodicidad" || !editing) && k !== "idIndicador" && k !== "tipo" &&
                   <TableRow key={i}>
                     <TableCell className={classes.thead}>{camelToText(k)}</TableCell>
                     <TableCell>
@@ -161,16 +162,16 @@ export default function IndicatorInfo(props) {
                         <TextField
                           margin="normal"
                           fullWidth
-                          type={k === "meta"? "number": "default"}
+                          type={k === "meta" ? "number" : "default"}
                           id={i}
                           label={camelToText(k)}
                           name={k}
                           value={indicator[k]}
                           autoComplete={k}
                           onChange={handleChange}
-                          multiline = {k !== "meta"}
+                          multiline={k !== "meta"}
                         /> :
-                      <span>{indicator[k]}</span>}
+                        <span>{indicator[k]}</span>}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -179,7 +180,7 @@ export default function IndicatorInfo(props) {
             <Grid container spacing={3}>
               <Grid item xs>
                 {
-                  props.admin ? editing ?
+                  props.admin && editing ?
                     <div>
                       <Button
                         variant="contained"
@@ -194,23 +195,23 @@ export default function IndicatorInfo(props) {
                         onClick={handleClickCancel}
                       > Cancelar </Button>
                     </div> :
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      className={classes.submit}
-                      onClick={handleClickEdit}
-                    > Editar Indicador </Button> :
-                    <span />
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        className={classes.submit}
+                        onClick={handleClickEdit}
+                      > Editar Indicador </Button>
+
                 }
               </Grid>
             </Grid>
           </div>
       }
-      <UpdateIndicatorModal 
-      open ={editModalVisible} 
-      setOpen={setEditModalVisible} 
-      confirmEdit ={confirmEdit}
-      indicator ={indicator}
+      <UpdateIndicatorModal
+        open={editModalVisible}
+        setOpen={setEditModalVisible}
+        confirmEdit={confirmEdit}
+        indicator={indicator}
       />
     </React.Fragment>
   );
