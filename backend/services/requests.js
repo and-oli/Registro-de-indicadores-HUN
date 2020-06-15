@@ -104,5 +104,26 @@ module.exports = {
         return result.recordset;
     },
 
+    getRequestsHistory: async function (dbCon) {
+        const result = await dbCon.query`
+            SELECT 
+                SOLICITUDES.idSolicitud,
+                fechaInicio,
+                fechaFin,
+                USUARIOS.nombre as username, 
+                USUARIOS.apellidos as lastname,
+                INDICADORES.nombre as indicator, 
+                responsableDelIndicador, 
+                comentario,
+                ESTADOS.nombre as estado,
+                fecha 
+            FROM SOLICITUDES 
+            INNER JOIN USUARIOS ON SOLICITUDES.idSolicitante = USUARIOS.idUsuario
+            INNER JOIN INDICADORES ON SOLICITUDES.idIndicador = INDICADORES.idIndicador
+            INNER JOIN ESTADOS ON SOLICITUDES.idEstado = ESTADOS.idEstado
+            LEFT JOIN ACCESOS ON SOLICITUDES.idSolicitud = ACCESOS.idSolicitud
+        `;
+        return result.recordset;
+    },
 
 }
