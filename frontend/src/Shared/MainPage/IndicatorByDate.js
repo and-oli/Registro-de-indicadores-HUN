@@ -175,8 +175,6 @@ export default function IndicatorByDate(props) {
 
   let placedPeriods = new Set();
 
-  console.log(records.length > 0 ? records[0] : "esta en null");
-
   return (
     <React.Fragment>
       {
