@@ -7,6 +7,10 @@ import { TableRow, TableCell } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid';
 import Dropdown from '../Dropdown';
 import TablePagination from '@material-ui/core/TablePagination';
+import { withStyles } from '@material-ui/core/styles';
+import Switch from '@material-ui/core/Switch';
+import Typography from '@material-ui/core/Typography';
+
 
 const mapMonths = {
   "1": "Enero",
@@ -45,6 +49,47 @@ const camelToText = function (camel) {
   return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
+
+const AntSwitch = withStyles((theme) => ({
+  root: {
+    width: 42,
+    height: 26,
+    padding: 0,
+    margin: theme.spacing(1),
+  },
+  switchBase: {
+    padding: 1,
+    color: theme.palette.grey[500],
+    '&$checked': {
+      transform: 'translateX(16px)',
+      color: theme.palette.common.white,
+      '& + $track': {
+        opacity: 1,
+        backgroundColor: theme.palette.primary.main,
+        //borderColor: theme.palette.primary.main,
+        border: 'none',
+      },
+      '&$focusVisible $thumb': {
+        color: theme.palette.primary.main,
+        border: '6px solid #fff',
+      },
+    },
+  },
+  thumb: {
+    width: 24,
+    height: 24,
+    //boxShadow: 'none',
+  },
+  track: {
+    border: `1px solid ${theme.palette.grey[400]}`,
+    borderRadius: 26 / 2,
+    opacity: 1,
+    backgroundColor: theme.palette.grey[50],
+    transition: theme.transitions.create(['background-color', 'border']),
+  },
+  checked: {},
+}))(Switch);
+
 export default function IndicatorByDate(props) {
   const classes = useStyles();
   const [currentRecords, setCurrentRecords] = React.useState([]);
@@ -53,6 +98,8 @@ export default function IndicatorByDate(props) {
   const [loading, setLoading] = React.useState(false);
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
+  const [all, setAll] = React.useState(false);
+  //const [placedPeriods, setPlacedPeriods] = React.useState(new Set());
 
   React.useEffect(
     () => {
@@ -73,7 +120,6 @@ export default function IndicatorByDate(props) {
               delete rClone.idSolicitud;
               delete rClone.idIndicador;
               delete rClone.idUsuario;
-              delete rClone.ultimoDelPeriodo;
               return {
                 fecha: `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`,
                 ...rClone
@@ -123,7 +169,13 @@ export default function IndicatorByDate(props) {
     setPage(0);
   };
 
+  const handleSwitchChange = () => {
+    setAll(!all);
+  }
+
   let placedPeriods = new Set();
+
+  console.log(records.length > 0 ? records[0] : "esta en null");
 
   return (
     <React.Fragment>
@@ -161,20 +213,38 @@ export default function IndicatorByDate(props) {
                     </TableBody>
                   </Table>
                 }) :
+                /*<div>
+                  No hay registros para este indicador en este periodo
+                </div>*/
 
                 <div>
-                  <TablePagination
-                    component="div"
-                    count={records.length}
-                    page={page}
-                    onChangePage={handleChangePage}
-                    rowsPerPage={rowsPerPage}
-                    onChangeRowsPerPage={handleChangeRowsPerPage}
-                    labelRowsPerPage="Registros por página"
-                    rowsPerPageOptions={[10, 25, 50, 100, records.length].sort((a, b) => a - b)}
-                    labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
-                  />
-                  {records.map((r, i) => {
+                  <Grid container spacing={3}>
+                    <Grid item xs={6}>
+                      <Typography component="div">
+                        <Grid component="label" container alignItems="center" spacing={1}>
+                          <Grid item>Todos los registros</Grid>
+                          <Grid item>
+                            <AntSwitch checked={all} onChange={handleSwitchChange} />
+                          </Grid>
+                          <Grid item>Último del periodo</Grid>
+                        </Grid>
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <TablePagination
+                        component="div"
+                        count={records.length}
+                        page={page}
+                        onChangePage={handleChangePage}
+                        rowsPerPage={rowsPerPage}
+                        onChangeRowsPerPage={handleChangeRowsPerPage}
+                        labelRowsPerPage="Registros por página"
+                        rowsPerPageOptions={[10, 25, 50, 100, records.length].sort((a, b) => a - b)}
+                        labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
+                      />
+                    </Grid>
+                  </Grid>
+                  {records.filter(r => !all ? true : r.ultimoDelPeriodo).map((r, i) => {
                     let title = false;
                     if (!placedPeriods.has(r.periodo)) {
                       placedPeriods.add(r.periodo);
@@ -204,7 +274,6 @@ export default function IndicatorByDate(props) {
             }
           </div>
       }
-
     </React.Fragment>
   );
 }

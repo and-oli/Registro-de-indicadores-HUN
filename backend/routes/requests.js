@@ -51,6 +51,20 @@ function requests(dbCon) {
         }
     });
 
+    /** 
+     * Retorna el histórico de solicitudes con información relevante de la misma:
+     * (quien hizo la solicitud, a que indicador, en que fecha y el estado de la solicitud)
+    */
+    router.get('/hostoricInfo', token.checkToken, async function (req, res, next) {
+        try {
+            const solicitudes = await requestService.getRequestsHistory(await dbCon);
+            return res.json({ success: true, solicitudes, message: "" })
+        } catch (error) {
+            console.log(error);
+            return res.json({ success: false, message: "Ocurrió un error" })
+        }
+    })
+
     /**
      * Cambia el estado de una solicitud a RECHAZADA
      */

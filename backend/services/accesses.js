@@ -10,26 +10,6 @@ module.exports = {
         return result.recordset;
     },
 
-    getAccessesHistory: async function (dbCon) {
-        const result = await dbCon.query`
-        SELECT 
-            idAcceso,
-            fechaInicio, 
-            fechaFin, 
-            USUARIOS.nombre as username, 
-            USUARIOS.apellidos as lastname,
-            INDICADORES.nombre as indicator, 
-            responsableDelIndicador, 
-            comentario, 
-            fecha 
-        FROM ACCESOS 
-        INNER JOIN USUARIOS ON ACCESOS.idUsuario = USUARIOS.idUsuario
-        INNER JOIN INDICADORES ON ACCESOS.idIndicador = INDICADORES.idIndicador
-        INNER JOIN SOLICITUDES ON ACCESOS.idSolicitud = SOLICITUDES.idSolicitud
-        `;
-        return result.recordset;
-    },
-
     postAccess: async function (dbCon, access) {
         const { idUsuario,
             idIndicador,

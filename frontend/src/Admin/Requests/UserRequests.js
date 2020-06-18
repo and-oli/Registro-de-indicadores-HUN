@@ -84,7 +84,7 @@ export default function UserRequests(props) {
             }
           });
       }
-      fetch("/accesses/hostoricInfo/", {
+      fetch("/requests/hostoricInfo/", {
         method: 'GET',
         headers: {
           'x-access-token': localStorage.getItem("HUNToken")
@@ -92,7 +92,7 @@ export default function UserRequests(props) {
       }).then((response) => {status = response.status; return response.json();})
         .then((responseJson) => {
           if(responseJson.success) {
-            setAccesses(responseJson.accesos);
+            setRequests(responseJson.solicitudes);
           } else if(status === 403){
             localStorage.removeItem("HUNToken");
             window.location.reload(); 
@@ -106,7 +106,7 @@ export default function UserRequests(props) {
   const [selectedUser, setSelectedUser] = React.useState(null);
   const [approve, setApprove] = React.useState(false);
   const [value, setValue] = React.useState(0);
-  const [accesses, setAccesses] = React.useState([]);
+  const [requests, setRequests] = React.useState([]);
   const [filteredUser, setFilteredUser] = React.useState("");
   const [filteredInitDate, setInitDate] = React.useState(null);
   const [filteredEndDate, setEndDate] = React.useState(null);
@@ -200,7 +200,7 @@ export default function UserRequests(props) {
           <Grid item xs={4}>
             <Dropdown 
               type="Filtrar por usuario"
-              options={[...new Set(accesses.map(a => `${a.username} ${a.lastname}`))]}
+              options={[...new Set(requests.map(a => `${a.username} ${a.lastname}`))]}
               handleDropdownChange={handleUserChange}
             />
           </Grid>
@@ -239,20 +239,22 @@ export default function UserRequests(props) {
               <TableCell align="left">Indicador Solicitado</TableCell>
               <TableCell align="left">Responsable del Indicador</TableCell>
               <TableCell align="left">Comentario</TableCell>
+              <TableCell align="left">Estado</TableCell>
               <TableCell align="left">Acceso desde</TableCell>
               <TableCell align="left">Acceso hasta</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {accesses.length ? filteredAccesses().map((access) => (
-              <TableRow key={access.idAcceso}>
-                <TableCell align="left">{access.fecha}</TableCell>
-                <TableCell align="left">{`${access.username} ${access.lastname}`}</TableCell>
-                <TableCell align="left">{access.indicator}</TableCell>
-                <TableCell align="left">{access.responsableDelIndicador}</TableCell>
-                <TableCell align="left">{access.comentario ? access.comentario : "N/A"}</TableCell>
-                <TableCell align="left">{`${months[new Date(access.fechaInicio).getMonth()]} ${new Date(access.fechaInicio).getDate()} ${new Date(access.fechaInicio).getFullYear()}`}</TableCell>
-                <TableCell align="left">{`${months[new Date(access.fechaFin).getMonth()]} ${new Date(access.fechaFin).getDate()} ${new Date(access.fechaFin).getFullYear()}`}</TableCell>
+            {requests.length ? filteredRequests().map((request) => (
+              <TableRow key={request.idSolicitud}>
+                <TableCell align="left">{request.fecha}</TableCell>
+                <TableCell align="left">{`${request.username} ${request.lastname}`}</TableCell>
+                <TableCell align="left">{request.indicator}</TableCell>
+                <TableCell align="left">{request.responsableDelIndicador}</TableCell>
+                <TableCell align="left">{request.comentario ? request.comentario : "N/A"}</TableCell>
+                <TableCell align="left">{request.estado}</TableCell>
+                <TableCell align="left">{request.fechaInicio ? `${months[new Date(request.fechaInicio).getMonth()]} ${new Date(request.fechaInicio).getDate()} ${new Date(request.fechaInicio).getFullYear()}` : "N/A"}</TableCell>
+                <TableCell align="left">{request.fechaFin ? `${months[new Date(request.fechaFin).getMonth()]} ${new Date(request.fechaFin).getDate()} ${new Date(request.fechaFin).getFullYear()}` : "N/A"}</TableCell>
               </TableRow>
             )) : <TableRow><TableCell colSpan={7} align="center">No hay accesos extratemporales.</TableCell></TableRow>}
           </TableBody>
@@ -261,14 +263,14 @@ export default function UserRequests(props) {
     );
   }
 
-  const filteredAccesses = () => {
-    let filteredAccesses = accesses;
-    //console.log(moment(new Date(accesses[1].fecha)))
-    //console.log(filteredInitDate ? moment(filteredInitDate.toDateString()).isSameOrBefore(accesses[1].fecha) : "es null");
-    if(filteredUser) filteredAccesses = filteredAccesses.filter(access => `${access.username} ${access.lastname}` === filteredUser);
-    //if(filteredInitDate) filteredAccesses = filteredAccesses.filter(access => moment(filteredInitDate).isSameOrBefore(new Date(access.fecha))); //filteredAccesses.filter()
-    //if(filteredEndDate) filteredAccesses = filteredAccesses.filter(access => moment(filteredEndDate.toDateString()).isSameOrAfter(new Date(access.fecha))); //filteredAccesses.filter()
-    return filteredAccesses;
+  const filteredRequests = () => {
+    let filteredRequests = requests;
+    //console.log(moment(new Date(requests[1].fecha)))
+    //console.log(filteredInitDate ? moment(filteredInitDate.toDateString()).isSameOrBefore(requests[1].fecha) : "es null");
+    if(filteredUser) filteredRequests = filteredRequests.filter(request => `${request.username} ${request.lastname}` === filteredUser);
+    //if(filteredInitDate) filteredRequests = filteredRequests.filter(request => moment(filteredInitDate).isSameOrBefore(new Date(request.fecha))); //filteredRequests.filter()
+    //if(filteredEndDate) filteredRequests = filteredRequests.filter(request => moment(filteredEndDate.toDateString()).isSameOrAfter(new Date(request.fecha))); //filteredRequests.filter()
+    return filteredRequests;
   }
 
   return (
@@ -278,7 +280,7 @@ export default function UserRequests(props) {
         <AppBar color="transparent" position="static">
           <Tabs centered value={value} onChange={handleChange} aria-label="simple tabs example">
             <Tab label="Solicitudes" {...a11yProps(0)} />
-            <Tab label="Solicitudes Extratemporales" {...a11yProps(1)} />
+            <Tab label="Histórico" {...a11yProps(1)} />
           </Tabs>
         </AppBar>
       </div>
