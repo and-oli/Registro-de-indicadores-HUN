@@ -1,3 +1,5 @@
+const moment = require("moment")
+
 module.exports = {
 
     getRequestsByUser: async function (dbCon, idUsuario) {
@@ -66,6 +68,7 @@ module.exports = {
         where nombre = 'EN ESPERA'
         `).recordset[0].idEstado;
 
+            const newLocal = moment().format();
             const result = await dbCon.query`
             insert into SOLICITUDES (
                 idSolicitante, 
@@ -78,7 +81,7 @@ module.exports = {
                 ${idSolicitante},
                 ${idIndicador},
                 ${idEstado},
-                ${new Date()},
+                ${newLocal},
                 ${comentario}
                 )`;
             return {

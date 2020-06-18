@@ -47,8 +47,14 @@ const useStyles = makeStyles((theme) => ({
 
 const validateData = (data) => {
   for (let key in data) {
-    if (key === "startCurrentPeriod" && (moment(data[key]).isAfter(data["endCurrentPeriod"]) || moment(data[key]).isBefore(moment.now()))) return true
-    else if (!data[key]) return true;
+    if (key === "startCurrentPeriod" && moment(data[key]).isAfter(data["endCurrentPeriod"])) {
+      console.log(key, "a")
+      return true
+    }
+    else if (!data[key]) {
+      console.log(key, "s")
+      return true;
+    }
   }
   return false;
 }
@@ -118,8 +124,8 @@ export default function CreateIndicador() {
     responsableData: "",
     responsableIndicator: "",
     goal: "",
-    startCurrentPeriod: "",
-    endCurrentPeriod: "",
+    startCurrentPeriod: moment(),
+    endCurrentPeriod: moment().add(1,"days"),
   });
 
   const handleDateChange = (event) => {
@@ -132,8 +138,10 @@ export default function CreateIndicador() {
     }
     if (start) {
       if ((state.endCurrentPeriod && date.isBefore(state.endCurrentPeriod)) || !state.endCurrentPeriod) {
-        state.startCurrentPeriod = date;
-        setState(state);
+        setState({ ...state, startCurrentPeriod: date });
+        // state.startCurrentPeriod = date;
+        // setState(state);
+
       } else {
         setMessage("La fecha de inicio debe ser anterior a la fecha de finalización.");
         setSuccess(false);
@@ -141,8 +149,9 @@ export default function CreateIndicador() {
       }
     } else {
       if ((state.startCurrentPeriod && date.isAfter(state.startCurrentPeriod)) || !state.startCurrentPeriod) {
-        state.endCurrentPeriod = date;
-        setState(state);
+        setState({ ...state, endCurrentPeriod: date });
+        // state.startCurrentPeriod = date;
+        // setState(state);
       } else {
         setMessage("La fecha de finalización debe ser posterior a la fecha de inicio.");
         setSuccess(false);
@@ -241,8 +250,8 @@ export default function CreateIndicador() {
                 {
                   state.idUnit &&
                   <HighlightOffIcon
-                  className="delete-unit"
-                  onClick={() => setDeleteUnitModalVisible(true)}
+                    className="delete-unit"
+                    onClick={() => setDeleteUnitModalVisible(true)}
                   />
                 }
               </div>
@@ -376,7 +385,7 @@ export default function CreateIndicador() {
                 fullWidth
                 id="endCurrentPeriod"
                 label="Fecha fin de la primera vigencia"
-                defaultValue={`${new Date().getFullYear()}-${new Date().getMonth() + 1 < 10 ? "0" + (new Date().getMonth() + 1) : new Date().getMonth() + 1}-${new Date().getDate() < 10 ? "0" + (new Date().getDate()) : new Date().getDate()}`}
+                defaultValue={`${state.endCurrentPeriod.year()}-${state.endCurrentPeriod.month() + 1 < 10 ? "0" + (state.endCurrentPeriod.month() + 1) : state.endCurrentPeriod.month() + 1}-${state.endCurrentPeriod.date() < 10 ? "0" + (state.endCurrentPeriod.date()) : state.endCurrentPeriod.date()}`}
                 name="endCurrentPeriod"
                 autoComplete="endCurrentPeriod"
                 type="date"
@@ -419,8 +428,8 @@ export default function CreateIndicador() {
           {message}
         </Alert>
       </Snackbar>
-      <NewUnitModal open={newUnitModalVisible} close={()=>setNewUnitModalVisible(false)}/>
-      <DeleteUnitModal open={deleteUnitModalVisible} close={()=>setDeleteUnitModalVisible(false)} unitId={state.idUnit}/>
+      <NewUnitModal open={newUnitModalVisible} close={() => setNewUnitModalVisible(false)} />
+      <DeleteUnitModal open={deleteUnitModalVisible} close={() => setDeleteUnitModalVisible(false)} unitId={state.idUnit} />
     </main>
   );
 }

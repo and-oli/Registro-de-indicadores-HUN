@@ -70,111 +70,113 @@ export default function EditUser(props) {
         setAccessesToDelete(newAccesses)
     }
 
-    const accept = (selectedIndicators) => {
+    const accept = async (selectedIndicators) => {
         setLoading(true)
         let newIndicatorPermissions = []
-        let newUnitPerimssions = []
+        let newIndicatorReadPermissions = []
+        let newUnitPermissions = []
+        let newUnitReadPermissions = []
         for (let ind of selectedIndicators) {
-            if (!props.currentUserPermissions.find(cup => cup.idUnidad === ind.idUnidad && cup.idIndicador === ind.idIndicador)) {
+            if (!props.currentUserPermissions.find(cup => cup.uniqueId === ind.uniqueId)) {
                 if (ind.idIndicador === -1) {
-                    newUnitPerimssions.push({ idUnidad: ind.idUnidad, idUsuario: props.currentUserId })
+                    if (ind.edit) {
+                        newUnitPermissions.push({ idUnidad: ind.idUnidad, idUsuario: props.currentUserId })
+                    } else {
+                        newUnitReadPermissions.push({ idUnidad: ind.idUnidad, idUsuario: props.currentUserId })
+                    }
                 } else {
-                    newIndicatorPermissions.push({ idIndicador: ind.idIndicador, idUsuario: props.currentUserId })
+                    if (ind.edit) {
+                        newIndicatorReadPermissions.push({ idIndicador: ind.idIndicador, idUsuario: props.currentUserId })
+                    } else {
+                        newIndicatorReadPermissions.push({ idIndicador: ind.idIndicador, idUsuario: props.currentUserId })
+                    }
                 }
             }
         }
         let indicatorPermissionsToRemove = []
-        let unitPerimssionsToRemove = []
-        for (let perm of props.currentUserPermissions) {
+        let indicatorReadPermissionsToRemove = []
+        let unitPermissionsToRemove = []
+        let unitReadPermissionsToRemove = []
 
-            if (!selectedIndicators.find(ind => perm.idUnidad === ind.idUnidad && perm.idIndicador === ind.idIndicador)) {
+        for (let perm of props.currentUserPermissions) {
+            if (!selectedIndicators.find(ind => perm.uniqueId === ind.uniqueId)) {
                 if (perm.idIndicador === -1) {
-                    unitPerimssionsToRemove.push({ idUnidad: perm.idUnidad, idUsuario: props.currentUserId })
+                    if (perm.edit) {
+                        unitPermissionsToRemove.push({ idUnidad: perm.idUnidad, idUsuario: props.currentUserId })
+                    } else {
+                        unitReadPermissionsToRemove.push({ idUnidad: perm.idUnidad, idUsuario: props.currentUserId })
+                    }
                 } else {
-                    indicatorPermissionsToRemove.push({ idIndicador: perm.idIndicador, idUsuario: props.currentUserId })
+                    if (perm.edit) {
+                        indicatorPermissionsToRemove.push({ idIndicador: perm.idIndicador, idUsuario: props.currentUserId })
+                    } else {
+                        indicatorReadPermissionsToRemove.push({ idIndicador: perm.idIndicador, idUsuario: props.currentUserId })
+                    }
                 }
             }
         }
-
-        fetch("/permissions/addMultipleUserIndicatorPermissions/", {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
+        console.log(newIndicatorReadPermissions, newUnitReadPermissions, indicatorReadPermissionsToRemove, unitReadPermissionsToRemove)
+        let permissionsData = [
+            {
+                route: "/permissions/addMultipleUserIndicatorPermissions/",
+                list: newIndicatorPermissions
             },
-            body: JSON.stringify({ list: newIndicatorPermissions })
-        }).then((response) => response.json())
-            .then((responseJson) => {
-                if (responseJson.success) {
+            {
+                route: "/permissions/addMultipleUserUnitPermissions/",
+                list: newUnitPermissions
+            },
+            {
+                route: "/permissions/removeMultipleUserIndicatorPermissions/",
+                list: indicatorPermissionsToRemove
+            },
+            {
+                route: "/permissions/removeMultipleUserUnitPermissions/",
+                list: unitPermissionsToRemove
+            },
+            {
+                route: "/permissions/addMultipleUserIndicatorReadPermissions/",
+                list: newIndicatorReadPermissions
+            },
+            {
+                route: "/permissions/addMultipleUserUnitReadPermissions/",
+                list: newUnitReadPermissions
+            },
+            {
+                route: "/permissions/removeMultipleUserIndicatorReadPermissions/",
+                list: indicatorReadPermissionsToRemove
+            },
+            {
+                route: "/permissions/removeMultipleUserUnitReadPermissions/",
+                list: unitReadPermissionsToRemove
+            },
+            {
+                route: "/accesses/removeMultipleAccesses/",
+                list: accessesToDelete.map(a => a.idAcceso)
+            },
+        ]
 
-                    fetch("/permissions/addMultipleUserUnitPermissions/", {
-                        method: 'POST',
-                        headers: {
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ list: newUnitPerimssions })
-                    }).then((response) => response.json())
-                        .then((responseJson) => {
-                            if (responseJson.success) {
+        let response;
+        for (let permission of permissionsData) {
+            response = await (await fetch(permission.route, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ list: permission.list })
+            })).json()
 
-                                fetch("/permissions/removeMultipleUserIndicatorPermissions/", {
-                                    method: 'POST',
-                                    headers: {
-                                        'Accept': 'application/json',
-                                        'Content-Type': 'application/json',
-                                    },
-                                    body: JSON.stringify({ list: indicatorPermissionsToRemove })
-                                }).then((response) => response.json())
-                                    .then((responseJson) => {
-                                        if (responseJson.success) {
+            if (!response.success) {
+                setMessage({ color: "red", text: response.message });
+                break;
+            }
+        }
+        setLoading(false)
+        if (response.success) {
+            setMessage({ color: "green", text: "Permisos modificados, refresque la aplicación" })
+            setDone(true)
+        }
 
-                                            fetch("/permissions/removeMultipleUserUnitPermissions/", {
-                                                method: 'POST',
-                                                headers: {
-                                                    'Accept': 'application/json',
-                                                    'Content-Type': 'application/json',
-                                                },
-                                                body: JSON.stringify({ list: unitPerimssionsToRemove })
-                                            }).then((response) => response.json())
-                                                .then((responseJson) => {
-                                                    setLoading(false)
-                                                    if (responseJson.success) {
-                                                        fetch("/accesses/removeMultipleAccesses/", {
-                                                            method: 'POST',
-                                                            headers: {
-                                                                'Accept': 'application/json',
-                                                                'Content-Type': 'application/json',
-                                                            },
-                                                            body: JSON.stringify({ list: accessesToDelete.map(a => a.idAcceso) })
-                                                        }).then((response) => response.json())
-                                                            .then((responseJson) => {
-                                                                setLoading(false)
-                                                                if (responseJson.success) {
-                                                                    setMessage({ color: "green", text: "Permisos modificados, refresque la aplicación" })
-                                                                    setDone(true)
-                                                                } else {
-                                                                    setMessage({ color: "red", text: responseJson.message })
-                                                                }
-                                                            })
-                                                    } else {
-                                                        setMessage({ color: "red", text: responseJson.message })
-                                                    }
-                                                })
-
-                                        } else {
-                                            setMessage({ color: "red", text: responseJson.message })
-                                        }
-                                    })
-
-                            } else {
-                                setMessage({ color: "red", text: responseJson.message })
-                            }
-                        })
-                } else {
-                    setMessage({ color: "red", text: responseJson.message })
-                }
-            })
     }
 
     return (
