@@ -27,7 +27,7 @@ function accesses(dbCon) {
             const accesos = await accessService.getAccessesHistory(await dbCon);
             return res.json({ success: true, accesos, message: "" })
         } catch (error) {
-            console.log(error);
+            console.error(error);
             return res.json({ success: false, message: "Ocurrió un error" })
         }
     })
@@ -57,10 +57,10 @@ function accesses(dbCon) {
         }
     });
 
-     /**
-     * Elimina una lista de accesos de la tabla ACCESOS
-     * Body: {list: [idAcceso]}
-     */
+    /**
+    * Elimina una lista de accesos de la tabla ACCESOS
+    * Body: {list: [idAcceso]}
+    */
     router.post('/removeMultipleAccesses', async function (req, res) {
         try {
             const result = await accessService.removeMultipleAccesses(await dbCon, req.body.list);

@@ -57,7 +57,7 @@ module.exports = {
         } = record;
         // Revisar si hay un objeto acceso vigente para el usuario al indicador.
         const acceses = await accessService.getAccessesByIndicatorIdAndUserId(dbCon, idIndicador, idUsuario);
-        const currentTime = new Date().getTime() // El servidor en heroku estará en la hora 0 GMT, Colombia está en -5GMT
+        const currentTime = new Date().getTime()
         const validAccess = acceses.find(a =>
             moment(a.fechaInicio).valueOf() <= currentTime &&
             moment(a.fechaFin).valueOf() >= (currentTime - 24 * 3600 * 1000)
@@ -97,7 +97,7 @@ module.exports = {
             denominador,
             nuevoPeriodo
         } = record;
-        const fecha = new Date(new Date().getTime() - (1000 * 3600 * 5)).toString();
+        const fecha = moment().format()
         record.idUsuario = idUsuario
         const userPermissionToPost = await this.userCanPostRecord(dbCon, record);
         if (userPermissionToPost) {

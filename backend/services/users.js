@@ -16,22 +16,40 @@ module.exports = {
         select usuarios.*, indicadores.idIndicador as idIndicador,indicadores.nombre as nombreIndicador, 
         indicadores.idUnidad as idUnidadIndicador, unidades.nombre as nombreUnidad, unidades.idUnidad as idUnidad
         ,x.nombreIndicadorDelAcceso, x.fechaInicioAccesoIndicador,x.fechaFinAccesoIndicador, idAcceso,
-        x.nombreUnidadDelAccesoAlIndicador, x.idIndicadorDelAcceso
+        x.nombreUnidadDelAccesoAlIndicador, x.idIndicadorDelAcceso, 
+        permisos_lectura.idIndicadorLectura as idIndicadorLectura, 
+        permisos_lectura.nombreIndicadorLectura as nombreIndicadorLectura, 
+        permisos_lectura.nombreUnidadLectura as nombreUnidadLectura,
+		permisos_lectura.idUnidadLectura as idUnidadLectura,
+		permisos_lectura.idUnidadIndicadorLectura as idUnidadIndicadorLectura
+
         from usuarios 
         inner join roles on usuarios.idRol = roles.idRol
         left join  usuarios_unidades on usuarios.idUsuario = usuarios_unidades.idUsuario 
         left join  usuarios_indicadores on usuarios.idUsuario = usuarios_indicadores.idUsuario
-        left join unidades on usuarios_unidades.idUnidad = unidades.idUnidad
+		left join unidades on usuarios_unidades.idUnidad = unidades.idUnidad
         left join indicadores on usuarios_indicadores.idIndicador = indicadores.idIndicador
+
         left join 
             (select  accesos.idUsuario as idUsuario, indicadores.nombre as nombreIndicadorDelAcceso, 
             indicadores.idIndicador as idIndicadorDelAcceso, ACCESOS.idAcceso,
             ACCESOS.fechaInicio as fechaInicioAccesoIndicador, ACCESOS.fechaFin as fechaFinAccesoIndicador, 
             UNIDADES.nombre as nombreUnidadDelAccesoAlIndicador
             from ACCESOS inner join indicadores on ACCESOS.idIndicador = INDICADORES.idIndicador 
-            inner join UNIDADES on INDICADORES.idUnidad = UNIDADES.idUnidad
+            left join UNIDADES on INDICADORES.idUnidad = UNIDADES.idUnidad
             ) as x 
         on x.idUsuario = USUARIOS.idUsuario
+		left join 
+            (select  usuarios.idUsuario as idUsuario, indicadores.nombre as nombreIndicadorLectura, 
+			indicadores.idIndicador as idIndicadorLectura, UNIDADES.nombre as nombreUnidadLectura,
+			unidades.idUnidad as idUnidadLectura, indicadores.idUnidad as idUnidadIndicadorLectura
+			from usuarios 
+			left join LECT_USUARIOS_INDICADORES on usuarios.idUsuario = LECT_USUARIOS_INDICADORES.idUsuario 
+			left join LECT_USUARIOS_UNIDADES on usuarios.idUsuario = LECT_USUARIOS_UNIDADES.idUsuario 
+			left join INDICADORES on LECT_USUARIOS_INDICADORES.idIndicador = INDICADORES.idIndicador
+			left join UNIDADES on LECT_USUARIOS_UNIDADES.idUnidad = UNIDADES.idUnidad
+            ) as permisos_lectura
+        on permisos_lectura.idUsuario = USUARIOS.idUsuario
         where roles.nombre = 'EMPLEADO'
     `).recordset;
         let users = {}
@@ -39,13 +57,17 @@ module.exports = {
             if (!users[element.idUsuario]) {
                 let firstIndicator = element.idIndicador ? [{
                     idIndicador: element.idIndicador,
-                    nombreIndicador: element.nombreIndicador,
+                    nombre: element.nombreIndicador + " (edición)",
                     idUnidad: element.idUnidadIndicador,
+                    uniqueId: (element.idIndicador + "e"),
+                    edit: true,
                 }] : [];
 
                 let firstUnit = element.nombreUnidad ? [{
-                    nombreUnidad: element.nombreUnidad,
-                    idUnidad: element.idUnidad
+                    idUnidad: element.idUnidad,
+                    nombre: element.nombreUnidad + " (edición)",
+                    uniqueId: ("u" + element.idUnidad + "e"),
+                    edit: true,
                 }] : [];
                 let firstAccess = []
                 if (element.idAcceso && accessHasValidDate(element)) {
@@ -59,29 +81,51 @@ module.exports = {
                     }];
                 }
 
+                let firstReadIndicator = element.idIndicadorLectura ? [{
+                    idIndicador: element.idIndicadorLectura,
+                    nombre: element.nombreIndicadorLectura + " (lectura)",
+                    idUnidad: element.idUnidadIndicadorLectura,
+                    uniqueId: (element.idUnidad + "r"),
+                    edit: false,
+                }] : [];
+
+                let firstReadUnit = element.nombreUnidadLectura ? [{
+                    idUnidad: element.idUnidadLectura,
+                    nombre: element.nombreUnidadLectura + " (lectura)",
+                    uniqueId: ("u" + element.idUnidadLectura + "r"),
+                    edit: false,
+                }] : [];
+
                 users[element.idUsuario] = {
                     username: element.username,
                     nombre: element.nombre,
                     apellidos: element.apellidos,
                     indicadores: firstIndicator,
                     unidades: firstUnit,
+                    indicadoresLectura: firstReadIndicator,
+                    unidadesLectura: firstReadUnit,
                     accesos: firstAccess,
                 };
             } else {
-                if (element.idIndicador && !users[element.idUsuario].indicadores.findIndex(ind => ind.idIndicador === element.idIndicador)) {
+                if (element.idIndicador && users[element.idUsuario].indicadores.findIndex(ind => ind.idIndicador === element.idIndicador) < 0) {
                     users[element.idUsuario].indicadores.push({
                         idIndicador: element.idIndicador,
-                        nombreIndicador: element.nombreIndicador,
+                        nombre: element.nombreIndicador + " (edición)",
                         idUnidad: element.idUnidadIndicador,
+                        uniqueId: (element.idIndicador + "e"),
+                        edit: true,
+
                     })
                 }
-                if (element.nombreUnidad && users[element.idUsuario].unidades.findIndex(und => und.nombreUnidad === element.nombreUnidad) === -1) {
+                if (element.nombreUnidad && users[element.idUsuario].unidades.findIndex(und => und.idUnidad === element.idUnidad) < 0) {
                     users[element.idUsuario].unidades.push({
-                        nombreUnidad: element.nombreUnidad,
-                        idUnidad: element.idUnidad
+                        idUnidad: element.idUnidad,
+                        nombre: element.nombreUnidad + " (edición)",
+                        uniqueId: ("u" + element.idUnidad + "e"),
+                        edit: true,
                     })
                 }
-                if (element.idAcceso && users[element.idUsuario].accesos.findIndex(acc => acc.idAcceso === element.idAcceso) === -1 && accessHasValidDate(element)) {
+                if (element.idAcceso && users[element.idUsuario].accesos.findIndex(acc => acc.idAcceso === element.idAcceso) < 0 && accessHasValidDate(element)) {
                     users[element.idUsuario].accesos.push({
                         nombreIndicadorDelAcceso: element.nombreIndicadorDelAcceso,
                         nombreUnidadDelAccesoAlIndicador: element.nombreUnidadDelAccesoAlIndicador,
@@ -91,6 +135,24 @@ module.exports = {
                         idIndicadorDelAcceso: element.idIndicadorDelAcceso,
                     })
                 }
+                if (element.idIndicadorLectura && users[element.idUsuario].indicadoresLectura.findIndex(ind => ind.idIndicador === element.idIndicadorLectura) < 0) {
+                    users[element.idUsuario].indicadoresLectura.push({
+                        idIndicador: element.idIndicadorLectura,
+                        nombre: element.nombreIndicadorLectura + " (lectura)",
+                        idUnidad: element.idUnidadIndicadorLectura,
+                        uniqueId: (element.idIndicadorLectura + "r"),
+                        edit: false,
+                    })
+                }
+                if (element.nombreUnidadLectura && users[element.idUsuario].unidadesLectura.findIndex(und => und.idUnidad === element.idUnidadLectura) < 0) {
+                    users[element.idUsuario].unidadesLectura.push({
+                        idUnidad: element.idUnidadLectura,
+                        nombre: element.nombreUnidadLectura + " (lectura)",
+                        uniqueId: ("u" + element.idUnidadLectura + "r"),
+                        edit: false,
+                    })
+                }
+
             }
         });
         let employees = Object.keys(users).map(k => {
@@ -98,7 +160,6 @@ module.exports = {
             return users[k];
         })
         return employees;
-
     },
 
     getUserByUsername: async function (dbCon, username) {
@@ -123,17 +184,24 @@ module.exports = {
         let idUsuario = result.recordset[0].idUsuario
         if (idUsuario) {
             if (user.permissions) {
-                let unitList = user.permissions.filter(p => p.idIndicador === -1)
-                    .map(p => {
-                        return { idUnidad: p.idUnidad, idUsuario }
+                let unitList = user.permissions.filter(p => p.idIndicador === -1 && p.edit).map(p => {
+                    return { idUnidad: p.idUnidad, idUsuario }
+                })
+                let unitReadList = user.permissions.filter(p => p.idIndicador === -1 && !p.edit).map(p => {
+                    return { idUnidad: p.idUnidad, idUsuario }
+                })
+
+                if (await permissionsService.addMultipleUserUnitPermissions(dbCon, unitList) &&
+                    await permissionsService.addMultipleUserUnitReadPermissions(dbCon, unitReadList)) {
+                    let indicatorList = user.permissions.filter(p => p.idIndicador !== -1 && p.edit).map(p => {
+                        return { idIndicador: p.idIndicador, idUsuario }
+                    })
+                    let indicatorReadList = user.permissions.filter(p => p.idIndicador !== -1 && !p.edit).map(p => {
+                        return { idIndicador: p.idIndicador, idUsuario }
                     })
 
-                if (await permissionsService.addMultipleUserUnitPermissions(dbCon, unitList)) {
-                    let indicatorList = user.permissions.filter(p => p.idIndicador !== -1)
-                        .map(p => {
-                            return { idIndicador: p.idIndicador, idUsuario }
-                        })
-                    return await permissionsService.addMultipleUserIndicatorPermissions(dbCon, indicatorList);
+                    return await permissionsService.addMultipleUserIndicatorPermissions(dbCon, indicatorList) &&
+                        await permissionsService.addMultipleUserIndicatorReadPermissions(dbCon, indicatorReadList)
                 }
                 console.error("Ocurrió un error al crear los permisos del usuario")
                 return false;
@@ -147,7 +215,7 @@ module.exports = {
 }
 
 function accessHasValidDate(element) {
-    const currentTime = new Date().getTime() // El servidor en heroku estará en la hora 0 GMT, Colombia está en -5GMT
+    const currentTime = new Date().getTime()
     return moment(element.fechaInicioAccesoIndicador).valueOf() <= currentTime &&
         moment(element.fechaFinAccesoIndicador).valueOf() >= (currentTime - 24 * 3600 * 1000)
 }
