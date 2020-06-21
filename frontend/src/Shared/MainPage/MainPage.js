@@ -52,7 +52,7 @@ export default function MainPage(props) {
             indicator &&
             < Grid item xs={12}>
               <Paper className={fixedHeightPaper}>
-                <Chart indicator={indicator}  />
+                <Chart indicator={indicator} />
               </Paper>
             </Grid>
           }
@@ -61,7 +61,7 @@ export default function MainPage(props) {
             indicator &&
             < Grid item xs={12}>
               <Paper className={classes.paper}>
-                <IndicatorByDate indicatorId={indicator.idIndicador} />
+                <IndicatorByDate indicatorId={indicator.idIndicador} periodicity={indicator.periodicidad} />
               </Paper>
             </Grid>
           }

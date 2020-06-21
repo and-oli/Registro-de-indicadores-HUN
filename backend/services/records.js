@@ -22,23 +22,6 @@ module.exports = {
         `;
         return result.recordset;
     },
-    getRecordsByPeriod: async function (dbCon, idIndicador, periodo) {
-        const result = await dbCon.query`
-            select *  from REGISTROS 
-            where idIndicador = ${idIndicador}
-            and periodo = ${periodo}
-        `;
-        return result.recordset;
-    },
-    getLastRecordByPeriod: async function (dbCon, idIndicador, periodo) {
-        const result = await dbCon.query`
-            select *  from REGISTROS 
-            where idIndicador = ${idIndicador}
-            and periodo = ${periodo}
-            and ultimoDelPeriodo = ${true}
-        `;
-        return result.recordset[0];
-    },
 
     /**
      * Determina si un usuario está habilitadO para subir un registro. Es decir, si se cumple una de las siguientes condiciones:
@@ -92,33 +75,23 @@ module.exports = {
             analisisCualitativo,
             accionMejora,
             valor,
-            periodo,
             numerador,
             denominador,
-            nuevoPeriodo
+            ano,
+            nombrePeriodo,
         } = record;
         const fecha = moment().format()
         record.idUsuario = idUsuario
         const userPermissionToPost = await this.userCanPostRecord(dbCon, record);
         if (userPermissionToPost) {
 
-            // Determinar si se puede ingresar el registro de este periodo si en la base de datos se encuentra 
-            // un registro para el periodo anterior
-
-            const result = await dbCon.query`
-            select idRegistro from REGISTROS
-            where periodo = ${periodo - 1}
-            `;
-            if (!(result.recordset[0] || periodo === 0)) {
-                return { success: false, message: "Debe registrar un valor para este indicador para el último periodo sin registro." }
-            }
 
             // Actualizar los registros previos del periodo
 
             await dbCon.query`
                             update REGISTROS 
                             set ultimoDelPeriodo = 0
-                            where periodo = ${periodo}
+                            where ano = ${ano} and nombrePeriodo = ${nombrePeriodo} 
                             `;
             // Insertar el registro
             const result2 = await dbCon.query`
@@ -132,7 +105,8 @@ module.exports = {
                 valor,
                 numerador,
                 denominador,
-                periodo,
+                nombrePeriodo,
+                ano,
                 ultimoDelPeriodo
                 )
             values (
@@ -145,20 +119,11 @@ module.exports = {
                 ${valor},
                 ${numerador},
                 ${denominador},
-                ${periodo},
+                ${nombrePeriodo},
+                ${ano},
                 ${true}
                 )`;
             if (result2.rowsAffected > 0) {
-
-
-                if (nuevoPeriodo) {
-
-                    // Actualizar el periodo actual y su vigencia en el indicador.
-
-                    if (await indicatorsService.updatePeriod(dbCon, idIndicador)) {
-                        return { success: false, message: "No existe un indicador con ese id" }
-                    }
-                }
                 return { success: true, message: "Registro ingresado." }
             }
             return { success: false, message: "Ocurrió un error" }

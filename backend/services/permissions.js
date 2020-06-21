@@ -3,18 +3,19 @@ module.exports = {
 
     /**
      * Determina si se puede ingresar un valor para indicador en la fecha actual 
-     * (Si la fecha actual está incluida en la vigencia del indicador) 
+     * (Si la fecha actual está incluida en la vigencia del indicador)
+     *  
      */
     indicatorRegistryIsEnabled: async function (dbCon, idIndicador) {
         const result = await dbCon.query`
-        SELECT inicioPeriodoActual, finPeriodoActual FROM INDICADORES 
+        SELECT inicioVigencia, finVigencia FROM INDICADORES 
         WHERE idIndicador = ${idIndicador}
         `;
-        const currentTime = new Date().getTime()
-        if (result.recordset[0] && result.recordset[0].inicioPeriodoActual && result.recordset[0].finPeriodoActual) {
-            const time1 = new Date(result.recordset[0].inicioPeriodoActual).getTime()
-            const time2 = new Date(result.recordset[0].finPeriodoActual).getTime()
-            return currentTime >= time1 && (currentTime <= time2 || (currentTime - time2) < (24 * 3600 * 1000)); // Incluir el último día
+        const currentTime = new Date().getDate()
+        if (result.recordset[0] && result.recordset[0].inicioVigencia && result.recordset[0].finVigencia) {
+            const time1 = new Date(result.recordset[0].inicioVigencia).getDate()
+            const time2 = new Date(result.recordset[0].finVigencia).getDate()
+            return currentTime >= time1 && (currentTime <= time2 ); // Incluir el último día
         }
         return false
 
@@ -33,6 +34,28 @@ module.exports = {
     },
 
     userCanEditIndicator: async function (dbCon, idIndicador, idUsuario) {
+        const result = await dbCon.query`
+        SELECT * FROM USUARIOS_INDICADORES 
+        WHERE idUsuario = ${idUsuario}
+        AND idIndicador = ${idIndicador}
+    `;
+        return result.recordset[0];
+
+    },
+    
+    userCanReadUnit: async function (dbCon, idIndicador, idUsuario) {
+
+        const result = await dbCon.query`
+            SELECT INDICADORES.idIndicador, USUARIOS_UNIDADES.idUnidad, USUARIOS_UNIDADES.idUsuario
+            FROM INDICADORES 
+            INNER JOIN USUARIOS_UNIDADES ON INDICADORES.idUnidad = USUARIOS_UNIDADES.idUnidad 
+            WHERE USUARIOS_UNIDADES.idUsuario = ${idUsuario}
+            AND INDICADORES.idIndicador = ${idIndicador}
+        `;
+        return result.recordset[0];
+    },
+
+    userCanReadIndicator: async function (dbCon, idIndicador, idUsuario) {
         const result = await dbCon.query`
         SELECT * FROM USUARIOS_INDICADORES 
         WHERE idUsuario = ${idUsuario}

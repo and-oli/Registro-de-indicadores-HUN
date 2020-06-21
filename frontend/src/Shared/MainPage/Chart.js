@@ -5,6 +5,8 @@ import Title from '../Title';
 import Dropdown from '../Dropdown';
 import { Grid } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
+import  periodsOrder from '../../PeriodsOrder';
+
 class CustomizedAxisTick extends PureComponent {
   render() {
     const {
@@ -31,18 +33,6 @@ export default function Chart(props) {
 
   const letters = '0123456789ABCDEF';
   let currentData = [
-    { month: "Enero" },
-    { month: "Febrero" },
-    { month: "Marzo" },
-    { month: "Abril" },
-    { month: "Mayo" },
-    { month: "Junio" },
-    { month: "Julio" },
-    { month: "Agosto" },
-    { month: "Sept." },
-    { month: "Octubre" },
-    { month: "Nov." },
-    { month: "Diciembre" }
   ]
   React.useEffect(
     () => {
@@ -61,20 +51,30 @@ export default function Chart(props) {
             let currentDataByYear = {}
             setRecords(responseJson.registros.length);
             setBuffer(responseJson.registros.map(r => {
-              let d = new Date(r.fecha)
-              let dtf = new Intl.DateTimeFormat('sp', { year: 'numeric', month: 'numeric', day: '2-digit' })
-              let [{ value: da }, , { value: mo }, , { value: ye }] = dtf.formatToParts(d);
-              currentYears.add(ye);
-              currentDataByYear[ye] = currentDataByYear[ye] || []
-              currentDataByYear[ye].push({
+              let ano = r.ano
+              currentYears.add(ano);
+              currentDataByYear[ano] = currentDataByYear[ano] || []
+              currentDataByYear[ano].push({
                 analysis: r.analisisCualitativo,
                 value: r.valor,
                 improvement: r.accionMejora,
-                month: mo,
+                period: r.nombrePeriodo,
               })
-              const monthIndex = parseInt(mo) - 1;
-              currentData[monthIndex][ye] = r.valor;
+              let previousData = currentData.find(data => data.period === r.nombrePeriodo)
+              if(previousData){
+                previousData[ano] = r.valor
+              }
+              else{
+                currentData.push({ period: r.nombrePeriodo, [ano]: r.valor })
+              }
             }));
+            let periods = Object.keys(periodsOrder[props.indicator.periodicidad])
+            periods.forEach(p => {
+              if (currentData.findIndex(cd => cd.period === p) < 0) {
+                currentData.push({ period: p })
+              }
+            })
+            currentData.sort((a, b) => periodsOrder[props.indicator.periodicidad][a.period] - periodsOrder[props.indicator.periodicidad][b.period])
             setYears(currentYears);
             setData(currentData);
             setDataByYear(currentDataByYear);
@@ -104,7 +104,6 @@ export default function Chart(props) {
       let orderedRecords = [...dataByYear[d]]
       orderedRecords.sort((or1, or2) => or1.month - or2.month)
       for (let record of orderedRecords) {
-        console.log(record)
         csvFile += `${currentData[record.month - 1].month};${record[field]}\n`
       }
     }
@@ -166,7 +165,7 @@ export default function Chart(props) {
                 }}
               >
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" stroke={theme.palette.text.secondary} padding={{ left: 30, right: 30 }} height={60} tick={<CustomizedAxisTick />} />
+                <XAxis dataKey="period" stroke={theme.palette.text.secondary} padding={{ left: 30, right: 30 }} height={60} tick={<CustomizedAxisTick />} />
                 <YAxis stroke={theme.palette.text.secondary} domain={[dataMin => (dataMin < 0 ? Math.floor(dataMin * 1.1) : 0), dataMax => (dataMax > props.indicator.meta ? Math.ceil(dataMax * 1.1) : Math.ceil(props.indicator.meta * 1.1))]}>
                   <Label
                     angle={270}

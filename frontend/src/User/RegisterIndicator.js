@@ -67,9 +67,6 @@ export default function RegisterIndicator() {
   const [indicators, setIndicators] = React.useState([]);
   const [loading, setLoading] = React.useState(false);
   const [currentPeriod, setCurrentPeriod] = React.useState("");
-  const [nextPeriod, setNextPeriod] = React.useState("");
-  const [registerForNextPeriod, setRegisterForNextPeriod] = React.useState(false);
-  const [currentPeriodNumber, setCurrentPeriodNumber] = React.useState(null);
   const [message, setMessage] = React.useState({ color: "green", text: "" });
   const [result, setResult] = React.useState("");
 
@@ -139,7 +136,7 @@ export default function RegisterIndicator() {
           if (responseJson.success) {
             setUserIsAllowed(!!responseJson.result)
             if (responseJson.result) {
-              getPeriodDates(currentIndicator.idIndicador)
+              getCurrentPeriod(currentIndicator.idIndicador)
             } else {
               setLoading(false)
             }
@@ -147,8 +144,10 @@ export default function RegisterIndicator() {
         })
     }
   }
-  const getPeriodDates = (idIndicador) => {
-    fetch(`/indicators/currentAndNextPeriodDates/${idIndicador}`, {
+
+
+  const getCurrentPeriod = (idIndicador) => {
+    fetch(`/indicators/currentPeriodName/${idIndicador}`, {
       method: 'GET',
       headers: {
         'x-access-token': localStorage.getItem("HUNToken")
@@ -157,27 +156,9 @@ export default function RegisterIndicator() {
       .then((responseJson) => {
         setLoading(false)
         if (responseJson.success) {
-          let { currentStartDate,
-            currentEndDate,
-            nextStartDate,
-            nextEndDate
-          } = responseJson.nextPeriod
-          setCurrentPeriod(`${currentStartDate} - ${currentEndDate}`)
-          setCurrentPeriodNumber(responseJson.nextPeriod.currentPeriod)
-          let time1 = new Date(nextStartDate).getTime()
-          let time2 = new Date(nextEndDate).getTime()
-          let currentTime = new Date().getTime()
-          let newPeriodOption = currentTime >= time1 && currentTime <= time2;
-          setNextPeriod(newPeriodOption ? `${nextStartDate} - ${nextEndDate}` : null);
+          setCurrentPeriod(responseJson.currentPeriod)
         }
       })
-  }
-
-  function handleCurrentPeriodChecked() {
-    setRegisterForNextPeriod(false)
-  }
-  function handleNextPeriodChecked() {
-    setRegisterForNextPeriod(true)
   }
 
 
@@ -199,8 +180,8 @@ export default function RegisterIndicator() {
         valor: result,
         numerador: state.numerator,
         denominador: indicator.tipo ? state.denominator : 0,
-        periodo: registerForNextPeriod ? currentPeriodNumber + 1 : currentPeriodNumber,
-        nuevoPeriodo: registerForNextPeriod,
+        ano: currentPeriod.year,
+        nombrePeriodo: currentPeriod.name,
       }
       fetch("/records/", {
         method: 'POST',
@@ -265,29 +246,8 @@ export default function RegisterIndicator() {
                       alignItems="center"
                     >
                       <Grid item xs>
-
-                        <Checkbox
-                          className={classes.checkboxSpacer}
-                          checked={!registerForNextPeriod}
-                          onChange={handleCurrentPeriodChecked}
-                          color="primary"
-                          inputProps={{ 'aria-label': 'secondary checkbox' }}
-                        />
-                        Registro para el periodo {currentPeriod}
+                        Registro para el periodo {currentPeriod.name} {currentPeriod.year}
                       </Grid>
-                      {
-                        nextPeriod &&
-                        <Grid item xs>
-                          <Checkbox
-                            className={classes.checkboxSpacer}
-                            checked={registerForNextPeriod}
-                            onChange={handleNextPeriodChecked}
-                            color="primary"
-                            inputProps={{ 'aria-label': 'secondary checkbox' }}
-                          />
-                        Registro para el periodo {nextPeriod}
-                        </Grid>
-                      }
                       <Grid item xs>
                         <TextField
                           className={classes.textFieldSpacer}

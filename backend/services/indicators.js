@@ -1,4 +1,5 @@
 const moment = require("moment")
+const periodicities = require("../periodicities")
 module.exports = {
 
     getIndicators: async function (dbCon) {
@@ -67,6 +68,8 @@ module.exports = {
             endCurrentPeriod,
             indicatorType,
         } = indicator;
+        let inicioVigencia = new Date(startCurrentPeriod).getDate()
+        let finVigencia = new Date(endCurrentPeriod).getDate()
         const result = await dbCon.query`
             insert into indicadores (
                 nombre, 
@@ -79,8 +82,8 @@ module.exports = {
                 responsableDeRecolectarDatos,
                 responsableDelIndicador,
                 meta, 
-                inicioPeriodoActual,
-                finPeriodoActual,
+                inicioVigencia,
+                finVigencia,
                 tipo,
                 periodoActual
                 )
@@ -95,8 +98,8 @@ module.exports = {
                 ${responsableData},
                 ${responsableIndicator},
                 ${goal},
-                ${startCurrentPeriod},
-                ${endCurrentPeriod},
+                ${inicioVigencia},
+                ${finVigencia},
                 ${indicatorType},
                 0
                 )`;
@@ -111,65 +114,59 @@ module.exports = {
         return result.recordset[0];
     },
 
-    getCurrentAndNextPeriodDates: async function (dbCon, idIndicador) {
+    getCurrentPeriodName: async function (dbCon, indicatorId) {
 
-        const result = (await dbCon.query`
-        select INDICADORES.inicioPeriodoActual, INDICADORES.finPeriodoActual, INDICADORES.periodoActual, PERIODOS.meses 
-        from INDICADORES inner join PERIODOS on INDICADORES.idPeriodo = PERIODOS.idPeriodo  
-        where idIndicador = ${idIndicador}
-        `).recordset[0];
-        if (result) {
-            const currentStartDate = moment(result.inicioPeriodoActual).toString()
-            const currentEndDate = moment(result.finPeriodoActual).toString()
-            const currentPeriod = result.periodoActual;
-            const nextStartDate = moment(result.inicioPeriodoActual).add(result.meses, "M").toString()
-            const nextEndDate = moment(result.finPeriodoActual).add(result.meses, "M").toString()
-            return { currentStartDate, currentEndDate, currentPeriod, nextStartDate, nextEndDate }
-        }
-        return false;
-    },
-    getPastPeriodsDates: async function (dbCon, idIndicador) {
+        let indicatorPeriodicityName = (await dbCon.query`
+            select PERIODOS.nombre from INDICADORES inner join 
+            PERIODOS on INDICADORES.idPeriodo = PERIODOS.idPeriodo
+            WHERE idIndicador = ${indicatorId}
+            `).recordset[0];
+        let lastRecordPeriod = (await dbCon.query`
+            SELECT TOP 1 REGISTROS.nombrePeriodo as nombre, REGISTROS.ano FROM REGISTROS 
+            WHERE idIndicador = ${indicatorId}
+            ORDER BY idRegistro DESC;
+            `).recordset[0];
+        if (indicatorPeriodicityName && lastRecordPeriod) {
 
-        const result = (await dbCon.query`
-        select INDICADORES.inicioPeriodoActual, INDICADORES.finPeriodoActual, INDICADORES.periodoActual, PERIODOS.meses 
-        from INDICADORES inner join PERIODOS on INDICADORES.idPeriodo = PERIODOS.idPeriodo  
-        where idIndicador = ${idIndicador}
-        `).recordset[0];
-        if (result) {
-            let currentPeriod = result.periodoActual;
-            let response = [];
-            for (let i = 0; i <= currentPeriod; i++) {
-                response.push(
-                    {
-                        startDate: moment(result.inicioPeriodoActual).subtract(result.meses * (currentPeriod - i), "M").toString(),
-                        endDate: moment(result.finPeriodoActual).subtract(result.meses * (currentPeriod - i), "M").toString(),
-                        period: i
-                    }
-                )
+            indicatorPeriodicityName = indicatorPeriodicityName.nombre;
+            lastRecordPeriod = lastRecordPeriod.nombre;
+
+            let periodicityKeys = Object.keys(periodicities[indicatorPeriodicityName])
+            let lastRecordPeriodIndex = periodicityKeys.findIndex(p => p === lastRecordPeriod)
+            let nextRecordPeriodIndex = lastRecordPeriodIndex === periodicities.length - 1 ? 0 : lastRecordPeriodIndex + 1;
+            let nextRecordPeriod = Object.keys(periodicities[indicatorPeriodicityName])[nextRecordPeriodIndex]
+            let nextRecordPeriodStartMonth = Number.parseInt(periodicities[indicatorPeriodicityName][nextRecordPeriod].split(",")[0])
+            let nextRecordPeriodFinalMonth = Number.parseInt(periodicities[indicatorPeriodicityName][nextRecordPeriod].split(",")[1])
+
+            let currentMonthIndex = moment().month()
+
+            if (currentMonthIndex >= nextRecordPeriodStartMonth && currentMonthIndex <= nextRecordPeriodFinalMonth) {
+                // El ultimo periodo con registros es el periodo inmediatamente anterior al actual.
+                return { name: lastRecordPeriod, year: lastRecordPeriod.ano }
+            } else {
+                return {
+                    name: nextRecordPeriod, year: lastRecordPeriod.ano + nextRecordPeriodIndex === 0 ? 1 : 0
+                }
             }
-            return response;
-        }
-        return false;
-    },
-    updatePeriod: async function (dbCon, idIndicador) {
 
-        const result = (await dbCon.query`
-        select INDICADORES.inicioPeriodoActual, INDICADORES.finPeriodoActual, INDICADORES.periodoActual, PERIODOS.meses 
-        from INDICADORES inner join PERIODOS on INDICADORES.idPeriodo = PERIODOS.idPeriodo  
-        where idIndicador = ${idIndicador}
-        `).recordset[0];
-        if (result) {
-            const newStartDate = moment(result.inicioPeriodoActual).add(result.meses, "M").toString()
-            const newEndDate = moment(result.finPeriodoActual).add(result.meses, "M").toString()
-            const newPeriod = result.periodoActual + 1;
-            await dbCon.query`
-        update INDICADORES 
-        set inicioPeriodoActual = ${newStartDate},  
-        finPeriodoActual = ${newEndDate},  
-        periodoActual = ${newPeriod}  
-        where idIndicador = ${idIndicador}
-        `;
-            return result.rowsAffected > 0
+        } else if (indicatorPeriodicityName) {
+            let currentMonthIndex = moment().month()
+            let currentYear = moment().year();
+
+            indicatorPeriodicityName = indicatorPeriodicityName.nombre;
+            let monthCount = 0;
+            let periods = periodicities[indicatorPeriodicityName];
+            for (let periodName in periods) {
+                let currentPeriodStartMonth = Number.parseInt(periods[periodName].split(",")[0])
+                let currentPeriodFinalMonth = Number.parseInt(periods[periodName].split(",")[1])
+                if (currentMonthIndex >= currentPeriodStartMonth && currentMonthIndex <= currentPeriodFinalMonth) {
+                    break
+                }
+                monthCount++;
+            }
+            let periodsNames = Object.keys(periodicities[indicatorPeriodicityName]);
+            return monthCount === 0 ? { name: periodsNames[periodsNames.length - 1], year: currentYear - 1 } :
+                { name: periodsNames[monthCount - 1], year: currentYear }
         }
         return false;
     },

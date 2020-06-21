@@ -265,11 +265,7 @@ export default function UserRequests(props) {
 
   const filteredRequests = () => {
     let filteredRequests = requests;
-    //console.log(moment(new Date(requests[1].fecha)))
-    //console.log(filteredInitDate ? moment(filteredInitDate.toDateString()).isSameOrBefore(requests[1].fecha) : "es null");
     if(filteredUser) filteredRequests = filteredRequests.filter(request => `${request.username} ${request.lastname}` === filteredUser);
-    //if(filteredInitDate) filteredRequests = filteredRequests.filter(request => moment(filteredInitDate).isSameOrBefore(new Date(request.fecha))); //filteredRequests.filter()
-    //if(filteredEndDate) filteredRequests = filteredRequests.filter(request => moment(filteredEndDate.toDateString()).isSameOrAfter(new Date(request.fecha))); //filteredRequests.filter()
     return filteredRequests;
   }
 

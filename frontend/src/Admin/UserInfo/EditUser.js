@@ -86,7 +86,7 @@ export default function EditUser(props) {
                     }
                 } else {
                     if (ind.edit) {
-                        newIndicatorReadPermissions.push({ idIndicador: ind.idIndicador, idUsuario: props.currentUserId })
+                        newIndicatorPermissions.push({ idIndicador: ind.idIndicador, idUsuario: props.currentUserId })
                     } else {
                         newIndicatorReadPermissions.push({ idIndicador: ind.idIndicador, idUsuario: props.currentUserId })
                     }
@@ -115,7 +115,6 @@ export default function EditUser(props) {
                 }
             }
         }
-        console.log(newIndicatorReadPermissions, newUnitReadPermissions, indicatorReadPermissionsToRemove, unitReadPermissionsToRemove)
         let permissionsData = [
             {
                 route: "/permissions/addMultipleUserIndicatorPermissions/",

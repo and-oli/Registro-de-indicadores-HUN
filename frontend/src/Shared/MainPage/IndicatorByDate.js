@@ -5,11 +5,11 @@ import TableBody from '@material-ui/core/TableBody';
 import Title from '../Title';
 import { TableRow, TableCell } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid';
-import Dropdown from '../Dropdown';
 import TablePagination from '@material-ui/core/TablePagination';
 import { withStyles } from '@material-ui/core/styles';
 import Switch from '@material-ui/core/Switch';
 import Typography from '@material-ui/core/Typography';
+import periodsOrder from '../../PeriodsOrder';
 
 
 const mapMonths = {
@@ -92,14 +92,12 @@ const AntSwitch = withStyles((theme) => ({
 
 export default function IndicatorByDate(props) {
   const classes = useStyles();
-  const [currentRecords, setCurrentRecords] = React.useState([]);
   const [records, setRecords] = React.useState([]);
-  const [dates, setDates] = React.useState([]);
   const [loading, setLoading] = React.useState(false);
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
-  const [all, setAll] = React.useState(false);
-  //const [placedPeriods, setPlacedPeriods] = React.useState(new Set());
+  const [last, setLast] = React.useState(false);
+  const [periods, setPeriods] = React.useState([]);
 
   React.useEffect(
     () => {
@@ -112,53 +110,34 @@ export default function IndicatorByDate(props) {
       }).then((response) => response.json())
         .then((responseJson) => {
           if (responseJson.success) {
+            let currentPeriods = []
+            responseJson.registros.forEach(element => {
+              if (currentPeriods.findIndex(cp => cp.name === element.nombrePeriodo && cp.year === element.ano) < 0) {
+                currentPeriods.push({ name: element.nombrePeriodo, year: element.ano })
+              }
+            });
+            currentPeriods.sort((a, b) => {
+              if (a.year === b.year) {
+                return periodsOrder[props.periodicity][b.name] - periodsOrder[props.periodicity][a.name]
+              }
+              return b.year - a.year
+            })
+            setPeriods(currentPeriods)
             setRecords(responseJson.registros.map(r => {
-              let date = new Date(r.fecha);
               let rClone = JSON.parse(JSON.stringify(r))
-              delete rClone.fecha;
               delete rClone.idRegistro;
               delete rClone.idSolicitud;
               delete rClone.idIndicador;
               delete rClone.idUsuario;
-              return {
-                fecha: `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`,
-                ...rClone
-              }
-            }).sort((a, b) => b.periodo - a.periodo)
+              return rClone;
+            })
             );
+            setLoading(false)
           }
-          getDates();
         })
     }, [props]
   )
 
-  function getDates() {
-    fetch(`/indicators/pastPeriodsDates/${props.indicatorId}`, {
-      method: 'GET',
-      headers: {
-        'x-access-token': localStorage.getItem("HUNToken")
-      },
-    }).then((response) => response.json())
-      .then((responseJson) => {
-        setLoading(false)
-        if (responseJson.success) {
-          setDates(responseJson.dates)
-        }
-      })
-  }
-
-  function handlePeriodChange(periodText) {
-    if (periodText) {
-      let currentPeriod = dates.find(d =>
-        `${d.startDate} - ${d.endDate}` === periodText
-      ).period
-      setCurrentRecords(
-        records.filter(r => r.periodo === currentPeriod)
-      )
-    } else {
-      setCurrentRecords([]);
-    }
-  }
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -170,12 +149,35 @@ export default function IndicatorByDate(props) {
   };
 
   const handleSwitchChange = () => {
-    setAll(!all);
+    setLast(!last);
   }
-
-  let placedPeriods = new Set();
-
-  console.log(records.length > 0 ? records[0] : "esta en null");
+  const renderRecords = (period) => {
+    let recordsToRender = [...records]
+    recordsToRender.sort((a, b) => {
+      return new Date(b.fecha).getTime() - new Date(a.fecha).getTime()
+    })
+    return recordsToRender.filter(r => (r.ultimoDelPeriodo || !last) && r.nombrePeriodo === period.name && r.ano === period.year)
+      .map((r, i) => {
+        return (
+          <Table className={classes.table} size="small">
+            <TableBody className="registry-by-date">
+              {
+                Object.keys(r).map((k, j) => {
+                  if (k !== "ultimoDelPeriodo") {
+                    return (
+                      <TableRow key={i + "" + j}>
+                        <TableCell className={classes.thead}>{k === "ano" ? "Año" : camelToText(k)}</TableCell>
+                        <TableCell className={classes.tcell}>{r[k]}</TableCell>
+                      </TableRow>
+                    )
+                  }
+                })
+              }
+            </TableBody>
+          </Table>
+        )
+      })
+  }
 
   return (
     <React.Fragment>
@@ -184,39 +186,12 @@ export default function IndicatorByDate(props) {
           <div className="loader"></div> :
           <div>
             <Title>Información por Fecha</Title>
-            <Grid container spacing={3}>
-              <Grid item xs>
-                <Dropdown
-                  type="Filtrar por periodo"
-                  options={dates.map(d => `${d.startDate} - ${d.endDate}`)}
-                  handleDropdownChange={handlePeriodChange}
-                />
-              </Grid>
-            </Grid>
             {
-              currentRecords[0] ?
-                currentRecords.map((cr, j) => {
-                  return <Table key={cr.fecha + j} className={classes.table} size="small">
-                    <TableBody className="registry-by-date">
-                      {
-                        Object.keys(cr).map((k, i) => {
-                          if (k !== "periodo") {
-                            return (
-                              <TableRow key={"filtered" + i + "" + j}>
-                                <TableCell className={classes.thead}>{camelToText(k)}</TableCell>
-                                <TableCell className={classes.tcell}>{cr[k]}</TableCell>
-                              </TableRow>
-                            )
-                          }
-                        })
-                      }
-                    </TableBody>
-                  </Table>
-                }) :
-                /*<div>
-                  No hay registros para este indicador en este periodo
-                </div>*/
-
+              !records[0] ?
+                <div>
+                  No hay registros para este indicador todavía
+              </div>
+                :
                 <div>
                   <Grid container spacing={3}>
                     <Grid item xs={6}>
@@ -224,7 +199,7 @@ export default function IndicatorByDate(props) {
                         <Grid component="label" container alignItems="center" spacing={1}>
                           <Grid item>Todos los registros</Grid>
                           <Grid item>
-                            <AntSwitch checked={all} onChange={handleSwitchChange} />
+                            <AntSwitch checked={last} onChange={handleSwitchChange} />
                           </Grid>
                           <Grid item>Último del periodo</Grid>
                         </Grid>
@@ -233,43 +208,29 @@ export default function IndicatorByDate(props) {
                     <Grid item xs={6}>
                       <TablePagination
                         component="div"
-                        count={records.length}
+                        count={periods.length}
                         page={page}
                         onChangePage={handleChangePage}
                         rowsPerPage={rowsPerPage}
                         onChangeRowsPerPage={handleChangeRowsPerPage}
-                        labelRowsPerPage="Registros por página"
-                        rowsPerPageOptions={[10, 25, 50, 100, records.length].sort((a, b) => a - b)}
+                        labelRowsPerPage="Periodos por página"
+                        rowsPerPageOptions={[10, 25, 50, 100, periods.length].sort((a, b) => a - b)}
                         labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
                       />
                     </Grid>
                   </Grid>
-                  {records.filter(r => !all ? true : r.ultimoDelPeriodo).map((r, i) => {
-                    let title = false;
-                    if (!placedPeriods.has(r.periodo)) {
-                      placedPeriods.add(r.periodo);
-                      title = true;
-                    }
-                    return <div key={i + r.fecha} >
-                      {title ? <Title> {`${mapMonths[r.fecha.split("/")[1]]} de ${r.fecha.split("/")[2]}`} </Title> : ""}
-                      <Table className={classes.table} size="small">
-                        <TableBody className="registry-by-date">
+                  {
+                    periods.map((period, i) => {
+                      return (
+                        <div key={i}>
+                          <Title> {`${period.name} de ${period.year}`} </Title>
                           {
-                            Object.keys(r).map((k, j) => {
-                              if (k !== "periodo") {
-                                return (
-                                  <TableRow key={i + "" + j}>
-                                    <TableCell className={classes.thead}>{camelToText(k)}</TableCell>
-                                    <TableCell className={classes.tcell}>{r[k]}</TableCell>
-                                  </TableRow>
-                                )
-                              }
-                            })
+                            renderRecords(period)
                           }
-                        </TableBody>
-                      </Table>
-                    </div>
-                  }).filter((_, i) => i >= page * rowsPerPage && i < (page + 1) * rowsPerPage)}
+                        </div>
+                      )
+                    }).filter((_, i) => i >= page * rowsPerPage && i < (page + 1) * rowsPerPage)
+                  }
                 </div>
             }
           </div>

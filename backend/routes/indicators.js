@@ -5,9 +5,9 @@ const indicatorService = require("../services/indicators");
 
 function indicators(dbCon) {
 
-     /**
-     * Retorna los indicadores 
-     */
+    /**
+    * Retorna los indicadores 
+    */
     router.get('/', token.checkToken, async function (req, res, next) {
         try {
             const indicadores = await indicatorService.getIndicators(await dbCon)
@@ -45,7 +45,7 @@ function indicators(dbCon) {
                 return res.json({ success: false, message: "Debe ingresar un id de indicador" });
             }
             const indicador = await indicatorService.getIndicatorById(await dbCon, req.params.indicatorId)
-            if(indicador){
+            if (indicador) {
                 return res.json({ success: true, indicador, message: "" });
             }
             return res.json({ success: false, message: "No hay indicadores con ese ID" });
@@ -56,14 +56,14 @@ function indicators(dbCon) {
 
     });
 
-    
+
     /**
      * Modifica un indicador
      */
     router.put('/', (req, res, next) => token.checkTokenAdmin(req, res, next, true), async function (req, res, next) {
         try {
             const indicador = await indicatorService.updateIndicator(await dbCon, req.body)
-            if(indicador){
+            if (indicador) {
                 return res.json({ success: true, indicador, message: "Indicador actualizado" });
             }
             return res.json({ success: false, message: "No hay indicadores con ese ID" });
@@ -92,37 +92,6 @@ function indicators(dbCon) {
 
         }
     });
-    /**
-     * Retorna la vigencia del periodo actual y del siguiente de un indicador de acuerdo a su periodicidad,
-     * dado su id
-     */
-    router.get('/currentAndNextPeriodDates/:idIndicador', token.checkToken, async function (req, res) {
-        if (!res.headersSent) {
-            try {
-                const nextPeriod = await indicatorService.getCurrentAndNextPeriodDates(await dbCon, req.params.idIndicador)
-                return res.json({ success: true, nextPeriod, message: "" });
-            } catch (error) {
-                console.error(error);
-                return res.json({ success: false, message: "Ocurrió un error" });
-            }
-        }
-    });
-
-    /**
-     * Retorna las vigencias de todos los periodos anteriores y la del actual de un indicador dado su id ante un.
-     * response: [{startDate,endDate,period}, ... ]
-     */
-    router.get('/pastPeriodsDates/:idIndicador', token.checkToken, async function (req, res) {
-        if (!res.headersSent) {
-            try {
-                const dates = await indicatorService.getPastPeriodsDates(await dbCon, req.params.idIndicador)
-                return res.json({ success: true, dates, message: "" });
-            } catch (error) {
-                console.error(error);
-                return res.json({ success: false, message: "Ocurrió un error" });
-            }
-        }
-    });
 
     /**
      * Retorna las posibles periodicidaes que pueden tener los indicadores.
@@ -133,6 +102,25 @@ function indicators(dbCon) {
             try {
                 const periodos = await indicatorService.getPeriods(await dbCon)
                 return res.json({ success: true, periodos, message: "" });
+            } catch (error) {
+                console.error(error);
+                return res.json({ success: false, message: "Ocurrió un error" });
+            }
+        }
+    });
+
+    /**
+     * Retorna el nombre del último periodo para el cual se puede registrar un valor.
+     * Es decir, el periodo más antiguo diferente al periodo actual sin un registro o,
+     * el periodo anterior (si todos los periodos anteriores ya tienen un registro).
+     * En caso de que no haya registros todavía para el indicador dado, devuelve el periodo
+     * inmediatamente anterior.
+     */
+    router.get('/currentPeriodName/:idIndicador', token.checkToken, async function (req, res) {
+        if (!res.headersSent) {
+            try {
+                const currentPeriod = await indicatorService.getCurrentPeriodName(await dbCon, req.params.idIndicador)
+                return res.json({ success: true, currentPeriod, message: "" });
             } catch (error) {
                 console.error(error);
                 return res.json({ success: false, message: "Ocurrió un error" });

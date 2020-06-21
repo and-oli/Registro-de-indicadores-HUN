@@ -48,11 +48,9 @@ const useStyles = makeStyles((theme) => ({
 const validateData = (data) => {
   for (let key in data) {
     if (key === "startCurrentPeriod" && moment(data[key]).isAfter(data["endCurrentPeriod"])) {
-      console.log(key, "a")
       return true
     }
     else if (!data[key]) {
-      console.log(key, "s")
       return true;
     }
   }
