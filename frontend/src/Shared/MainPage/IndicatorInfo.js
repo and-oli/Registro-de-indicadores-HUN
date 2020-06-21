@@ -55,7 +55,6 @@ export default function IndicatorInfo(props) {
   const [loading, setLoading] = React.useState(false)
   const [units, setUnits] = React.useState([])
   const [indicators, setIndicators] = React.useState([])
-  const [unit, setUnit] = React.useState("")
   const [indicator, setIndicator] = React.useState(null)
   const [indicatorCopy, setIndicatorCopy] = React.useState(null)
   const [editing, setEditing] = React.useState(false)
@@ -88,7 +87,6 @@ export default function IndicatorInfo(props) {
     props.setIndicator(null)
     let currentUnit = units.find(u => u.nombre === newUnit);
     if (currentUnit) {
-      setUnit(currentUnit)
       setIndicator(null)
       fetch(`/indicators/names/${currentUnit.idUnidad}`, {
         method: 'GET',

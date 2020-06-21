@@ -11,22 +11,6 @@ import Switch from '@material-ui/core/Switch';
 import Typography from '@material-ui/core/Typography';
 import periodsOrder from '../../PeriodsOrder';
 
-
-const mapMonths = {
-  "1": "Enero",
-  "2": "Febrero",
-  "3": "Marzo",
-  "4": "Abril",
-  "5": "Mayo",
-  "6": "Junio",
-  "7": "Julio",
-  "8": "Agosto",
-  "9": "Septiembre",
-  "10": "Octubre",
-  "11": "Noviembre",
-  "12": "Diciembre",
-}
-
 const useStyles = makeStyles((theme) => ({
   depositContext: {
     flex: 1,
@@ -171,6 +155,7 @@ export default function IndicatorByDate(props) {
                       </TableRow>
                     )
                   }
+                  return <span/>
                 })
               }
             </TableBody>

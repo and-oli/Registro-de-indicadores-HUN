@@ -5,12 +5,12 @@ import Title from '../Title';
 import Dropdown from '../Dropdown';
 import { Grid } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
-import  periodsOrder from '../../PeriodsOrder';
+import periodsOrder from '../../PeriodsOrder';
 
 class CustomizedAxisTick extends PureComponent {
   render() {
     const {
-      x, y, stroke, payload,
+      x, y, payload,
     } = this.props;
 
     return (
@@ -24,7 +24,6 @@ class CustomizedAxisTick extends PureComponent {
 export default function Chart(props) {
   const theme = useTheme();
   const [loading, setLoading] = React.useState(false);
-  const [buffer, setBuffer] = React.useState([]);
   const [records, setRecords] = React.useState(0);
   const [years, setYears] = React.useState([]);
   const [selectedYear, setSelectedYear] = React.useState("");
@@ -50,7 +49,7 @@ export default function Chart(props) {
 
             let currentDataByYear = {}
             setRecords(responseJson.registros.length);
-            setBuffer(responseJson.registros.map(r => {
+            responseJson.registros.forEach(r => {
               let ano = r.ano
               currentYears.add(ano);
               currentDataByYear[ano] = currentDataByYear[ano] || []
@@ -61,13 +60,13 @@ export default function Chart(props) {
                 period: r.nombrePeriodo,
               })
               let previousData = currentData.find(data => data.period === r.nombrePeriodo)
-              if(previousData){
+              if (previousData) {
                 previousData[ano] = r.valor
               }
-              else{
+              else {
                 currentData.push({ period: r.nombrePeriodo, [ano]: r.valor })
               }
-            }));
+            });
             let periods = Object.keys(periodsOrder[props.indicator.periodicidad])
             periods.forEach(p => {
               if (currentData.findIndex(cd => cd.period === p) < 0) {
@@ -99,25 +98,29 @@ export default function Chart(props) {
   }
   const createFile = (filename, field) => {
     let csvFile = "";
-    for (let d in dataByYear) {
+    let years = Object.keys(dataByYear)
+    years.sort((a, b) => Number.parseInt(b) - Number.parseInt(a))
+    for (let d of years) {
       csvFile += (d + "\n")
       let orderedRecords = [...dataByYear[d]]
-      orderedRecords.sort((or1, or2) => or1.month - or2.month)
+      orderedRecords.sort((or1, or2) =>
+        periodsOrder[props.indicator.periodicidad][or2.period] -
+        periodsOrder[props.indicator.periodicidad][or1.period]
+      )
       for (let record of orderedRecords) {
-        csvFile += `${currentData[record.month - 1].month};${record[field]}\n`
+        csvFile += `${record.period};${record[field]}\n`
       }
     }
-    var csvContent = "...csv content...";
-    var encodedUri = encodeURI(csvContent);
-    var link = document.createElement("a");
-    var blob = new Blob([csvFile], { type: "data:text/csv;charset=utf-8,\uFEFF" + encodedUri });
-    if (navigator.msSaveBlob) { // IE 10+
+    let csvContent = "...csv content...";
+    let encodedUri = encodeURI(csvContent);
+    let link = document.createElement("a");
+    let blob = new Blob([csvFile], { type: "data:text/csv;charset=utf-8,\uFEFF" + encodedUri });
+    if (navigator.msSaveBlob) {
       navigator.msSaveBlob(blob, filename);
     } else {
-      var link = document.createElement("a");
-      if (link.download !== undefined) { // feature detection
-        // Browsers that support HTML5 download attribute
-        var url = URL.createObjectURL(blob);
+      link = document.createElement("a");
+      if (link.download !== undefined) {
+        let url = URL.createObjectURL(blob);
         link.setAttribute("href", url);
         link.setAttribute("download", filename);
         link.style.visibility = 'hidden';

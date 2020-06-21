@@ -19,10 +19,6 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import Dropdown from '../../Shared/Dropdown';
 import Grid from '@material-ui/core/Grid';
-import DateFnsUtils from '@date-io/date-fns';
-import esLocale from 'date-fns/locale/es'
-import { MuiPickersUtilsProvider, DatePicker } from '@material-ui/pickers';
-import moment from 'moment';
 
 function a11yProps(index) {
   return {
@@ -108,8 +104,6 @@ export default function UserRequests(props) {
   const [value, setValue] = React.useState(0);
   const [requests, setRequests] = React.useState([]);
   const [filteredUser, setFilteredUser] = React.useState("");
-  const [filteredInitDate, setInitDate] = React.useState(null);
-  const [filteredEndDate, setEndDate] = React.useState(null);
 
   const handleOpen = (row) => {
     setSelectedUser(row);
@@ -133,14 +127,6 @@ export default function UserRequests(props) {
 
   const handleUserChange = (user) => {
     setFilteredUser(user);
-  }
-
-  const handleInitDateChange = (date) => {
-    setInitDate(date);
-  }
-
-  const handleEndDateChange = (date) => {
-    setEndDate(date);
   }
 
   const renderUserRequests = () => {
