@@ -1,5 +1,6 @@
 const moment = require("moment")
 const periodicities = require("../periodicities")
+const permissionsService = require("./permissions")
 module.exports = {
 
     getIndicators: async function (dbCon) {
@@ -12,8 +13,71 @@ module.exports = {
         const result = await dbCon.query`
             select nombre, idIndicador, idUnidad,tipo  from indicadores 
             where idUnidad = ${idUnidad}
-        `;
+            `;
         return result.recordset;
+    },
+    getIndicatorsNamesByUnitIdRead: async function (dbCon, idUnidad, idUsuario, admin) {
+        if (admin) {
+            return await this.getIndicatorsNamesByUnitId(dbCon, idUnidad)
+        }
+        const result = await dbCon.query`
+            select edicionesIndicadores.nombre as nombreEdicionIndicador, edicionesIndicadores.idIndicador as idEdicionIndicador, 
+            lecturasIndicadores.nombre as nombreLecturaIndicador, lecturasIndicadores.idIndicador as idLecturaIndicador,
+            edicionUnidades.nombre as nombreEdicionUnidad, edicionUnidades.idIndicador as idEdicionUnidad, 
+            lecturasUnidades.nombre as nombreLecturaUnidad, lecturasUnidades.idIndicador as idLecturaUnidad
+            from
+            (
+            select INDICADORES.nombre, INDICADORES.idIndicador,  USUARIOS_INDICADORES.idUsuario 
+            from USUARIOS_INDICADORES 
+            inner join INDICADORES on USUARIOS_INDICADORES.idIndicador = INDICADORES.idIndicador
+            where INDICADORES.idUnidad = ${idUnidad} and USUARIOS_INDICADORES.idUsuario = ${idUsuario}
+            ) as edicionesIndicadores
+            full outer join
+            (
+            select INDICADORES.nombre, INDICADORES.idIndicador, LECT_USUARIOS_INDICADORES.idUsuario 
+            from LECT_USUARIOS_INDICADORES 
+            inner join INDICADORES on LECT_USUARIOS_INDICADORES .idIndicador = INDICADORES.idIndicador
+            where INDICADORES.idUnidad = ${idUnidad} and LECT_USUARIOS_INDICADORES .idUsuario = ${idUsuario}
+            ) as lecturasIndicadores
+            on edicionesIndicadores.idUsuario = lecturasIndicadores.idUsuario
+            full outer join
+            (
+            select INDICADORES.nombre, INDICADORES.idIndicador, USUARIOS_UNIDADES.idUsuario   
+            from USUARIOS_UNIDADES 
+            left join INDICADORES on USUARIOS_UNIDADES.idUnidad = INDICADORES.idUnidad
+            where USUARIOS_UNIDADES.idUnidad = ${idUnidad} and USUARIOS_UNIDADES .idUsuario = ${idUsuario}
+            ) as edicionUnidades
+            on edicionUnidades.idUsuario = lecturasIndicadores.idUsuario
+            
+            full outer join
+            (
+            select INDICADORES.nombre, INDICADORES.idIndicador,  LECT_USUARIOS_UNIDADES.idUsuario   
+            from LECT_USUARIOS_UNIDADES 
+            left join INDICADORES on LECT_USUARIOS_UNIDADES.idUnidad = INDICADORES.idUnidad
+            where LECT_USUARIOS_UNIDADES.idUnidad = ${idUnidad} and LECT_USUARIOS_UNIDADES .idUsuario = ${idUsuario}
+            ) as lecturasUnidades
+            on lecturasUnidades.idUsuario = lecturasIndicadores.idUsuario
+            `;
+
+        let indicators = {}
+        result.recordset.forEach(element => {
+            if (element.idEdicionIndicador && !indicators[element.idEdicionIndicador]) {
+                indicators[element.idEdicionIndicador] = { nombre: element.nombreEdicionIndicador, idIndicador: element.idEdicionIndicador }
+            }
+            if (element.idLecturaIndicador && !indicators[element.idLecturaIndicador]) {
+                indicators[element.idLecturaIndicador] = { nombre: element.nombreLecturaIndicador, idIndicador: element.idLecturaIndicador }
+            }
+            if (element.idEdicionUnidad && !indicators[element.idEdicionUnidad]) {
+                indicators[element.idEdicionUnidad] = { nombre: element.nombreEdicionUnidad, idIndicador: element.idEdicionUnidad }
+            }
+            if (element.idLecturaUnidad && !indicators[element.idLecturaUnidad]) {
+                indicators[element.idLecturaUnidad] = { nombre: element.nombreLecturaUnidad, idIndicador: element.idLecturaUnidad }
+            }
+        });
+        let finalResult = Object.keys(indicators).map(k => {
+            return indicators[k];
+        })
+        return finalResult;
     },
     getIndicatorById: async function (dbCon, idIndicador) {
         const result = await dbCon.query`
@@ -84,8 +148,7 @@ module.exports = {
                 meta, 
                 inicioVigencia,
                 finVigencia,
-                tipo,
-                periodoActual
+                tipo
                 )
             values (
                 ${name},
@@ -100,8 +163,7 @@ module.exports = {
                 ${goal},
                 ${inicioVigencia},
                 ${finVigencia},
-                ${indicatorType},
-                0
+                ${indicatorType}
                 )`;
         return result.rowsAffected > 0
     },

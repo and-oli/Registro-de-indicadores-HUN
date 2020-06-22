@@ -37,6 +37,23 @@ function indicators(dbCon) {
     });
 
     /**
+     * Retorna los indicadores bajo una unidad, dado el id de la unidad, en forma {idIndicador,nombre}
+     */
+    router.get('/names/read/:unitId', token.checkToken, async function (req, res, next) {
+        try {
+            if (!req.params.unitId) {
+                return res.json({ success: false, message: "Debe ingresar un id de unidad" });
+            }
+            const indicadores = await indicatorService.getIndicatorsNamesByUnitIdRead(await dbCon, req.params.unitId, req.decoded.idUsuario, req.decoded.rol === "ADMINISTRADOR")
+            return res.json({ success: true, indicadores, message: "" });
+        } catch (error) {
+            console.error(error);
+            return res.json({ success: false, message: "Ocurrió un error" });
+        }
+
+    });
+
+    /**
      * Retorna un indicador dado su id.
      */
     router.get('/:indicatorId', token.checkToken, async function (req, res, next) {

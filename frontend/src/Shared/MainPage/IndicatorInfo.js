@@ -88,7 +88,7 @@ export default function IndicatorInfo(props) {
     let currentUnit = units.find(u => u.nombre === newUnit);
     if (currentUnit) {
       setIndicator(null)
-      fetch(`/indicators/names/${currentUnit.idUnidad}`, {
+      fetch(`/indicators/names/read/${currentUnit.idUnidad}`, {
         method: 'GET',
         headers: {
           'x-access-token': localStorage.getItem("HUNToken")
