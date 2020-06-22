@@ -19,6 +19,11 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import Dropdown from '../../Shared/Dropdown';
 import Grid from '@material-ui/core/Grid';
+import Button from '@material-ui/core/Button';
+import moment from 'moment';
+import DateFnsUtils from '@date-io/date-fns';
+import esLocale from 'date-fns/locale/es'
+import { MuiPickersUtilsProvider, DatePicker } from '@material-ui/pickers';
 
 function a11yProps(index) {
   return {
@@ -46,6 +51,9 @@ const useStyles = makeStyles((theme) => ({
     paddingTop: theme.spacing(4),
     paddingBottom: theme.spacing(4),
   },
+  consolidate: {
+    marginTop: theme.spacing(1),
+  },
   paper: {
     padding: theme.spacing(2),
     display: 'flex',
@@ -57,7 +65,7 @@ const useStyles = makeStyles((theme) => ({
   },
   denyAccess: {
     color: red[500],
-  }
+  },
 }));
 
 export default function UserRequests(props) {
@@ -104,6 +112,8 @@ export default function UserRequests(props) {
   const [value, setValue] = React.useState(0);
   const [requests, setRequests] = React.useState([]);
   const [filteredUser, setFilteredUser] = React.useState("");
+  const [filteredInitDate, setInitDate] = React.useState(null);
+  const [filteredEndDate, setEndDate] = React.useState(null);
 
   const handleOpen = (row) => {
     setSelectedUser(row);
@@ -127,6 +137,21 @@ export default function UserRequests(props) {
 
   const handleUserChange = (user) => {
     setFilteredUser(user);
+  }
+
+  const handleInitDateChange = (date) => {
+    setInitDate(date);
+  }
+  const handleEndDateChange = (date) => {
+    setEndDate(date);
+  }
+
+  const clearInit = () => {
+    setInitDate(null);
+  }
+  
+  const clearEnd = () => {
+    setEndDate(null);
   }
 
   const renderUserRequests = () => {
@@ -178,10 +203,56 @@ export default function UserRequests(props) {
     )
   }
 
+  const downloadConsolidate = () => {
+    createFile("HISTORICO_SOLICITUDES.csv", null)
+  }
+  const createFile = (filename, field) => {
+    let csvFile = "";
+    requests.sort((a, b) => moment(a.fecha).isSameOrAfter(b.fecha) ? -1 : 1);
+    csvFile += "Fecha de Solicitud;Usuario Solicitante;Indicador Solicitado;Responsable del Indicador;Comentario;Estado;Acceso desde;Acceso hasta\n"
+    for (let request of requests) {
+      let since = request.fechaInicio ? `${months[new Date(request.fechaInicio).getMonth()]} ${new Date(request.fechaInicio).getDate()} ${new Date(request.fechaInicio).getFullYear()}` : "N/A";
+      let to = request.fechaFin ? `${months[new Date(request.fechaFin).getMonth()]} ${new Date(request.fechaFin).getDate()} ${new Date(request.fechaFin).getFullYear()}` : "N/A";
+      csvFile += `${request.fecha};${request.username} ${request.lastname};${request.indicator};${request.responsableDelIndicador};${request.comentario ? request.comentario : "N/A"};${request.estado};${since};${to}\n`
+    }
+    let csvContent = "...csv content...";
+    let encodedUri = encodeURI(csvContent);
+    let link = document.createElement("a");
+    let blob = new Blob([csvFile], { type: "data:text/csv;charset=utf-8,\uFEFF" + encodedUri });
+    if (navigator.msSaveBlob) {
+      navigator.msSaveBlob(blob, filename);
+    } else {
+      link = document.createElement("a");
+      if (link.download !== undefined) {
+        let url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", filename);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        return true
+      }
+    }
+  }
+
   const renderExtraTemporalRequests = () => {
     return (
       <React.Fragment>
-        <Title>Histórico de Solicitudes Extratemporales</Title>
+        <Grid container>
+          <Grid item xs={8}>
+            <Title>Histórico de Solicitudes Extratemporales</Title>
+          </Grid>
+          <Grid item xs={4}>
+            <Button
+              className={classes.consolidate}
+              variant="contained"
+              color="primary"
+              onClick={downloadConsolidate}
+            > Descargar consolidado </Button>
+          </Grid>
+        </Grid>
         <Grid container>
           <Grid item xs={4}>
             <Dropdown 
@@ -190,10 +261,10 @@ export default function UserRequests(props) {
               handleDropdownChange={handleUserChange}
             />
           </Grid>
-          {/*<Grid item xs={8}>
+          {<Grid item xs={8}>
             <MuiPickersUtilsProvider utils={DateFnsUtils} locale={esLocale}>
             <Grid container spacing={3}>
-              <Grid item xs={6}>
+              <Grid item xs={3}>
                 <DatePicker
                   autoOk
                   variant="inline"
@@ -203,7 +274,19 @@ export default function UserRequests(props) {
                   format="dd/MM/yyyy"
                 />
                 </Grid>
-                <Grid item xs={6}>
+                <Grid item xs={1}>
+                  {filteredInitDate ? <Tooltip title="Remover filtro">
+                    <IconButton
+                      edge="start"
+                      color="inherit"
+                      aria-label="remove filter"
+                      onClick={() => clearInit()}
+                    >
+                      <HighlightOffIcon color="primary" />
+                    </IconButton>
+                  </Tooltip> : <span></span>}
+                </Grid>
+                <Grid item xs={3}>
                 <DatePicker
                   autoOk
                   variant="inline"
@@ -213,9 +296,21 @@ export default function UserRequests(props) {
                   format="dd/MM/yyyy"
                 />
                 </Grid>
+                <Grid item xs={1} >
+                  {filteredEndDate ? <Tooltip title="Remover filtro">
+                    <IconButton
+                      edge="start"
+                      color="inherit"
+                      aria-label="remove filter"
+                      onClick={() => clearEnd()}
+                    >
+                      <HighlightOffIcon color="primary"/>
+                    </IconButton>
+                  </Tooltip> : <span></span>}
+                </Grid>
               </Grid>
             </MuiPickersUtilsProvider>
-        </Grid>*/}
+        </Grid>}
         </Grid>
         <Table size="small">
           <TableHead>
@@ -252,6 +347,8 @@ export default function UserRequests(props) {
   const filteredRequests = () => {
     let filteredRequests = requests;
     if(filteredUser) filteredRequests = filteredRequests.filter(request => `${request.username} ${request.lastname}` === filteredUser);
+    if(filteredInitDate) filteredRequests = filteredRequests.filter(request => moment(filteredInitDate).isSameOrBefore(request.fecha)); //filteredRequests.filter()
+    if(filteredEndDate) filteredRequests = filteredRequests.filter(request => moment(filteredEndDate).isSameOrAfter(request.fecha)); //filteredRequests.filter()
     return filteredRequests;
   }
 
