@@ -6,6 +6,8 @@ import Dropdown from '../Dropdown';
 import { Grid } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
 import periodsOrder from '../../PeriodsOrder';
+import Switch from '@material-ui/core/Switch';
+import { withStyles } from '@material-ui/core/styles';
 
 class CustomizedAxisTick extends PureComponent {
   render() {
@@ -20,7 +22,45 @@ class CustomizedAxisTick extends PureComponent {
     );
   }
 }
-
+const AntSwitch = withStyles((theme) => ({
+  root: {
+    width: 42,
+    height: 26,
+    padding: 0,
+    margin: theme.spacing(1),
+  },
+  switchBase: {
+    padding: 1,
+    color: theme.palette.grey[500],
+    '&$checked': {
+      transform: 'translateX(16px)',
+      color: theme.palette.common.white,
+      '& + $track': {
+        opacity: 1,
+        backgroundColor: theme.palette.primary.main,
+        //borderColor: theme.palette.primary.main,
+        border: 'none',
+      },
+      '&$focusVisible $thumb': {
+        color: theme.palette.primary.main,
+        border: '6px solid #fff',
+      },
+    },
+  },
+  thumb: {
+    width: 24,
+    height: 24,
+    //boxShadow: 'none',
+  },
+  track: {
+    border: `1px solid ${theme.palette.grey[400]}`,
+    borderRadius: 26 / 2,
+    opacity: 1,
+    backgroundColor: theme.palette.grey[50],
+    transition: theme.transitions.create(['background-color', 'border']),
+  },
+  checked: {},
+}))(Switch);
 export default function Chart(props) {
   const theme = useTheme();
   const [loading, setLoading] = React.useState(false);
@@ -29,6 +69,7 @@ export default function Chart(props) {
   const [selectedYear, setSelectedYear] = React.useState("");
   const [data, setData] = React.useState([]);
   const [dataByYear, setDataByYear] = React.useState({});
+  const [downOnly, setDownOnly] = React.useState(false);
 
   const letters = '0123456789ABCDEF';
   let currentData = [
@@ -56,6 +97,7 @@ export default function Chart(props) {
               currentDataByYear[ano].push({
                 analysis: r.analisisCualitativo,
                 value: r.valor,
+                goal: r.meta,
                 improvement: r.accionMejora,
                 period: r.nombrePeriodo,
               })
@@ -85,7 +127,9 @@ export default function Chart(props) {
   const handleChange = (year) => {
     setSelectedYear(year);
   }
-
+  const handleSwitchChange = () => {
+    setDownOnly(!downOnly);
+  }
   const downloadConsolidate = () => {
     let options = [
       { filename: "MEJORAMIENTO.csv", field: "improvement" },
@@ -108,7 +152,8 @@ export default function Chart(props) {
         periodsOrder[props.indicator.periodicidad][or1.period]
       )
       for (let record of orderedRecords) {
-        csvFile += `${record.period};${record[field]}\n`
+        if (Number.parseFloat(record.value) < Number.parseFloat(record.goal) || !downOnly)
+          csvFile += `${record.period};${record[field]}\n`
       }
     }
     let csvContent = "...csv content...";
@@ -148,6 +193,14 @@ export default function Chart(props) {
               color="primary"
               onClick={downloadConsolidate}
             > Descargar consolidado </Button>
+            <Grid component="label" container alignItems="center" spacing={1}>
+              <Grid item>Filtro para el consolidado:</Grid>
+              <Grid item>Todos los registros</Grid>
+              <Grid item>
+                <AntSwitch checked={downOnly} onChange={handleSwitchChange} />
+              </Grid>
+              <Grid item>Registros por fuera de la meta</Grid>
+            </Grid>
           </Grid>
         }
 
@@ -182,7 +235,7 @@ export default function Chart(props) {
                 <Legend />
                 <ReferenceLine y={props.indicator.meta} label="Meta" stroke="red" />
                 {!selectedYear ? Array.from(years.values()).map((y, i) =>
-                  <Line key={`line-${y}-${i}`} type="monotone" dataKey={y} stroke={`#${letters[Math.floor(Math.random() * 16)]}${y}${letters[Math.floor(Math.random() * 16)]}`} connectNulls />) :
+                  <Line key={`line-${y}-${i}`} type="monotone" dataKey={y} stroke={`#${letters[Math.floor(Math.random() * 16)]}${i % 10}${letters[Math.floor(Math.random() * 16)]}`} connectNulls />) :
                   <Line type="monotone" dataKey={selectedYear} stroke={theme.palette.primary.main} connectNulls />
                 }
               </LineChart>

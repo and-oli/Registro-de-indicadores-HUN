@@ -15,9 +15,12 @@ module.exports = {
 
     getLastRecordsByIndicatorId: async function (dbCon, idIndicador) {
         const result = await dbCon.query`
-        select REGISTROS.*, USUARIOS.username as usuario from REGISTROS INNER JOIN USUARIOS 
+        select REGISTROS.*, INDICADORES.meta, USUARIOS.username as usuario 
+        from REGISTROS INNER JOIN USUARIOS 
         ON USUARIOS.idUsuario = REGISTROS.idUsuario  
-            where idIndicador = ${idIndicador}
+        LEFT JOIN INDICADORES 
+        ON REGISTROS.idIndicador = INDICADORES.idIndicador  
+            where REGISTROS.idIndicador = ${idIndicador}
             and ultimoDelPeriodo = ${true}
         `;
         return result.recordset;
@@ -92,6 +95,7 @@ module.exports = {
                             update REGISTROS 
                             set ultimoDelPeriodo = 0
                             where ano = ${ano} and nombrePeriodo = ${nombrePeriodo} 
+                            and idIndicador = ${idIndicador}
                             `;
             // Insertar el registro
             const result2 = await dbCon.query`
