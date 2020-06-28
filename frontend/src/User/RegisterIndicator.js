@@ -177,7 +177,7 @@ export default function RegisterIndicator() {
         idIndicador: indicator.idIndicador,
         analisisCualitativo: state.analysis.trim(),
         accionMejora: state.checked ? state.improvement.trim() : "",
-        valor: result,
+        valor: indicator.tipo ? (Number.parseFloat(result) * 100) : result,
         numerador: state.numerator,
         denominador: indicator.tipo ? state.denominator : 0,
         ano: currentPeriod.year,

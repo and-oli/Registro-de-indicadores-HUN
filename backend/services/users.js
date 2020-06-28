@@ -212,6 +212,45 @@ module.exports = {
             return false
         }
     },
+    changePassword: async function (dbCon, username, user, res) {
+        const result = await this.getUserByUsername(dbCon, username);
+        // El usuario no existe
+        if (!result) {
+            res.json({
+                success: false,
+                message: "Usuario incorrecto"
+            });
+        } else {
+            // Revisar si la contraseña coincide
+            const validPassword = bcrypt.compareSync(user.currentPassword, result.password);
+            if (!validPassword) {
+                res.json({
+                    success: false,
+                    message: "Contraseña incorrecta"
+                });
+            } else {
+                // Las credenciales son correctas
+                let password = await bcrypt.hash(user.newPassword, 5)
+
+                let result = await dbCon.query`
+                update usuarios set password = ${password}
+                where
+                username = ${username};`;
+                if (result.rowsAffected > 0) {
+                    return res.json({
+                        success: true,
+                        message: "Contraseña actualizada",
+                    });
+                } else {
+                    return res.json({
+                        success: false,
+                        message: "Ocurrió un error",
+                    });
+                }
+            }
+        }
+
+    }
 }
 
 function accessHasValidDate(element) {

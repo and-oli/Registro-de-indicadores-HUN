@@ -20,6 +20,7 @@ import UserRequests from '../Admin/Requests/UserRequests';
 import UsersInfo from '../Admin/UserInfo/UsersInfo';
 import RegisterIndicator from '../User/RegisterIndicator';
 import AccessRequests from '../User/Requests/AccessRequests';
+import ChangePasswordModal from './ChangePasswordModal';
 
 const drawerWidth = 240;
 
@@ -81,6 +82,14 @@ const useStyles = makeStyles((theme) => ({
       width: theme.spacing(9),
     },
   },
+  changePassword: {
+    fontSize: "15px",
+    position:"relative",
+    right:"75px",
+    "&:hover": {
+      cursor: 'pointer'
+    }
+  },
   logout: {
     fontSize: "15px",
     "&:hover": {
@@ -112,6 +121,7 @@ export default function Navigation(props) {
   const { admin } = props;
   const classes = useStyles();
   const [open, setOpen] = React.useState(false);
+  const [changePasswordModalOpen, setChangePasswordModalOpen] = React.useState(false);
   const [userRequests, setUserRequests] = React.useState([]);
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -135,6 +145,12 @@ export default function Navigation(props) {
           </IconButton>
           <Typography component="h1" variant="h6" color="inherit" noWrap className={classes.title}>
             Registro De Indicadores HUN
+          </Typography>
+          <Typography component="h3" variant="h6" color="inherit" noWrap className={classes.changePassword}
+            onClick={() => {
+              setChangePasswordModalOpen(true)
+            }}>
+            Cambiar contraseña
           </Typography>
           <Typography component="h3" variant="h6" color="inherit" noWrap className={classes.logout}
             onClick={() => {
@@ -190,6 +206,7 @@ export default function Navigation(props) {
           </Route>
         </Switch>
       </Router>
+      <ChangePasswordModal close={()=>{setChangePasswordModalOpen(false)}} open={changePasswordModalOpen}/>
     </div>
   );
 }

@@ -15,7 +15,7 @@ function users(dbCon) {
             return res.json({ success: false, message: "Ocurrió un error" });
         }
     });
-    
+
     router.get('/employees', token.checkToken, async function (req, res, next) {
         try {
             const users = await userService.getEmployeesFull(await dbCon);
@@ -50,7 +50,18 @@ function users(dbCon) {
             return res.json({ success: false, message: "Ocurrió un error" });
         }
     });
-
+    /**
+     * Cambia la contraseña
+     * Body: {  currentPassword, newPassword}
+     */
+    router.post('/changePassword', token.checkToken, async function (req, res) {
+        try {
+            userService.changePassword(await dbCon, req.decoded.username, req.body, res);
+        } catch (error) {
+            console.error(error);
+            return res.json({ success: false, message: "Ocurrió un error" });
+        }
+    });
     router.post("/authenticate", async function (req, res) {
         token.getToken(await dbCon, req, res);
     });
