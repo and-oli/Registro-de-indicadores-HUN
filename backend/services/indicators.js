@@ -189,8 +189,9 @@ module.exports = {
             ORDER BY idRegistro DESC;
             `).recordset[0];
         if (indicatorPeriodicityName && lastRecordPeriod) {
-
+            // Ya hay registros para este indicador.
             indicatorPeriodicityName = indicatorPeriodicityName.nombre;
+            lastRecordPeriodYear = lastRecordPeriod.ano;
             lastRecordPeriod = lastRecordPeriod.nombre;
 
             let periodicityKeys = Object.keys(periodicities[indicatorPeriodicityName])
@@ -204,16 +205,20 @@ module.exports = {
 
             if (currentMonthIndex >= nextRecordPeriodStartMonth && currentMonthIndex <= nextRecordPeriodFinalMonth) {
                 // El ultimo periodo con registros es el periodo inmediatamente anterior al actual.
-                return { name: lastRecordPeriod, year: lastRecordPeriod.ano }
+                console.log("a")
+                return { name: lastRecordPeriod, year: lastRecordPeriodYear }
             } else {
                 return {
-                    name: nextRecordPeriod, year: lastRecordPeriod.ano + nextRecordPeriodIndex === 0 ? 1 : 0
+                    name: nextRecordPeriod, year: lastRecordPeriodYear + (nextRecordPeriodIndex === 0 ? 1 : 0)
                 }
             }
 
         } else if (indicatorPeriodicityName) {
+            // No hay registros para el indicador todavía.
+
             let currentMonthIndex = moment().month()
             let currentYear = moment().year();
+            console.log("c")
 
             indicatorPeriodicityName = indicatorPeriodicityName.nombre;
             let monthCount = 0;

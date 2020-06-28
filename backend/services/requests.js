@@ -115,6 +115,7 @@ module.exports = {
                 fechaFin,
                 USUARIOS.nombre as username, 
                 USUARIOS.apellidos as lastname,
+                USUARIOS.username as cedula,
                 INDICADORES.nombre as indicator, 
                 responsableDelIndicador, 
                 comentario,

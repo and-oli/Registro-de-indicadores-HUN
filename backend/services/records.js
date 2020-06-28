@@ -15,7 +15,8 @@ module.exports = {
 
     getLastRecordsByIndicatorId: async function (dbCon, idIndicador) {
         const result = await dbCon.query`
-        select REGISTROS.*, INDICADORES.meta, USUARIOS.username as usuario 
+        select REGISTROS.*, INDICADORES.meta, USUARIOS.username as usuario, 
+        USUARIOS.nombre as nombreUsuario, USUARIOS.apellidos as apellidosUsuario
         from REGISTROS INNER JOIN USUARIOS 
         ON USUARIOS.idUsuario = REGISTROS.idUsuario  
         LEFT JOIN INDICADORES 

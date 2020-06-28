@@ -209,16 +209,20 @@ export default function UserRequests(props) {
   const createFile = (filename, field) => {
     let csvFile = "";
     requests.sort((a, b) => moment(a.fecha).isSameOrAfter(b.fecha) ? -1 : 1);
-    csvFile += "Fecha de Solicitud;Usuario Solicitante;Indicador Solicitado;Responsable del Indicador;Comentario;Estado;Acceso desde;Acceso hasta\n"
+    csvFile += "Fecha de Solicitud;Usuario Solicitante;Cédula usuario;Indicador Solicitado;Responsable del Indicador;Comentario;Estado;Acceso desde;Acceso hasta\n"
     for (let request of requests) {
       let since = request.fechaInicio ? `${months[new Date(request.fechaInicio).getMonth()]} ${new Date(request.fechaInicio).getDate()} ${new Date(request.fechaInicio).getFullYear()}` : "N/A";
       let to = request.fechaFin ? `${months[new Date(request.fechaFin).getMonth()]} ${new Date(request.fechaFin).getDate()} ${new Date(request.fechaFin).getFullYear()}` : "N/A";
-      csvFile += `${request.fecha};${request.username} ${request.lastname};${request.indicator};${request.responsableDelIndicador};${request.comentario ? request.comentario : "N/A"};${request.estado};${since};${to}\n`
+      csvFile += `${request.fecha};${request.username} ${request.lastname};${request.cedula}${request.indicator};${request.responsableDelIndicador};${request.comentario ? request.comentario : "N/A"};${request.estado};${since};${to}\n`
     }
     let csvContent = "...csv content...";
     let encodedUri = encodeURI(csvContent);
     let link = document.createElement("a");
-    let blob = new Blob([csvFile], { type: "data:text/csv;charset=utf-8,\uFEFF" + encodedUri });
+    let uint8 = new Uint8Array(csvFile.length);
+    for (let i = 0; i <  uint8.length; i++){
+        uint8[i] = csvFile.charCodeAt(i);
+    }
+    let blob = new Blob([uint8], { type: "data:text/csv;charset=utf-8,\uFEFF" + encodedUri });
     if (navigator.msSaveBlob) {
       navigator.msSaveBlob(blob, filename);
     } else {
@@ -317,6 +321,7 @@ export default function UserRequests(props) {
             <TableRow>
               <TableCell align="left">Fecha de Solicitud</TableCell>
               <TableCell align="left">Usuario Solicitante</TableCell>
+              <TableCell align="left">Cédula usuario</TableCell>
               <TableCell align="left">Indicador Solicitado</TableCell>
               <TableCell align="left">Responsable del Indicador</TableCell>
               <TableCell align="left">Comentario</TableCell>
@@ -330,6 +335,7 @@ export default function UserRequests(props) {
               <TableRow key={request.idSolicitud}>
                 <TableCell align="left">{request.fecha}</TableCell>
                 <TableCell align="left">{`${request.username} ${request.lastname}`}</TableCell>
+                <TableCell align="left">{request.cedula}</TableCell>
                 <TableCell align="left">{request.indicator}</TableCell>
                 <TableCell align="left">{request.responsableDelIndicador}</TableCell>
                 <TableCell align="left">{request.comentario ? request.comentario : "N/A"}</TableCell>

@@ -100,6 +100,7 @@ export default function Chart(props) {
                 goal: r.meta,
                 improvement: r.accionMejora,
                 period: r.nombrePeriodo,
+                user: `${r.nombreUsuario} ${r.apellidosUsuario}`,
               })
               let previousData = currentData.find(data => data.period === r.nombrePeriodo)
               if (previousData) {
@@ -132,20 +133,21 @@ export default function Chart(props) {
   }
   const downloadConsolidate = () => {
     let options = [
-      { filename: "MEJORAMIENTO.csv", field: "improvement" },
-      { filename: "DATO_MES.csv", field: "value" },
-      { filename: "ANALISIS.csv", field: "analysis" },
+      { filename: `${props.indicator.nombre} - MEJORAMIENTO.csv`, field: "improvement" },
+      { filename: `${props.indicator.nombre} - DATO_MES.csv`, field: "value" },
+      { filename: `${props.indicator.nombre} - ANALISIS.csv`, field: "analysis" },
     ]
     for (let option of options) {
       createFile(option.filename, option.field)
     }
   }
   const createFile = (filename, field) => {
-    let csvFile = "";
+    let csvFile = props.indicator.nombre + "\n\n"
     let years = Object.keys(dataByYear)
     years.sort((a, b) => Number.parseInt(b) - Number.parseInt(a))
     for (let d of years) {
-      csvFile += (d + "\n")
+      csvFile += `Año:;${d}\n`
+      csvFile += `Periodo del año;Valor registrado;Usuario que registra\n`
       let orderedRecords = [...dataByYear[d]]
       orderedRecords.sort((or1, or2) =>
         periodsOrder[props.indicator.periodicidad][or2.period] -
@@ -153,13 +155,18 @@ export default function Chart(props) {
       )
       for (let record of orderedRecords) {
         if (Number.parseFloat(record.value) < Number.parseFloat(record.goal) || !downOnly)
-          csvFile += `${record.period};${record[field]}\n`
+          csvFile += `${record.period};${record[field]};${record.user}\n`
       }
+      csvFile += "\n"
     }
     let csvContent = "...csv content...";
     let encodedUri = encodeURI(csvContent);
     let link = document.createElement("a");
-    let blob = new Blob([csvFile], { type: "data:text/csv;charset=utf-8,\uFEFF" + encodedUri });
+    let uint8 = new Uint8Array(csvFile.length);
+    for (let i = 0; i <  uint8.length; i++){
+        uint8[i] = csvFile.charCodeAt(i);
+    }
+    let blob = new Blob([uint8], { type: "data:text/csv;charset=utf-8,\uFEFF" + encodedUri });
     if (navigator.msSaveBlob) {
       navigator.msSaveBlob(blob, filename);
     } else {
