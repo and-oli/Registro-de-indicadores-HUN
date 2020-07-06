@@ -13,8 +13,8 @@ module.exports = {
         `;
         const currentTime = new Date().getDate()
         if (result.recordset[0] && result.recordset[0].inicioVigencia && result.recordset[0].finVigencia) {
-            const time1 = new Date(result.recordset[0].inicioVigencia).getDate()
-            const time2 = new Date(result.recordset[0].finVigencia).getDate()
+            const time1 = Number.parseInt(result.recordset[0].inicioVigencia)
+            const time2 = Number.parseInt(result.recordset[0].finVigencia)
             return currentTime >= time1 && (currentTime <= time2 ); // Incluir el último día
         }
         return false

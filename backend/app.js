@@ -32,6 +32,13 @@ app.use('/requests',  requests);
 app.use('/records',  records);
 app.use('/permissions',  permissions);
 
+app.get('/*', function(req, res) {
+  res.sendFile(path.join(__dirname, './public/index.html'), function(err) {
+    if (err) {
+      res.status(500).send(err)
+    }
+  })
+})
 
 // error handler
 app.use(function(err, req, res, next) {
