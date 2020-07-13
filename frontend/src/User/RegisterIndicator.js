@@ -68,6 +68,7 @@ export default function RegisterIndicator() {
   const [loading, setLoading] = React.useState(false);
   const [currentPeriod, setCurrentPeriod] = React.useState("");
   const [message, setMessage] = React.useState({ color: "green", text: "" });
+  const [accessMessage, setAccessMessage] = React.useState( "No tiene permiso para editar este indicador en este momento");
   const [result, setResult] = React.useState("");
 
   const [state, setState] = React.useState({
@@ -135,6 +136,9 @@ export default function RegisterIndicator() {
         .then((responseJson) => {
           if (responseJson.success) {
             setUserIsAllowed(!!responseJson.result)
+            if(responseJson.accessMessage){
+              setAccessMessage(responseJson.accessMessage)
+            }
             if (responseJson.result) {
               getCurrentPeriod(currentIndicator.idIndicador)
             } else {
@@ -195,6 +199,13 @@ export default function RegisterIndicator() {
         .then((responseJson) => {
           setLoading(false)
           if (responseJson.success) {
+            setState({
+              analysis: "",
+              improvement: "",
+              checked: false,
+              numerator: "",
+              denominator: ""
+            })
             setMessage({ color: "green", text: responseJson.message })
           } else {
             setMessage({ color: "red", text: responseJson.message })
@@ -237,7 +248,7 @@ export default function RegisterIndicator() {
                 loading ?
                   <div className="loader"></div> :
                   indicator && !userIsAllowed ?
-                    <AccessDenied indicatorId={indicator.idIndicador} /> :
+                    <AccessDenied indicatorId={indicator.idIndicador} message={accessMessage}/> :
                     indicator &&
                     <Grid
                       container

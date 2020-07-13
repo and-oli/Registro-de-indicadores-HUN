@@ -84,8 +84,8 @@ const useStyles = makeStyles((theme) => ({
   },
   changePassword: {
     fontSize: "15px",
-    position:"relative",
-    right:"75px",
+    position: "relative",
+    right: "75px",
     "&:hover": {
       cursor: 'pointer'
     }
@@ -143,6 +143,11 @@ export default function Navigation(props) {
           >
             <MenuIcon />
           </IconButton>
+          <Typography component="h3"  color="inherit" noWrap >
+            {
+              localStorage.getItem("HUNName")
+            }
+          </Typography>
           <Typography component="h1" variant="h6" color="inherit" noWrap className={classes.title}>
             Registro De Indicadores HUN
           </Typography>
@@ -206,7 +211,7 @@ export default function Navigation(props) {
           </Route>
         </Switch>
       </Router>
-      <ChangePasswordModal close={()=>{setChangePasswordModalOpen(false)}} open={changePasswordModalOpen}/>
+      <ChangePasswordModal close={() => { setChangePasswordModalOpen(false) }} open={changePasswordModalOpen} />
     </div>
   );
 }

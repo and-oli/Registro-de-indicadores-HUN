@@ -58,6 +58,13 @@ module.exports = {
                     message: "Usuario incorrecto"
                 });
             } else {
+                // El usuario está desactivado
+                if (!result.activo){
+                    return res.json({
+                        success: false,
+                        message: "Usuario incorrecto"
+                    });
+                }
                 // Revisar si la contraseña coincide
                 const validPassword = bcrypt.compareSync(req.body.password, result.password);
                 if (!validPassword) {
@@ -83,6 +90,8 @@ module.exports = {
                         idUsuario: result.idUsuario,
                         message: `Bienvenido ${result.nombre} ${result.apellidos}`,
                         admin: result.rol === "ADMINISTRADOR",
+                        nombre: result.nombre,
+                        apellidos: result.apellidos,
                         token,
                     });
                 }

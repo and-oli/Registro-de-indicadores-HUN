@@ -46,9 +46,16 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const validateData = (data) => {
+  if (Number.parseInt(data['startCurrentPeriod']) > 28 || Number.parseInt(data['startCurrentPeriod']) < 1
+    || Number.parseInt(data['endCurrentPeriod']) > 28 || Number.parseInt(data['endCurrentPeriod']) < 1) {
+    return { message: "Los días del mes deben estar entre 1 y 28" }
+  }
+  if (Number.parseInt(data['startCurrentPeriod']) > Number.parseInt(data['endCurrentPeriod'])) {
+    return { message: "La fecha de inicio debe ser anterior a la del fin de la vigencia." }
+  }
   for (let key in data) {
-    if (key === "startCurrentPeriod" && moment(data[key]).isAfter(data["endCurrentPeriod"])) {
-      return true
+    if (key === "startCurrentPeriod" && moment().isAfter(data["endCurrentPeriod"])) {
+
     }
     else if (!data[key]) {
       return true;
@@ -122,39 +129,17 @@ export default function CreateIndicador() {
     responsableData: "",
     responsableIndicator: "",
     goal: "",
-    startCurrentPeriod: moment(),
-    endCurrentPeriod: moment().add(1,"days"),
+    startCurrentPeriod: 1,
+    endCurrentPeriod: 10,
   });
 
   const handleDateChange = (event) => {
     const start = event.target.name === "startCurrentPeriod" ? true : false;
-    const date = moment(event.target.value);
-    if (date.date() > 28) {
-      setMessage("El día del mes debe ser entre 1 y 28");
-      setSuccess(false);
-      setOpen(true);
-    }
+    const date = (event.target.value);
     if (start) {
-      if ((state.endCurrentPeriod && date.isBefore(state.endCurrentPeriod)) || !state.endCurrentPeriod) {
-        setState({ ...state, startCurrentPeriod: date });
-        // state.startCurrentPeriod = date;
-        // setState(state);
-
-      } else {
-        setMessage("La fecha de inicio debe ser anterior a la fecha de finalización.");
-        setSuccess(false);
-        setOpen(true);
-      }
+      setState({ ...state, startCurrentPeriod: date });
     } else {
-      if ((state.startCurrentPeriod && date.isAfter(state.startCurrentPeriod)) || !state.startCurrentPeriod) {
-        setState({ ...state, endCurrentPeriod: date });
-        // state.startCurrentPeriod = date;
-        // setState(state);
-      } else {
-        setMessage("La fecha de finalización debe ser posterior a la fecha de inicio.");
-        setSuccess(false);
-        setOpen(true);
-      }
+      setState({ ...state, endCurrentPeriod: date });
     }
   }
 
@@ -178,8 +163,14 @@ export default function CreateIndicador() {
     event.preventDefault();
     let status;
     setLoading(true);
-    if (validateData(state)) {
-      setMessage("Ocurrío un error con el formato de los datos. Por favor asegúrese de haber ingresado todos los datos correctamente.");
+    let validationResult = validateData(state)
+    if (validationResult) {
+      if (validationResult.message) {
+        setMessage(validationResult.message);
+      } else {
+        setMessage("Ocurrío un error con el formato de los datos. Por favor asegúrese de haber ingresado todos los datos correctamente.");
+
+      }
       setSuccess(false);
       setLoading(false);
       setOpen(true);
@@ -369,11 +360,11 @@ export default function CreateIndicador() {
                 required
                 fullWidth
                 id="startCurrentPeriod"
-                label="Fecha inicio de la primera vigencia"
-                defaultValue={`${new Date().getFullYear()}-${new Date().getMonth() + 1 < 10 ? "0" + (new Date().getMonth() + 1) : new Date().getMonth() + 1}-${new Date().getDate() < 10 ? "0" + (new Date().getDate()) : new Date().getDate()}`}
+                label="Inicio de la vigencia (día del mes)"
+                defaultValue={1}
                 name="startCurrentPeriod"
                 autoComplete="startCurrentPeriod"
-                type="date"
+                type="number"
                 onChange={handleDateChange}
               />
               <TextField
@@ -382,11 +373,11 @@ export default function CreateIndicador() {
                 required
                 fullWidth
                 id="endCurrentPeriod"
-                label="Fecha fin de la primera vigencia"
-                defaultValue={`${state.endCurrentPeriod.year()}-${state.endCurrentPeriod.month() + 1 < 10 ? "0" + (state.endCurrentPeriod.month() + 1) : state.endCurrentPeriod.month() + 1}-${state.endCurrentPeriod.date() < 10 ? "0" + (state.endCurrentPeriod.date()) : state.endCurrentPeriod.date()}`}
+                label="Fin de la vigencia (día del mes)"
+                defaultValue={10}
                 name="endCurrentPeriod"
                 autoComplete="endCurrentPeriod"
-                type="date"
+                type="number"
                 onChange={handleDateChange}
               />
               <div>

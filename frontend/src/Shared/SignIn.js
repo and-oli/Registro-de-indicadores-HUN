@@ -51,7 +51,8 @@ export default function SignIn() {
           if (responseJson.success) {
             localStorage.setItem("HUNToken", responseJson.token);
             localStorage.setItem("HUNAdmin", responseJson.admin);
-            localStorage.setItem("HUNUserId", responseJson.idUsuario);
+            localStorage.setItem("HUNName", responseJson.nombre + " " + responseJson.apellidos);
+            localStorage.setItem("HUNUserId", responseJson.idUsuario); 
             window.location.reload();
             setMessage({ color: "green", text: responseJson.message })
           } else {

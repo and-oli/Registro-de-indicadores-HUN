@@ -104,7 +104,7 @@ export default function AccessDenied(props) {
     }, [props]
   )
   const message = hasRequested ? <Alert severity="warning">Usted ya solicitó acceso a este indicador. Contáctese con el administrador para que le otorge permiso de registro.</Alert>
-    : <Alert severity="error">No tiene permiso para editar este indicador en este momento.</Alert>;
+  : <Alert severity="error">{props.message}</Alert>;
   return (
     loading ?
     <div className="loader"></div> :

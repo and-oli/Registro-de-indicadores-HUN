@@ -98,6 +98,8 @@ module.exports = {
             unidadMedicion,
             responsableDeRecolectarDatos,
             responsableDelIndicador,
+            inicioVigencia,
+            finVigencia,
             meta,
         } = indicator;
         const result = await dbCon.query`
@@ -110,6 +112,8 @@ module.exports = {
                 unidadMedicion =  ${unidadMedicion},
                 responsableDeRecolectarDatos =  ${responsableDeRecolectarDatos},
                 responsableDelIndicador =  ${responsableDelIndicador},
+                inicioVigencia =  ${inicioVigencia},
+                finVigencia =  ${finVigencia},
                 meta =  ${meta}
             WHERE idIndicador =  ${idIndicador}
                 `;
@@ -118,6 +122,7 @@ module.exports = {
 
 
     postIndicator: async function (dbCon, indicator) {
+        console.log(indicator)
         const { name,
             definition,
             idPeriod,
@@ -132,8 +137,6 @@ module.exports = {
             endCurrentPeriod,
             indicatorType,
         } = indicator;
-        let inicioVigencia = new Date(startCurrentPeriod).getDate()
-        let finVigencia = new Date(endCurrentPeriod).getDate()
         const result = await dbCon.query`
             insert into indicadores (
                 nombre, 
@@ -161,8 +164,8 @@ module.exports = {
                 ${responsableData},
                 ${responsableIndicator},
                 ${goal},
-                ${inicioVigencia},
-                ${finVigencia},
+                ${startCurrentPeriod},
+                ${endCurrentPeriod},
                 ${indicatorType}
                 )`;
         return result.rowsAffected > 0
@@ -205,7 +208,6 @@ module.exports = {
 
             if (currentMonthIndex >= nextRecordPeriodStartMonth && currentMonthIndex <= nextRecordPeriodFinalMonth) {
                 // El ultimo periodo con registros es el periodo inmediatamente anterior al actual.
-                console.log("a")
                 return { name: lastRecordPeriod, year: lastRecordPeriodYear }
             } else {
                 return {
@@ -218,7 +220,6 @@ module.exports = {
 
             let currentMonthIndex = moment().month()
             let currentYear = moment().year();
-            console.log("c")
 
             indicatorPeriodicityName = indicatorPeriodicityName.nombre;
             let monthCount = 0;

@@ -50,7 +50,7 @@ module.exports = {
 			left join UNIDADES on LECT_USUARIOS_UNIDADES.idUnidad = UNIDADES.idUnidad
             ) as permisos_lectura
         on permisos_lectura.idUsuario = USUARIOS.idUsuario
-        where roles.nombre = 'EMPLEADO'
+        where roles.nombre = 'EMPLEADO' AND USUARIOS.activo = 1
     `).recordset;
         let users = {}
         result.forEach(element => {
@@ -178,8 +178,8 @@ module.exports = {
             idRol = (await dbCon.query`select idRol from roles where nombre = 'EMPLEADO'`).recordset[0].idRol;
         }
         const result = await dbCon.query`
-        insert into usuarios (username, password, nombre, apellidos, idRol)
-        values (${username},${password},${nombre},${apellidos},${idRol});
+        insert into usuarios (username, password, nombre, apellidos, idRol, activo)
+        values (${username},${password},${nombre},${apellidos},${idRol}, 1);
         SELECT SCOPE_IDENTITY() AS idUsuario;`;
         let idUsuario = result.recordset[0].idUsuario
         if (idUsuario) {
@@ -250,7 +250,25 @@ module.exports = {
             }
         }
 
-    }
+    },
+    deactivateUser: async function (dbCon, idUsuario) {
+
+        let result = await dbCon.query`
+                     update usuarios set activo = 0
+                     where
+                     idUsuario = ${idUsuario};`;
+        return result.rowsAffected > 0
+
+    },
+    activateUser: async function (dbCon, idUsuario) {
+
+        let result = await dbCon.query`
+                     update usuarios set activo = 1
+                     where
+                     idUsuario = ${idUsuario};`;
+        return result.rowsAffected > 0
+
+    },
 }
 
 function accessHasValidDate(element) {

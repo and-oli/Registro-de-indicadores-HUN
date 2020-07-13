@@ -88,6 +88,7 @@ export default function NewUser(props) {
     fetch("/users/", {
       method: 'POST',
       headers: {
+        'x-access-token': localStorage.getItem("HUNToken"),
         'Accept': 'application/json',
         'Content-Type': 'application/json',
       },

@@ -6,7 +6,9 @@ import Title from '../../Shared/Title';
 import Button from '@material-ui/core/Button';
 import NewUser from './NewUser';
 import EditIcon from '@material-ui/icons/Edit';
+import DeleteIcon from '@material-ui/icons/Delete';
 import EditUser from './EditUser';
+import DeleteUser from './DeleteUser';
 import TablePagination from '@material-ui/core/TablePagination';
 import TextField from '@material-ui/core/TextField';
 
@@ -76,6 +78,7 @@ export default function UsersInfo() {
   const classes = useStyles();
   const [open, setOpen] = React.useState(false);
   const [editUserModalOpen, setEditUserModalOpen] = React.useState(false);
+  const [deleteUserModalOpen, setDeleteUserModalOpen] = React.useState(false);
   const [currentUserId, setCurrentUserId] = React.useState(null);
   const [currentUserPermissions, setCurrentUserPermissions] = React.useState([]);
   const [currentUserAccesses, setCurrentUserAccesses] = React.useState([]);
@@ -116,6 +119,10 @@ export default function UsersInfo() {
     setEditUserModalOpen(open);
   };
 
+  const handleDeleteUserModalOpen = (open, userId) => {
+    setCurrentUserId(userId)
+    setDeleteUserModalOpen(open);
+  }
 
   const goTo = (idIndicador) => {
     window.location = `/?indicator=${idIndicador}`
@@ -240,6 +247,10 @@ export default function UsersInfo() {
                         className="edit-user-icon"
                         onClick={() => { handleEditUserModalOpen(true, u.idUsuario, u.indicadores, u.indicadoresLectura, u.unidades, u.unidadesLectura, u.accesos) }}
                       />
+                      <DeleteIcon
+                        className="edit-user-icon"
+                        onClick={() => { handleDeleteUserModalOpen(true, u.idUsuario) }}
+                      />
                     </Paper>
                   )).filter((_, i) => i >= page * rowsPerPage && i < (page + 1) * rowsPerPage)
             }
@@ -253,6 +264,11 @@ export default function UsersInfo() {
         currentUserId={currentUserId}
         currentUserPermissions={currentUserPermissions}
         currentUserAccesses={currentUserAccesses}
+      />
+      <DeleteUser
+        open={deleteUserModalOpen}
+        handleDeleteUserModalOpen={handleDeleteUserModalOpen}
+        currentUserId={currentUserId}
       />
     </main>
   );

@@ -169,7 +169,7 @@ export default function IndicatorInfo(props) {
                           onChange={handleChange}
                           multiline={k !== "meta"}
                         /> :
-                        <span>{indicator[k]}</span>}
+                        <span style={{overflowWrap: "anywhere"}}>{indicator[k]}</span>}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -193,6 +193,7 @@ export default function IndicatorInfo(props) {
                         onClick={handleClickCancel}
                       > Cancelar </Button>
                     </div> :
+                    props.admin &&
                       <Button
                         variant="contained"
                         color="primary"

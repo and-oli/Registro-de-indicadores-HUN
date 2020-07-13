@@ -60,7 +60,7 @@ function requests(dbCon) {
             const solicitudes = await requestService.getRequestsHistory(await dbCon);
             return res.json({ success: true, solicitudes, message: "" })
         } catch (error) {
-            console.log(error);
+            console.error(error);
             return res.json({ success: false, message: "Ocurrió un error" })
         }
     })

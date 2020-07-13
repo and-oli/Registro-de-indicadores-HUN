@@ -69,6 +69,8 @@ module.exports = {
             if (validUnitPermision) {
                 return validUnitPermision
             }
+        } else {
+            return { message: "Está intentando registrar el indicador fuera de los plazos establecidos, por favor solicite autorización al administrador de la plataforma" }
         }
         return false;
     },

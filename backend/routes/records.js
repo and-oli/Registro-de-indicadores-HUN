@@ -46,13 +46,17 @@ function records(dbCon) {
      */
     router.get('/userCanPostRecord/:indicatorId', token.checkToken, async function (req, res, next) {
         try {
-            if (!req.params.indicatorId ) {
+            if (!req.params.indicatorId) {
                 return res.json({ success: false, message: "Debe ingresar un id de indicador" });
             }
             const record = { idIndicador: req.params.indicatorId, idUsuario: req.decoded.idUsuario };
-            const result = 
+            const result =
                 await recordsService.userCanPostRecord(await dbCon, record);
-            return res.json({ success: true, result, message: "" });
+            if (result.message) {
+                return res.json({ success: true, result: false, accessMessage: result.message, message: "" });
+            } else {
+                return res.json({ success: true, result, message: "" });
+            }
         } catch (error) {
             console.error(error);
             return res.json({ success: false, message: "Ocurrió un error" });
@@ -75,7 +79,7 @@ function records(dbCon) {
     router.post('/', token.checkToken, async function (req, res, next) {
         if (!res.headersSent) {
             try {
-                const result = await recordsService.postRecord(await dbCon, req.body,req.decoded.idUsuario)
+                const result = await recordsService.postRecord(await dbCon, req.body, req.decoded.idUsuario)
                 if (result) {
                     return res.json(result);
                 }

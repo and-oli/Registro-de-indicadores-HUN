@@ -32,10 +32,20 @@ function users(dbCon) {
      * Body: { username, password, nombre, apellidos, idRol, permissions}
      * Si idRol no está presente, se le asigna al usuario el id de rol correspondiente a empleado
      */
-    router.post('/', async function (req, res) {
+    router.post('/', (req, res, next) => token.checkTokenAdmin(req, res, next, true), async function (req, res) {
         try {
-            if (await userService.getUserByUsername(await dbCon, req.body.username)) {
-                return res.json({ success: false, message: "Ya existe un usuario con ese username" });
+            let currentUser = await userService.getUserByUsername(await dbCon, req.body.username)
+            if (currentUser) {
+                if(!currentUser.activo){
+                    const result = await userService.activateUser(await dbCon, currentUser.idUsuario);
+                    if (result) {
+                        return res.json({ success: true, message: "El usuario con esa cédula fue reactivado (los nuevos permisos se omitieron). Refresque la aplicación" });
+                    } else {
+                        return res.json({ success: false, message: "Ocurrió un error" });
+                    }
+                } else {
+                    return res.json({ success: false, message: "Ya existe un usuario con esa cédula." });
+                }
             }
             const passCopy = req.body.password + "";
             const result = await userService.postUser(await dbCon, req.body);
@@ -57,6 +67,23 @@ function users(dbCon) {
     router.post('/changePassword', token.checkToken, async function (req, res) {
         try {
             userService.changePassword(await dbCon, req.decoded.username, req.body, res);
+        } catch (error) {
+            console.error(error);
+            return res.json({ success: false, message: "Ocurrió un error" });
+        }
+    });
+    /**
+     * Desactiva un usuario
+     */
+    router.get('/deactivate/:userId', (req, res, next) => token.checkTokenAdmin(req, res, next, true), async function (req, res) {
+        try {
+            const result = await userService.deactivateUser(await dbCon, req.params.userId);
+            if (result) {
+                return res.json({ success: true, message: "¡Usuario eliminado! Refresque la aplicación." });
+            } else {
+                return res.json({ success: false, message: "Ocurrió un error" });
+            }
+            
         } catch (error) {
             console.error(error);
             return res.json({ success: false, message: "Ocurrió un error" });
