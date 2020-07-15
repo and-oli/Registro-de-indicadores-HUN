@@ -208,7 +208,6 @@ module.exports = {
             
             // El primer mes siguiente al primer periodo sin registros
             let firstMonthAfterNextPeriodIndex = nextRecordPeriodFinalMonth === 11 ? 0 : nextRecordPeriodFinalMonth + 1;
-            
             if (record) {
                 // El método se invoca para saber si el usuario puede registrar en esta fecha sin acceso.
                 if(currentMonthIndex ===  firstMonthAfterNextPeriodIndex  || currentMonthIndex === nextRecordPeriodStartMonth){
@@ -234,7 +233,7 @@ module.exports = {
             }
 
         } else if (indicatorPeriodicityName) {
-            // No hay registros para el indicador todavía.
+            // No hay registros para el indicador todavía, retornal el periodo inmediatamente anterior.
 
             let currentMonthIndex = moment().month()
             let currentYear = moment().year();
