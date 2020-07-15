@@ -6,6 +6,7 @@ module.exports = {
             select *  from ACCESOS 
             where idIndicador = ${idIndicador}
             and idUsuario = ${idUsuario}
+            and USADO = 0
         `;
         return result.recordset;
     },
@@ -19,8 +20,8 @@ module.exports = {
         } = access;
         await requestService.updateRequest(dbCon, idSolicitud, true)
         const result = await dbCon.query`
-            insert into ACCESOS (idUsuario, idIndicador, idSolicitud,fechaInicio,fechaFin)
-            values (${idUsuario},${idIndicador},${idSolicitud},${fechaInicio},${fechaFin})`;
+            insert into ACCESOS (idUsuario, idIndicador, idSolicitud,fechaInicio,fechaFin, USADO)
+            values (${idUsuario},${idIndicador},${idSolicitud},${fechaInicio},${fechaFin}, 0)`;
         return result.rowsAffected > 0;
     },
 

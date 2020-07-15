@@ -1,3 +1,5 @@
+const indicatorService = require("../services/indicators");
+
 
 module.exports = {
 
@@ -6,16 +8,18 @@ module.exports = {
      * (Si la fecha actual está incluida en la vigencia del indicador)
      *  
      */
-    indicatorRegistryIsEnabled: async function (dbCon, idIndicador) {
+    indicatorRegistryIsEnabled: async function (dbCon, idIndicador, record) {
         const result = await dbCon.query`
         SELECT inicioVigencia, finVigencia FROM INDICADORES 
         WHERE idIndicador = ${idIndicador}
         `;
+        
+        const isRightAfter = await indicatorService.getCurrentPeriodName(await dbCon, idIndicador, record)
         const currentTime = new Date().getDate()
         if (result.recordset[0] && result.recordset[0].inicioVigencia && result.recordset[0].finVigencia) {
             const time1 = Number.parseInt(result.recordset[0].inicioVigencia)
             const time2 = Number.parseInt(result.recordset[0].finVigencia)
-            return currentTime >= time1 && (currentTime <= time2 ); // Incluir el último día
+            return currentTime >= time1 && (currentTime <= time2 ) && isRightAfter; // Incluir el último día
         }
         return false
 

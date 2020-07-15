@@ -29,11 +29,11 @@ module.exports = {
 
     /**
      * Determina si un usuario está habilitadO para subir un registro. Es decir, si se cumple una de las siguientes condiciones:
-     * 1. Hay un objeto acceso en la base de datos que le da al usuario acceso al indicador en la fecha actual.
-     * 2. El indicador se puede registrar en la fecha actual y el usuario tiene acceso al indicador por medio de 
-     *    la tabla USUARIOS_INDICADORES
-     * 3. El indicador se puede registrar en la fecha actual y El usuario tiene acceso al indicador por medio de 
-     *    la tabla USUARIOS_UINIDADES
+     * 1. Hay un objeto acceso sin usar en la base de datos que le da al usuario acceso al indicador en la fecha actual.
+     * 2. El indicador se puede registrar en la fecha actual (por vigencia y el periodo a registrar es el inmediatamente anterior 
+     * al actual) y el usuario tiene acceso al indicador por medio de la tabla USUARIOS_INDICADORES.
+     * 3. El indicador se puede registrar en la fecha actual (por vigencia y el periodo a registrar es el inmediatamente anterior 
+     * al actual) y el usuario tiene acceso al indicador por medio de la tabla USUARIOS_UINIDADES.
      * @param {*} dbCon el pool de conexiones a la base de datos.
      * @param {*} record el registro que se intenta subir 
      */
@@ -53,9 +53,8 @@ module.exports = {
         if (validAccess) {
             return validAccess
         }
-
         // Revisar si el indicador se puede registrar en la fecha actual
-        if (await permissionsService.indicatorRegistryIsEnabled(dbCon, idIndicador)) {
+        if (await permissionsService.indicatorRegistryIsEnabled(dbCon, idIndicador,record)) {
 
             // Revisar si el usuario tiene permiso para registrar este indicador
             const validIndicatorPermision = await permissionsService.userCanEditIndicator(dbCon, idIndicador, idUsuario);
@@ -85,14 +84,29 @@ module.exports = {
             denominador,
             ano,
             nombrePeriodo,
+            idAcceso,
         } = record;
         const fecha = moment().format()
         record.idUsuario = idUsuario
         const userPermissionToPost = await this.userCanPostRecord(dbCon, record);
-        if (userPermissionToPost) {
+        if (userPermissionToPost && !userPermissionToPost.message ) {
 
 
             // Actualizar los registros previos del periodo
+
+            await dbCon.query`
+                            update REGISTROS 
+                            set ultimoDelPeriodo = 0
+                            where ano = ${ano} and nombrePeriodo = ${nombrePeriodo} 
+                            and idIndicador = ${idIndicador}
+                            `;
+
+            // Actualizar el acceso, si lo hay
+            await dbCon.query`
+                            update accesos 
+                            set usado = 1
+                            where idAcceso = ${idAcceso}
+                            `;
 
             await dbCon.query`
                             update REGISTROS 
@@ -135,7 +149,7 @@ module.exports = {
             }
             return { success: false, message: "Ocurrió un error" }
         }
-        else return { success: false, message: "No está autorizado para registrar un valor a este indicador" }
+        else return { success: false, message: "No está autorizado para registrar un valor a este indicador para este periodo. Si tenía un acceso temporal, puede que éste ya haya sido usado y deba solicitar uno nuevo (refresque la aplicación)." }
 
     },
 

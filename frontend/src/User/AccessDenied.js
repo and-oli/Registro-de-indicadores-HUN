@@ -138,6 +138,7 @@ export default function AccessDenied(props) {
                 onChange={handleCommentChange}
                 value={comment}
                 autoFocus
+                style={{width:"800px"}}
               ></TextField>
               <br/>
             <Button

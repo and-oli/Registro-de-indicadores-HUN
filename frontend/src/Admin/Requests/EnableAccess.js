@@ -45,9 +45,10 @@ export default function EnableAccess(props) {
   const [open, setOpen] = React.useState(false);
   const [success, setSuccess] = React.useState(false);
   const [message, setMessage] = React.useState("");
-
   const [initDate, setInintDate] = React.useState(new Date());
   const [endDate, setEndDate] = React.useState(new Date());
+
+  const [loading, setLoading] = React.useState(false);
 
   const handleInitDateChange = (date) => {
     setInintDate(date);
@@ -68,16 +69,16 @@ export default function EnableAccess(props) {
 
   const confirmAccess = function (event, approved) {
     event.preventDefault();
-    
-    let dateTimeFormat = new Intl.DateTimeFormat('en', { year: 'numeric', month: 'short', day: '2-digit' }) 
-    let [{ value: month },,{ value: day },,{ value: year }] = dateTimeFormat .formatToParts(initDate) 
-    let [{ value: monthEnd },,{ value: dayEnd },,{ value: yearEnd }] = dateTimeFormat .formatToParts(endDate) 
-    let [{ value: monthToday },,{ value: dayToday },,{ value: yearToday }] = dateTimeFormat .formatToParts(new Date()) 
-    
+    setLoading(true)
+    let dateTimeFormat = new Intl.DateTimeFormat('en', { year: 'numeric', month: 'short', day: '2-digit' })
+    let [{ value: month }, , { value: day }, , { value: year }] = dateTimeFormat.formatToParts(initDate)
+    let [{ value: monthEnd }, , { value: dayEnd }, , { value: yearEnd }] = dateTimeFormat.formatToParts(endDate)
+    let [{ value: monthToday }, , { value: dayToday }, , { value: yearToday }] = dateTimeFormat.formatToParts(new Date())
+
     let simpleInitDate = new Date(`${year}/${month}/${day}`)
     let simpleEndDate = new Date(`${yearEnd}/${monthEnd}/${dayEnd}`)
     let simpleToday = new Date(`${yearToday}/${monthToday}/${dayToday}`)
-    
+
     const approve = approved ? "approve" : "reject";
     const method = approved ? 'POST' : 'PUT';
     const baseURL = approved ? '/accesses/' : `/requests/${approve}/${props.user.idSolicitud}/`;
@@ -99,6 +100,7 @@ export default function EnableAccess(props) {
         })
       }).then((response) => response.json())
         .then((responseJson) => {
+          setLoading(false)
           setSuccess(responseJson.success);
           if (responseJson.success) {
             setMessage(approve ? "Acceso concedido exitosamennte" : "Acceso negado exitosamente");
@@ -111,6 +113,7 @@ export default function EnableAccess(props) {
           }
         });
     } else {
+      setLoading(false)
       setSuccess(false);
       setMessage("Revise que las fechas sean consistentes.");
       setOpen(true);
@@ -143,17 +146,21 @@ export default function EnableAccess(props) {
           </Grid>
         </Grid>
       </MuiPickersUtilsProvider>
-      <Grid item xs={12}>
-        <Button
-          type="submit"
-          variant="contained"
-          color="primary"
-          className={classes.submit}
-          onClick={(event) => confirmAccess(event, true)}
-        >
-          Aceptar
+      {
+        loading ?
+          <div className="loader"></div> :
+          <Grid item xs={12}>
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              className={classes.submit}
+              onClick={(event) => confirmAccess(event, true)}
+            >
+              Aceptar
           </Button>
-      </Grid>
+          </Grid>
+      }
     </div>
   );
 

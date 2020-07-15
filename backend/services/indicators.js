@@ -122,7 +122,6 @@ module.exports = {
 
 
     postIndicator: async function (dbCon, indicator) {
-        console.log(indicator)
         const { name,
             definition,
             idPeriod,
@@ -179,7 +178,7 @@ module.exports = {
         return result.recordset[0];
     },
 
-    getCurrentPeriodName: async function (dbCon, indicatorId) {
+    getCurrentPeriodName: async function (dbCon, indicatorId, record) {
 
         let indicatorPeriodicityName = (await dbCon.query`
             select PERIODOS.nombre from INDICADORES inner join 
@@ -198,14 +197,33 @@ module.exports = {
             lastRecordPeriod = lastRecordPeriod.nombre;
 
             let periodicityKeys = Object.keys(periodicities[indicatorPeriodicityName])
+            // Último periodo con registros
             let lastRecordPeriodIndex = periodicityKeys.findIndex(p => p === lastRecordPeriod)
-            let nextRecordPeriodIndex = lastRecordPeriodIndex === periodicities.length - 1 ? 0 : lastRecordPeriodIndex + 1;
-            let nextRecordPeriod = Object.keys(periodicities[indicatorPeriodicityName])[nextRecordPeriodIndex]
+            // Periodo siguiente al último periodo sin registros
+            let nextRecordPeriodIndex = lastRecordPeriodIndex === periodicityKeys.length - 1 ? 0 : lastRecordPeriodIndex + 1;
+            let nextRecordPeriod = periodicityKeys[nextRecordPeriodIndex]
             let nextRecordPeriodStartMonth = Number.parseInt(periodicities[indicatorPeriodicityName][nextRecordPeriod].split(",")[0])
             let nextRecordPeriodFinalMonth = Number.parseInt(periodicities[indicatorPeriodicityName][nextRecordPeriod].split(",")[1])
-
             let currentMonthIndex = moment().month()
-
+            
+            // El primer mes siguiente al primer periodo sin registros
+            let firstMonthAfterNextPeriodIndex = nextRecordPeriodFinalMonth === 11 ? 0 : nextRecordPeriodFinalMonth + 1;
+            
+            if (record) {
+                // El método se invoca para saber si el usuario puede registrar en esta fecha sin acceso.
+                if(currentMonthIndex ===  firstMonthAfterNextPeriodIndex  || currentMonthIndex === nextRecordPeriodStartMonth){
+                    // El mes actual es el inmediatamente siguiente al periodo que hay que registrar
+                    // Bien sea porque el primer periodo sin registros es el inmediatamente anterior al mes actual o 
+                    // Porque el último periodo con registros es el inmediatamente anterior al mes actual
+                    let periodToRegisterName = currentMonthIndex ===  firstMonthAfterNextPeriodIndex? nextRecordPeriod : lastRecordPeriod
+                    if(periodToRegisterName === record.nombrePeriodo || !record.nombrePeriodo){
+                        // Se está intentando registrar el periodo correcto
+                        // O no se está intentando registrar, solo validar si la fecha es oportuna
+                        return true
+                    }
+                } 
+                return false
+            }
             if (currentMonthIndex >= nextRecordPeriodStartMonth && currentMonthIndex <= nextRecordPeriodFinalMonth) {
                 // El ultimo periodo con registros es el periodo inmediatamente anterior al actual.
                 return { name: lastRecordPeriod, year: lastRecordPeriodYear }

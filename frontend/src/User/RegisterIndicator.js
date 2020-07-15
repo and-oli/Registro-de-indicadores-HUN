@@ -70,6 +70,7 @@ export default function RegisterIndicator() {
   const [message, setMessage] = React.useState({ color: "green", text: "" });
   const [accessMessage, setAccessMessage] = React.useState( "No tiene permiso para editar este indicador en este momento");
   const [result, setResult] = React.useState("");
+  const [idAcceso, setIdAcceso] = React.useState(null);
 
   const [state, setState] = React.useState({
     analysis: "",
@@ -140,6 +141,8 @@ export default function RegisterIndicator() {
               setAccessMessage(responseJson.accessMessage)
             }
             if (responseJson.result) {
+              setMessage({ color: "green", text: "" });
+              setIdAcceso(responseJson.result.idAcceso)
               getCurrentPeriod(currentIndicator.idIndicador)
             } else {
               setLoading(false)
@@ -186,6 +189,7 @@ export default function RegisterIndicator() {
         denominador: indicator.tipo ? state.denominator : 0,
         ano: currentPeriod.year,
         nombrePeriodo: currentPeriod.name,
+        idAcceso
       }
       fetch("/records/", {
         method: 'POST',
