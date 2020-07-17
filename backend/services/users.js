@@ -14,21 +14,21 @@ module.exports = {
 
         let result = (await dbCon.query`
         select usuarios.*, indicadores.idIndicador as idIndicador,indicadores.nombre as nombreIndicador, 
-        indicadores.idUnidad as idUnidadIndicador, unidades.nombre as nombreUnidad, unidades.idUnidad as idUnidad
+        indicadores.idUnidad as idUnidadIndicador, indicadores.nombreUnidadDelIndicadorEdicion, unidades.nombre as nombreUnidad, unidades.idUnidad as idUnidad
         ,x.nombreIndicadorDelAcceso, x.fechaInicioAccesoIndicador,x.fechaFinAccesoIndicador, idAcceso,
         x.nombreUnidadDelAccesoAlIndicador, x.idIndicadorDelAcceso, 
         permisos_lectura.idIndicadorLectura as idIndicadorLectura, 
         permisos_lectura.nombreIndicadorLectura as nombreIndicadorLectura, 
         permisos_lectura.nombreUnidadLectura as nombreUnidadLectura,
 		permisos_lectura.idUnidadLectura as idUnidadLectura,
-		permisos_lectura.idUnidadIndicadorLectura as idUnidadIndicadorLectura
-
+		permisos_lectura.idUnidadIndicadorLectura as idUnidadIndicadorLectura,
+		permisos_lectura.nombreUnidadDelIndicadorLectura as nombreUnidadDelIndicadorLectura
         from usuarios 
         inner join roles on usuarios.idRol = roles.idRol
         left join  usuarios_unidades on usuarios.idUsuario = usuarios_unidades.idUsuario 
         left join  usuarios_indicadores on usuarios.idUsuario = usuarios_indicadores.idUsuario
 		left join unidades on usuarios_unidades.idUnidad = unidades.idUnidad
-        left join indicadores on usuarios_indicadores.idIndicador = indicadores.idIndicador
+        left join (select INDICADORES.*, unidades.nombre as nombreUnidadDelIndicadorEdicion from indicadores inner join UNIDADES on INDICADORES.idUnidad = UNIDADES.idUnidad) as indicadores on usuarios_indicadores.idIndicador = indicadores.idIndicador
 
         left join 
             (select  accesos.idUsuario as idUsuario, indicadores.nombre as nombreIndicadorDelAcceso, 
@@ -41,12 +41,13 @@ module.exports = {
         on x.idUsuario = USUARIOS.idUsuario
 		left join 
             (select  usuarios.idUsuario as idUsuario, indicadores.nombre as nombreIndicadorLectura, 
-			indicadores.idIndicador as idIndicadorLectura, UNIDADES.nombre as nombreUnidadLectura,
+			indicadores.idIndicador as idIndicadorLectura, indicadores.nombreUnidadDelIndicadorLectura, 
+			UNIDADES.nombre as nombreUnidadLectura,
 			unidades.idUnidad as idUnidadLectura, indicadores.idUnidad as idUnidadIndicadorLectura
 			from usuarios 
 			left join LECT_USUARIOS_INDICADORES on usuarios.idUsuario = LECT_USUARIOS_INDICADORES.idUsuario 
 			left join LECT_USUARIOS_UNIDADES on usuarios.idUsuario = LECT_USUARIOS_UNIDADES.idUsuario 
-			left join INDICADORES on LECT_USUARIOS_INDICADORES.idIndicador = INDICADORES.idIndicador
+			left join (select INDICADORES.*, unidades.nombre as nombreUnidadDelIndicadorLectura from indicadores inner join UNIDADES on INDICADORES.idUnidad = UNIDADES.idUnidad) as INDICADORES on LECT_USUARIOS_INDICADORES.idIndicador = INDICADORES.idIndicador
 			left join UNIDADES on LECT_USUARIOS_UNIDADES.idUnidad = UNIDADES.idUnidad
             ) as permisos_lectura
         on permisos_lectura.idUsuario = USUARIOS.idUsuario
@@ -57,6 +58,7 @@ module.exports = {
             if (!users[element.idUsuario]) {
                 let firstIndicator = element.idIndicador ? [{
                     idIndicador: element.idIndicador,
+                    nombreUnidad: element.nombreUnidadDelIndicadorEdicion,
                     nombre: element.nombreIndicador + " (edición)",
                     idUnidad: element.idUnidadIndicador,
                     uniqueId: (element.idIndicador + "e"),
@@ -85,6 +87,7 @@ module.exports = {
                     idIndicador: element.idIndicadorLectura,
                     nombre: element.nombreIndicadorLectura + " (lectura)",
                     idUnidad: element.idUnidadIndicadorLectura,
+                    nombreUnidad: element.nombreUnidadDelIndicadorLectura,
                     uniqueId: (element.idUnidad + "r"),
                     edit: false,
                 }] : [];
@@ -110,6 +113,7 @@ module.exports = {
                 if (element.idIndicador && users[element.idUsuario].indicadores.findIndex(ind => ind.idIndicador === element.idIndicador) < 0) {
                     users[element.idUsuario].indicadores.push({
                         idIndicador: element.idIndicador,
+                        nombreUnidad: element.nombreUnidadDelIndicadorEdicion,
                         nombre: element.nombreIndicador + " (edición)",
                         idUnidad: element.idUnidadIndicador,
                         uniqueId: (element.idIndicador + "e"),
@@ -141,6 +145,7 @@ module.exports = {
                         nombre: element.nombreIndicadorLectura + " (lectura)",
                         idUnidad: element.idUnidadIndicadorLectura,
                         uniqueId: (element.idIndicadorLectura + "r"),
+                        nombreUnidad: element.nombreUnidadDelIndicadorLectura,
                         edit: false,
                     })
                 }
@@ -159,6 +164,7 @@ module.exports = {
             users[k].idUsuario = k;
             return users[k];
         })
+        console.log(employees[0].indicadores)
         return employees;
     },
 

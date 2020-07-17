@@ -79,6 +79,44 @@ module.exports = {
         })
         return finalResult;
     },
+    getIndicatorsNamesByUnitIdEdit: async function (dbCon, idUnidad, idUsuario, admin) {
+        if (admin) {
+            return await this.getIndicatorsNamesByUnitId(dbCon, idUnidad)
+        }
+        const result = await dbCon.query`
+            select edicionesIndicadores.nombre as nombreEdicionIndicador, edicionesIndicadores.idIndicador as idEdicionIndicador, 
+            edicionUnidades.nombre as nombreEdicionUnidad, edicionUnidades.idIndicador as idEdicionUnidad 
+            from
+            (
+            select INDICADORES.nombre, INDICADORES.idIndicador,  USUARIOS_INDICADORES.idUsuario 
+            from USUARIOS_INDICADORES 
+            inner join INDICADORES on USUARIOS_INDICADORES.idIndicador = INDICADORES.idIndicador
+            where INDICADORES.idUnidad = ${idUnidad} and USUARIOS_INDICADORES.idUsuario = ${idUsuario}
+            ) as edicionesIndicadores
+            full outer join
+            (
+            select INDICADORES.nombre, INDICADORES.idIndicador, USUARIOS_UNIDADES.idUsuario   
+            from USUARIOS_UNIDADES 
+            left join INDICADORES on USUARIOS_UNIDADES.idUnidad = INDICADORES.idUnidad
+            where USUARIOS_UNIDADES.idUnidad = ${idUnidad} and USUARIOS_UNIDADES .idUsuario = ${idUsuario}
+            ) as edicionUnidades
+            on edicionUnidades.idUsuario = edicionesIndicadores.idUsuario
+            `;
+
+        let indicators = {}
+        result.recordset.forEach(element => {
+            if (element.idEdicionIndicador && !indicators[element.idEdicionIndicador]) {
+                indicators[element.idEdicionIndicador] = { nombre: element.nombreEdicionIndicador, idIndicador: element.idEdicionIndicador }
+            }
+            if (element.idEdicionUnidad && !indicators[element.idEdicionUnidad]) {
+                indicators[element.idEdicionUnidad] = { nombre: element.nombreEdicionUnidad, idIndicador: element.idEdicionUnidad }
+            }
+        });
+        let finalResult = Object.keys(indicators).map(k => {
+            return indicators[k];
+        })
+        return finalResult;
+    },
     getIndicatorById: async function (dbCon, idIndicador) {
         const result = await dbCon.query`
         select INDICADORES.*, UNIDADES.nombre AS unidad, PERIODOS.nombre as periodicidad from INDICADORES 

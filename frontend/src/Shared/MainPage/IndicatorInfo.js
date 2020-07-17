@@ -125,7 +125,6 @@ export default function IndicatorInfo(props) {
           delete responseJson.indicador.inicioPeriodoActual
           delete responseJson.indicador.finPeriodoActual
           delete responseJson.indicador.periodoActual
-          delete responseJson.indicador.unidad
           setIndicator(responseJson.indicador)
           props.setIndicator(responseJson.indicador)
         }

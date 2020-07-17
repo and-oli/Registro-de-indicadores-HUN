@@ -108,7 +108,7 @@ export default function RegisterIndicator() {
     let currentUnit = units.find(u => u.nombre === newUnit);
     if (currentUnit) {
       setIndicator(null)
-      fetch(`/indicators/names/${currentUnit.idUnidad}`, {
+      fetch(`/indicators/names/edit/${currentUnit.idUnidad}`, {
         method: 'GET',
         headers: {
           'x-access-token': localStorage.getItem("HUNToken")

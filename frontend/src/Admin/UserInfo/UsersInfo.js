@@ -222,7 +222,8 @@ export default function UsersInfo() {
                                   className={classes.cellContent}
                                   onClick={() => goTo(ind.idIndicador)}
                                 >
-                                  {ind.nombre}
+                                  {`${ind.nombre} (${ind.nombreUnidad})`}
+
                                 </span>
                               )}
                             </TableCell>
@@ -236,7 +237,7 @@ export default function UsersInfo() {
                                   className={classes.cellContent}
                                   onClick={() => goTo(acc.idIndicadorDelAcceso)}
                                 >
-                                  {acc.nombreIndicadorDelAcceso}
+                                  {`${acc.nombreIndicadorDelAcceso} (${acc.nombreUnidadDelAccesoAlIndicador})`}
                                 </span>
                               )}
                             </TableCell>
